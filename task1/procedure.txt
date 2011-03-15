@@ -1,0 +1,24 @@
+PART ONE - TIME SERIES CONSTRUCTION
+desc:
+need to take the images and form a 2d array of luminosity per source per frame.
+
+problems:
+- sources move around (2 arcseconds)
+- sources appear and disappear
+
+important:
+- measuring distance change requires analysis of spherical coords
+
+implementation:
+- use a simple 2d array to store shit
+- new sources get a new row in the array filled out to zeros
+- disappearing sources that reappear are coorelated to last nearest position
+- use some efficient spatial data structure?
+
+PART TWO - ANALYSIS
+desc:
+given a 2d array of luminosity per source per frame, find the interesting sources.
+
+problems:
+- sources move around, may have swapped
+- sources appear and disappear
