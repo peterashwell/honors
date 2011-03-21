@@ -1,68 +1,146 @@
 \documentclass[12pt]{beamer}
-\mode<presentation>
-\title M. Lázaro-Gredilla, J. Quiñonero-Candela, C. E. Rasmussen \
-A. R. Figueiras-Vidali, Sparse Spectrum Gaussian Process Regression 2010, Journal of Machine Learning Research 11 pp. 1865-1881
-\author Peter Ashwell
 
+\usepackage{subfigure}
+\usepackage{caption}
+\usepackage{graphicx}
+%\usepackage{natbib}
+%\usepackage{bibentry}
+\usepackage{biblatex}
+
+\bibliography{refs}
+
+\mode<presentation>
+\subtitle{M. Lazaro-Gredilla, J. Quinonero-Candela, C. E. Rasmussen, \
+A. R. Figueiras-Vidali 2010, \emph{Journal of Machine Learning Research 11}, pp 1865-1881}
+\title{Sparse Spectrum Gaussian Process Regression}
+\date{}
+\author{Peter Ashwell}
+
+%\newcommand{\newblock}{}
+
+\begin{document}
 \maketitle
 
 \begin{frame}
-	\frametitle{Overview}
-	\begin{itemize}
-		\item The observation and analysis of transient events is vital to help astronomers understand our Universe
-		\item Modern telescopes are automated and produce enormous amounts of data and present new challenges
-		\item The ultimate goal is the complete automation of sky observation
-	\end{itemize}
-	%	TODO add an image showing how transient astronomy is important or cool or something
-	%	Also have an image of time series
+	\frametitle{Astroinformatics and Transients}
+	\begin{figure}
+	  \centering
+	  \subfigure {	
+	  	\includegraphics[width=140px]{ccs.jpg}
+	  }
+	  \subfigure {
+	  	\includegraphics[width=140px]{askap.png}
+	  }
+  	%\caption{Wall painting in Chaco Canyon, NM USA}
+	\end{figure}
+	The ultimate goal of Astroinformatics is the automatic analysis of large amounts of telescope data. This will help astronomers to do research on interesting events in our universe.
+
 \end{frame}
 
 \begin{frame}
-	\frametitle{Time Series}
-	\begin{itemize}
-		\item A big issue is the rapid analysis of time series - current methods are too slow
-		\item Want to determine as soon as possible if a time series is of interest - enter gaussian processes
-		\item Gaussian processes are used to predict the future behavior of a time series given some observed points
-	\end{itemize}
-	% Images of time series
+	\frametitle{Time Series Analysis and Gaussian Processes (GPs)}
+	\begin{figure}
+		\subfigure[Time series of supernova] {
+				\captionsetup[subfigure]{labelformat=empty}
+
+			\includegraphics[width=140px]{sne.jpg}
+		 }
+		\subfigure[GP learning sinc function] {
+				\captionsetup[subfigure]{labelformat=empty}
+
+		  	\includegraphics[width=130px]{gp.PNG}
+		}
+		\captionsetup[subfigure]{labelformat=empty}
+	\end{figure}
+  Gaussian process: Given some observed mappings from an unknown function $f$: $x \mapsto y$, make predictions about $f$ at unobserved $x_{u}$, or, tell me if some set of other observations were likely to come from $f$.
 \end{frame}
 
 \begin{frame}
-	\frametitle{The Paper}
-	\begin{itemize}
-		\item This paper addresses the issue of the speed of regression - the time taken to model data (TODO what)
-		\item Previous work had running times of the order of O(n2), where n is potentially very large
-		\item list previous important papers, overviews of gaussian process regression
-	\end{itemize}
-	% List of previous papers relevant and general reading, citations
+	\frametitle{Previous Work and the Paper}
+	Gaussian processes are computationally and space expensive, both for training and prediction - for $n$ training points:
+
+	\begin{table}
+	  \begin{footnotesize}
+	  \begin{center}
+	  \begin{tabular}{llll}
+		Author & Space & Time \\
+		Theory, O'Hagan ~\cite{o1978curve} 1978 & - & - \\
+		Rasmussen and Williams ~\cite{rasmussen2006gpfml} 2006 & $O(n^{3})$ & $O(n^{2})$ \\
+		Various 2001 - 2008  \cite{snelson2005sgppi} \cite{tresp2000bcm} \cite{walder2008sparse} & $O(nm^{2})$ & train $O(nm)$ predict $O(m^{2})$  \\
+		This Paper 2010& $O(nm^{2})$ & train $O(nm)$ predict $O(m^{2})$ \\
+	  \end{tabular}
+	  \end{center}
+	  \end{footnotesize}
+	\end{table}
+	Where $m << n$, $m$ is the number of basis functions in sparse approximation.
+	\begin{tiny}
+	\begin{enumerate}
+		\item \fullcite{o1978curve}
+		\item \fullcite{rasmussen2006gpfml}
+		\item \fullcite{tresp2000bcm}
+		\item \fullcite{snelson2005sgppi}
+		\item \fullcite{walder2008sparse}
+	\end{enumerate}
+	\end{tiny}
 \end{frame}
 
 \begin{frame}
-	\frametitle{The Results}
-	\begin{itemize}
-		\item Improved running time
-		\item Enabling the rapid analysis of astronomical data
-		\item Improving the ability of astronomers to understand the universe
-	\end{itemize}
-	% Simple list of performance iprovements
+  \frametitle{Method}
+  \begin{figure}
+  	\def \svgwidth{0.85\columnwidth}
+  	\input{gproc_fin.pdf_tex}
+  \end{figure}
+  \begin{tiny}
+  \begin{enumerate}
+  	\item[6.] A. B. Carlson. Communication Systems. McGraw-Hill, 3rd edition, 1986.
+	\item[7.] M. L. Stein. Interpolation of Spatial Data. Springer Verlag, 1999.
+  \end{enumerate}
+  \end{tiny}
 \end{frame}
 
 \begin{frame}
-	\frametitle{Method}
+	\frametitle{Paper results and review}
 	\begin{itemize}
-		\item Sparsifying of time series in a way that does not impede regression
-		% Flow chart of process}
+		\item Evaluation shows slight improvement in accuracy over other sparse methods
+		\item Small sacrifice in accuracy over full $O(n^{3})$ GP
+		\item More vulnerable than other GP methods to overfitting
 	\end{itemize}
+	\begin{figure}
+	\subfigure{
+		\includegraphics[width=150px]{eval3.PNG}
+	}
+	\end{figure}
 \end{frame}
 
 \begin{frame}
-	\frametitle{Review}
-	% talk about the practical problems, elegancy, significancy
+  \frametitle{Paper results and review}
+		\begin{itemize}
+			\item Attractive theoretical computational bounds $O(m^{2})$ for large amounts of data analysis
+			\item Respected, well cited experts in GP field and published in highly ranked journal
+			\item Evaluation does not discuss exact run-times compared to other sparse methods
+			\item Otherwise, rigorous evaluation shows an effective tool for multi-dimensional data modelling
+		\end{itemize}
 \end{frame}
 
 \begin{frame}
-	\frametitle{Research Plan}
+	\frametitle{In the Context of my Project}
+	This is a practical approach to modelling light curves for large volumes of data, however:
 	\begin{itemize}
-		\item Incorporate this method into the approach to data analysis
+	  \item There may be faster or more accurate methods 
+	\item May not be suitable for modelling astronomical data (overfitting risk)
+	\item This approach was not evaluated in terms of predictive power, just fit accuracy
 	\end{itemize}
+	My research approach is as follows:
+	\begin{enumerate}
+	  \item Simulate astronomical data 
+	  \item Decide on a method to rapidly identify transients, with confidence (perhaps this approach)
+	  \item Implement and evaluate method using simulated data
+	  \item Expand implementation to large data streams if possible
+	\end{enumerate}
+%	\cite{tresp2000bcm}
 \end{frame}
+
+	
+%\bibliography{refs}{}
+%\bibliographystyle{plain}
+\end{document}
