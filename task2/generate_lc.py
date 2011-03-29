@@ -20,76 +20,64 @@ import scipy.special
 import myutils  
 import scipy
 
-#def write2file(time, flux, fnum, type):	
-#	fname = "{}_{}.data".format(type, fnum)
-#	f = open(fname, 'w')
-#	for i in len(time):
-#		f.write("{}\t{}\n".format(time[i], flux[i]))
-#	f.close()
-
 # sigma is in mJy 
 def getnoise(sigma): 
 	return numpy.random.normal(0, sigma) 
 
-def generateNT(epochs, mean, sigma):
-	return (range(epochs), [mean + getnoise(sigma) for e in xrange(epochs)])
-	 
-# Generate an ESE lightcurve based on Fiedler 1994 
-def generateESE(epochs=1000): 
-	newESE = source.ESE() 
+def generateNT(total_time, mean, sigma, timestep=1): # TODO add timestep
+	return (range(total_time), [mean + getnoise(sigma) for e in xrange(total_time)])
 
-	# ESE duration range from 2months to 1.2 years 
-	newESE.event_duration = random.randrange(60,300) 
-	# Length of the lightcurve 
-	newESE.lc_duration = epochs
+# Produce a sudden peak
+def generateFlare(total_time, timestep=1.0):
+	num_points = int(math.floor(total_time / timestep))
+	flare_min = 0.2 # 20% total time minimum
+	flare_max = 0.8 # 80% total time maximum
+	flare_duration = random.randrange(int(math.floor(total_time * flare_min / timestep)), int(floor(total_time * flare_max / timestep)))
+	flare_start = random.randrange(0, num_points - flare_duration)
+	time = range(num_points)
+	background = random.uniform(1e-5, 1e-4) # TODO what should define background noise
+	flux = generateNT(flare_start, background, background / 3.0)
+	flare_intensity = background * random.randrange(50, 1000) # TODO flare is 50 to 1000 hotter than bg
+	flux += generateNT(flare_duration, flare_intensity, flare_intensity / 10.0) # TODO what variance for flares
+	flux += generateNT(num_points - flare_duration - flare_start, background, background / 3.0)
+	return time, flux
+
+# Generate an ESE lightcurve based on Fiedler 1994 
+def generateESE(total_time=5000, timestep=1, startingMJD=0):
+	newESE = source.ESE() 
 
 	theta_b = random.uniform(1.2,2.5) 
 	theta_l = random.uniform(1.2,5) 
-	scaling = random.randrange(5,500) 
-	newESE.generate_lc(theta_b,theta_l) 
+	
+	newESE.generate_lc(timestep, theta_b,theta_l) 
 	timesteps = len(newESE.time) 
 	# Write lightcurve to a file 
-	startingMJD = 0 
-
-	for i in xrange(timesteps): 
-		newESE.flux[i] = newESE.flux[i]*scaling + getnoise(1) 
+	sigma = 0.3 # TODO what noise level should this have?
+	for i in xrange(timesteps):
+		newESE.time[i] += startingMJD
+		newESE.flux[i] += getnoise(sigma) 
 	return (newESE.time, newESE.flux)
 
 # Lightcurve adapted from VAST Memo No. 3 
 # Equation is from Weiler (2002)  
-def generateSupernovae(epochs=1000): 
-	startingMJD = 0
-
+def generateSupernovae(total_time=1000, timestep=1, startingMJD=0): 
 	newSNe = source.Supernova() 
-	newSNe.lc_duration = epochs
-	newSNe.generate_lc() 
+	newSNe.generate_lc(timestep)
+	
 	timesteps = len(newSNe.time) 
-	galaxy_flux = random.randrange(5,500) 
+	print "timesteps:", timesteps
+	galaxy_flux = random.randrange(5,500) # TODO normalise flux with this 
 	noise = 1 
 
 	# return light curve object, modified with additional parameters
 	for i in xrange(timesteps):
 		newSNe.time[i] += startingMJD
-		newSNe.flux[i] += galaxy_flux + getnoise(noise)
+		newSNe.flux[i] += getnoise(noise) + galaxy_flux # TODO what is this
 	return (newSNe.time, newSNe.flux)
 	 
-# Generate a lightcurve with only gaussian noise
-def generateSinusoid(epochs=1000):
-	_max_frequency = 0.5 # TODO model for sinusoid
-	_min_frequency = 0.05
-	_max_flux = 1e-4 # What should flux be
-	_min_flux = 1e-6
-	_variance = 0.1
-	phase = random.random() * 2 * pi
-	frequency = random.uniform(_min_frequency, _max_frequency)
-	base_value = random.uniform(_min_flux, _max_flux)
-	time = range(epochs)
-	flux = [_variance * base_value * sin(phase + 2 * pi * frequency * t) + base_value for t in time]
-	return (time, flux)
-
 # Adapted from VAST memo 2. 
-def generateIDV(epochs=1000):
-	n_times = epochs
+def generateIDV(total_time=5000, timestep=1, startingMJD=0):
+	n_times = total_time
 	# Randomly sampled variables 
 	viss = random.uniform(3,5)*1e4 # velocity of ISS [m/s] 
 	sm = 10**random.uniform(-5,-2)*3.09e19 # integrated scattering index [m^-17/3]

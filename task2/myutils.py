@@ -96,33 +96,3 @@ class timestep():
         else: 
             return -1 
             print "Error! Exceeded set maximum time interval" 
- 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

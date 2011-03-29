@@ -13,9 +13,70 @@ import math
 import sys
 import getopt
 import random
-from models import *
+from generate_lc import *
+
+class FluxDistributor:
+	def __init__(self, fmin, fmax, num_sources, power=-2.3, buckets=100):
+		self.fmin = fmin
+		self.fmax = fmax
+		self.num_sources = num_sources
+		self.power = power # power of curve
+
+		# Solve integral to find constant giving the distribution over the desired max / min
+		self.constant = (self.power - 1) * self.num_sources / (fmax ** (self.power - 1) - fmin ** (self.power - 1))
+		self.buckets = buckets
+		self.bucketsize = (self.fmax - self.fmin) * 1.0 / self.buckets
+		self.used = 0
+		print 'bs:', self.bucketsize, 'cons:', self.constant 
+
+	def evaluate_integral(self, fmin, fmax):
+		# Find the number of sources between the given flux bounds 
+		return self.constant * (fmax ** (self.power - 1) - fmin ** (self.power - 1)) / (self.power - 1)
+	
+	def initialise_distribution(self):
+		self.bucket_srccount = {} # stores total sources per bucket b at index b
+		for b in xrange(self.buckets):
+			# evalute the integral across the bucket
+			print 'evaluating from:', self.bucketsize * b + self.fmin, 'to:', self.bucketsize * (b + 1) + self.fmin
+			num_sources = (self.evaluate_integral(self.bucketsize * b + self.fmin, self.bucketsize * (b + 1) + self.fmin))
+			print 'srcs', b, num_sources
+			if int(num_sources) != 0:
+				self.bucket_srccount[b] = int(round(num_sources)) # store it for later
+		print "BUCKETS", self.bucket_srccount
+	
+	def grab_mean(self):
+		rand_bucket = None
+		if len(self.bucket_srccount.keys()) == 0:
+			if self.used != self.num_sources: # rounding missed a value somewhere
+				self.used += 1
+				rand_bucket = 0 # assign to most frequent bucket...
+			else:
+				raise Exception("trying to draw mean but all buckets are empty")
+		else:
+			# draw a random mean from the distribtion to normalise a source flux to
+			rand_bucket = random.choice(self.bucket_srccount.keys())
+			if self.bucket_srccount[rand_bucket] == 1:
+				del self.bucket_srccount[rand_bucket] # delete key - don't want to attempt to assign flux to this bucket in future
+			else:
+				self.bucket_srccount[rand_bucket] -= 1
+			self.used += 1
+		# pull a value at random from the line joining the curve values at the edges of the bucket
+		#bucket_left = self.constant * ((self.bucketsize * rand_bucket + self.fmin) ** (self.power))
+		#bucket_right = self.constant * ((self.bucketsize * (rand_bucket + 1) + self.fmin) ** self.power)
+		bucket_left = self.bucketsize * rand_bucket + self.fmin
+		bucket_right = self.bucketsize * (rand_bucket + 1) + self.fmin
+		print "c:", self.constant, "bs:", self.bucketsize, "fmin:", self.fmin
+		print "rb:", rand_bucket, "l:", bucket_left, "r:", bucket_right
+		return random.uniform(bucket_right, bucket_left) # monotonic function, left > right
+
+	def normalise_flux(self, flux):
+		# fix the mean of the flux at some desired value - operates direct on array
+		mean = sum(flux) / (1.0 * len(flux))
+		for i in xrange(len(flux)):
+			flux[i] *= (self.grab_mean() / mean)
 
 def write2file(time, flux, fnum, type):
+	print "writing",  fnum, type
 	fname = str(type) + "_" + str(fnum) + ".data"
 	f = open(fname, 'w')
 	#print flux
@@ -26,42 +87,28 @@ def write2file(time, flux, fnum, type):
 	f.close()
 
 # generate the test data using Kitty's script (modified slightly)  and the given counts and time domain
-def generateLCData(ttype, amount, epochs, step, gap_percent):
+def generateLCData(type, amount, step, gap_percent):
+	print "generating", amount, type
+	epochs = 300
 	for i in xrange(amount):
-		event_length = None
 		time, flux = None, None
 		if ttype == 'SNe':
-			#print "making sne"
-			event_length = int(floor(random.uniform(200, 500))) # TODO: how long does a supernovae last (weeks to months)
-			time, flux = generateSupernovae(event_length)
+			time, flux = generateSupernovae()
 		elif ttype == 'ESE':
 			#print "making ese"
-			event_length = int(floor(random.uniform(200, 500))) # TODO: how long do ese last
-			time, flux = generateESE(event_length)
+			time, flux = generateESE()
 		elif ttype == 'IDV':
-			time, flux = generateIDV(event_length)
+			time, flux = generateIDV(epochs)
 		elif ttype == 'NT':
-			pass # An underlying NT is generated for every j
-		# generate a noise curve and superimpose an event on it if we want one
-		nt_time, nt_flux = generateNT(epochs, 1, 0.2) # TODO: suitable mean for non interesting sources 
-		if event_length is not None:
-			event_start = int(floor(random.uniform(0, epochs - event_length)))
-			for epoch in xrange(event_start, event_length):
-				nt_flux[epoch] = flux[epoch] # copy the event onto the uninteresting source curve
-		# calculate the number of missing data points from the desired missing percentage
-		gap_epochs = int(floor(epochs * gap_percent * 0.01))
-		#if gap_epochs != 0:
-		#	gapstr = bin(random.getrandbits(gap_epochs))[2:]
-		#	for bitnum in xrange(len(gapstr)):
-		#		if gapstr[bitnum] == '1':
-		#			nt_flux[bitnum] = 'x' # how to handle gaps
-		if step != 1:
-			nt_time = range(int(floor(1.0 * epochs / step)), step)
-			sampled_ts = [nt_flux[epoch] for epoch in nt_time]
-			nt_flux = sampled_ts
-		# finally, apply the power law distribution to the flux array
-		
-		write2file(nt_time, nt_flux, i, ttype)
+			time, flux = generateNT(epochs, 1, 0.2)
+		min = 1
+		max = 10
+		new_flux = random.uniform(max ** -2.3, min) ** (1 / -2.3)
+		mean = 1.0 * sum(flux) / len(flux)
+		for obs_num in xrange(len(flux)):
+			pass
+			#flux[obs_num] *= new_flux / mean
+		write2file(time, flux, i, type)
 
 def usage():
 	print "usage: generate_data [-eghinstj] [-e --ESE ese count] [-m --missing data missing percent] [-i --IDV idv count] [-h --help] \
@@ -69,9 +116,9 @@ def usage():
 
 if __name__ == "__main__":
 	desired = {}
-	epochs = None
 	step = None
 	gap_percent = 0
+	total = 0
 	try:
 		opts, args = getopt.getopt(sys.argv[1:], "hs:i:e:n:m:t:j", ["help", "SNe", "ESE", "IDV", "NT", "missing", "time", "jump"])
 	except getopt.GetoptError as (errno, strerror):
@@ -84,8 +131,6 @@ if __name__ == "__main__":
 	for opt, arg in opts:
 		if opt in ("-h", "--help"):
 			usage()
-		elif opt == "-t":
-			epochs = int(arg)
 		elif opt in ("-s", "--SNe"):
 			desired['SNe'] = int(arg)
 		elif opt in ("-e" "--ESE"):
@@ -98,12 +143,18 @@ if __name__ == "__main__":
 			gap_percent = float(arg)
 		elif opt in ("s", "--step"):
 			step = int(arg)
-	if epochs is None:
-		epochs = 1000
 		print "set default LC length (1000)"
 	if step is None:
 		step = 1
 		print "set default step size (1)"
+	#for k in desired.keys():
+	#	total += desired[k] # find sum of sources
+	#dist = FluxDistributor(1, 2, total)
+	#dist.initialise_distribution()
+	print total
 	for ttype in desired.keys():
-		generateLCData(ttype, desired[ttype], epochs, step, gap_percent)
-		
+		generateLCData(ttype, desired[ttype], step, gap_percent)
+	
+	for i in xrange(10000):
+		pass
+		#todo test this cunt

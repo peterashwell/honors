@@ -102,7 +102,7 @@ A. R. Figueiras-Vidali 2010, \emph{Journal of Machine Learning Research 11}, pp 
 	\frametitle{Paper results and review}
 	\begin{itemize}
 		\item Evaluation shows slight improvement in accuracy over other sparse methods
-		\item Small sacrifice in accuracy over full $O(n^{3})$ GP
+		\item Small sacrifice in accuracy over full $O(n^{2})$ GP
 		\item More vulnerable than other GP methods to overfitting
 	\end{itemize}
 	\begin{figure}
@@ -123,14 +123,7 @@ A. R. Figueiras-Vidali 2010, \emph{Journal of Machine Learning Research 11}, pp 
 \end{frame}
 
 \begin{frame}
-	\frametitle{In the Context of my Project}
-	This is a practical approach to modelling light curves for large volumes of data, however:
-	\begin{itemize}
-	  \item There may be faster or more accurate methods 
-	\item May not be suitable for modelling astronomical data (overfitting risk)
-	\item This approach was not evaluated in terms of predictive power, just fit accuracy
-	\end{itemize}
-	My research approach is as follows:
+	\frametitle{Research Approach}
 	\begin{enumerate}
 	  \item Simulate astronomical data 
 	  \item Decide on a method to rapidly identify transients, with confidence (perhaps this approach)
@@ -140,7 +133,13 @@ A. R. Figueiras-Vidali 2010, \emph{Journal of Machine Learning Research 11}, pp 
 %	\cite{tresp2000bcm}
 \end{frame}
 
-	
+\begin{frame}
+	\frametitle{Thanks!}
+	\begin{itemize}
+		\item Search for "gaussian process applet" for a fun interactive introduction.
+		\item If you're interested in GPs have a read of \emph{Gaussian Processes for Machine Learning} by Rasmussen and Williams (free!)
+	\end{itemize}
+\end{frame}
 %\bibliography{refs}{}
 %\bibliographystyle{plain}
 \end{document}
