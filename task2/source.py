@@ -18,7 +18,6 @@ class ESE():
 		self.time = []
 		self.angle = []
 		self.flux = []
-		self.event_duration = random.randrange(60, 400) # TODO confirm this
 
 	def caustic(self, d, theta_b, theta_l):
 		theta_l *= self.theta_s
@@ -38,7 +37,8 @@ class ESE():
 
 		return fn
 
-	def generate_lc(self, timestep=1, theta_b=1.4, theta_l=5): # TODO confirm timestep in seconds
+	def generate_lc(self, timestep=1.0, theta_b=1.4, theta_l=5): # TODO confirm timestep in seconds
+		self.event_duration = int(floor(random.randrange(50, 350) / timestep)) 
 		#nsteps = 518400   # 2 * 30 * 24 * 60 * 60 / 10 (10 seconds)
 		timer = myutils.timestep() 
 		timer.set_start_time(0) 
@@ -79,7 +79,6 @@ class Supernova():
 		self.type = 'sne'
 		self.time = []
 		self.flux = []
-		self.event_duration = random.randrange(100, 350) # TODO confirm this
 		# Lightcurve parameters 
 		# Frequency nu 
 		self.nu = 1.34 
@@ -113,7 +112,8 @@ class Supernova():
 		flux  = self.k2 *((self.nu/5.0)**self.alpha) * pow(tmt0,self.beta) * (exp(-1.0*(tau+tau3)))
 		return flux
 
-	def generate_lc(self, timestep=1): # TODO timestep in seconds 
+	def generate_lc(self, timestep=1.0): # TODO timestep in seconds 
+		self.event_duration = int(floor(random.randrange(100, 350) / timestep)) # TODO confirm this
 		timer = myutils.timestep() 
 		timer.set_start_time(0) 
 		timer.set_end_time(self.event_duration) 

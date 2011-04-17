@@ -28,22 +28,16 @@ def generateNT(total_time, mean, sigma, timestep=1): # TODO add timestep
 	return (range(total_time), [mean + getnoise(sigma) for e in xrange(total_time)])
 
 # Produce a sudden peak
-def generateFlare(total_time, timestep=1.0):
-	num_points = int(math.floor(total_time / timestep))
-	flare_min = 0.2 # 20% total time minimum
-	flare_max = 0.8 # 80% total time maximum
-	flare_duration = random.randrange(int(math.floor(total_time * flare_min / timestep)), int(floor(total_time * flare_max / timestep)))
-	flare_start = random.randrange(0, num_points - flare_duration)
+def generateFlare(background=1e-5, timestep=1.0):
+	event_duration = random.randrange(30, 200)
+	num_points = int(floor(event_duration / timestep))
 	time = range(num_points)
-	background = random.uniform(1e-5, 1e-4) # TODO what should define background noise
-	flux = generateNT(flare_start, background, background / 3.0)
 	flare_intensity = background * random.randrange(50, 1000) # TODO flare is 50 to 1000 hotter than bg
-	flux += generateNT(flare_duration, flare_intensity, flare_intensity / 10.0) # TODO what variance for flares
-	flux += generateNT(num_points - flare_duration - flare_start, background, background / 3.0)
+	flux = generateNT(num_points, flare_intensity, background / 3.0)
 	return time, flux
 
 # Generate an ESE lightcurve based on Fiedler 1994 
-def generateESE(total_time=5000, timestep=1, startingMJD=0):
+def generateESE(timestep=1.0, startingMJD=0):
 	newESE = source.ESE() 
 
 	theta_b = random.uniform(1.2,2.5) 
@@ -60,12 +54,11 @@ def generateESE(total_time=5000, timestep=1, startingMJD=0):
 
 # Lightcurve adapted from VAST Memo No. 3 
 # Equation is from Weiler (2002)  
-def generateSupernovae(total_time=1000, timestep=1, startingMJD=0): 
+def generateSupernovae(timestep=1.0, startingMJD=0): 
 	newSNe = source.Supernova() 
 	newSNe.generate_lc(timestep)
 	
 	timesteps = len(newSNe.time) 
-	print "timesteps:", timesteps
 	galaxy_flux = random.randrange(5,500) # TODO normalise flux with this 
 	noise = 1 
 
@@ -76,8 +69,8 @@ def generateSupernovae(total_time=1000, timestep=1, startingMJD=0):
 	return (newSNe.time, newSNe.flux)
 	 
 # Adapted from VAST memo 2. 
-def generateIDV(total_time=5000, timestep=1, startingMJD=0):
-	n_times = total_time
+def generateIDV(total_time=500, timestep=1.0, startingMJD=0):
+	n_times = int(floor(total_time / timestep))
 	# Randomly sampled variables 
 	viss = random.uniform(3,5)*1e4 # velocity of ISS [m/s] 
 	sm = 10**random.uniform(-5,-2)*3.09e19 # integrated scattering index [m^-17/3]
@@ -94,9 +87,8 @@ def generateIDV(total_time=5000, timestep=1, startingMJD=0):
 	timeInDays = (x*2*z*theta0/viss)/(24*3600)	
  
 	y = scipy.linspace(0,0,n_times)  
-	for i in range(n_times): 
+	for i in range(n_times):
 		y[i] = myutils.laguerre_7on6(float(pow(x[i],2)))
-  
 	y2 = scipy.linspace(0,0,n_times*2-1)
 	y2[0:n_times-1] = y[0:n_times-1]  
 	temp = y[::-1] 
