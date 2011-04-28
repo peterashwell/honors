@@ -14,15 +14,17 @@ class Perceptron:
 			self.num_features = num_features
 			self.num_classes = num_classes
 			self.classes = classes
-		self.weights = [0] * self.num_classes * self.num_features
+		# initialise training data
+		self.weights = [0] * self.num_classes * self.num_features # initial weights used for classification
+		self.weight_sums = [0] * self.num_classes * self.num_features # sum of weights during training
+		self.rounds = 0.0 # rounds during training
 	
+	# train, but do not average
 	def train(self, train_file):
-		last_weight = [0] * self.num_classes * self.num_features
-		weight_sums = [0] * self.num_classes * self.num_features
+		last_weight = self.weights
 		train_data = open(train_file)
-		rounds = 0.0
 		for line in train_data:
-			rounds += 1
+			self.rounds += 1
 			split_line = line.strip().split(',')
 			features = [float(obj.strip()) for obj in split_line[:-1]]
 			true_class = self.classes[split_line[-1].strip()]
@@ -33,11 +35,19 @@ class Perceptron:
 				for index in xrange(self.num_features):
 					last_weight[weight_start_true + index] += features[index]
 					last_weight[weight_start_comp + index] -= features[index]
-			for index in xrange(self.num_features):
-				weight_sums[index] += last_weight[index]
-		for index in xrange(self.num_features):
-			weight_sums[index] /= rounds # average the weights
-		self.weights = weight_sums # update main weights
+			for index in xrange(self.num_features * self.num_classes):
+				self.weight_sums[index] += last_weight[index] # wtf, didn't have * self.num_classes before...
+			self.weights = last_weight
+		#for index in xrange(self.num_features):
+		#	weight_sums[index] /= rounds # average the weights
+		#self.weights = weight_sums # update main weights
+		# DO NOT AVERAGE ^^^
+		pass # done
+	
+	def finish_training(self):
+		for index in xrange(self.num_features * self.num_classes):
+			self.weight_sums[index] /= self.rounds # this is a float
+		self.weights = self.weight_sums
 
 	def compute_class(self, features):
 		best_score = None
@@ -70,7 +80,7 @@ class Perceptron:
 		incorrect = 0
 		for line in test_data:
 			split_line = line.strip().split(',')
-			features = [int(obj.strip()) for obj in split_line[:-1]]
+			features = [float(obj.strip()) for obj in split_line[:-1]]
 			true_class = self.classes[split_line[-1].strip()]
 			computed_class = self.compute_class(features)
 			if true_class == computed_class:
