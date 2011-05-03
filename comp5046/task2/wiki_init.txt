@@ -1,0 +1,18 @@
+16
+101519
+Person:Academic / Teacher
+Person:Actor / Director / Producer
+Person:Artist
+Person:Author/Journalist / Writer / Poet
+Person:Business
+Person:Celebrity
+Person:Criminal
+Person:Medical / Scientist / Researcher
+Person:Military / Army / Navy / Airforce
+Person:Musician / Singer
+Person:Other
+Person:Politician/Advisor
+Person:Religious / Priest / Minister / Cleric
+Person:Royalty
+Person:Sports
+Person:Uncelebrated / victims / bystander / witnes

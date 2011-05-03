@@ -1,0 +1,164 @@
+\documentclass[11pt]{article}
+
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage[margin=2.5cm]{geometry}
+
+\usepackage[round]{natbib}
+\usepackage{hyperref}
+\usepackage{hypernat}
+
+\bibliographystyle{plainnat}
+
+\title{Literature Review}
+\author{Peter Ashwell}
+\date{}
+
+\begin{document}
+	\maketitle
+	\section{Introduction}
+	\paragraph{}
+	Astronomical transient detection is the problem of discovering changes in the structure of astronomical observations over time. The observations take the form of a \emph{time series}, referred to by astronomers as \emph{light curves}. Time series are defined as:
+	\begin{center}
+	\begin{math}
+		\{(t_i, \mathbf{x}_{i}) \quad i \in \{t_{1} \ldots t_{D}\} \subset \mathbb{R} \quad \mathbf{x}_{i} \in \mathbb{R}^{D} \}
+	\end{math}
+	\end{center}
+	A mapping from unique time indices $t_{i}$ to a $D$ dimensional vector $\mathbf{x}_{i}$. The $t_{i}$ values may represent any real unit of time - seconds, days, years. The sequence of increasing $t_{i}$ is not necessarily evenly distributed.
+	\paragraph{}
+	The problem of astronomical transient detection for this research is the on-line classification of time series data from automated observatories. Data is fed at regular intervals of 5 seconds to the program. At each timestep any new transients need to be reported with a confidence margin. The main goal is the detection of astronomical transients as early as possible, but also with high precision.
+	\paragraph{}
+	Over recent years time series analysis has received a lot of attention in various domains: speech recognition, handwriting analysis, even image outlines can be represented as time series and classified. Unfortunately these well developed techniques do not extend easily to astronomical time series. Here are some of the difficulties inherent to this task:
+	\begin{enumerate}
+		\item The data arrives in a stream, not a complete structure. Classification is needed without complete light curve data. Developed techniques assume the entire curve is available at classification time.
+		\item Astronomical time series have distortions in terms of amplitude scaling, time stretching, noise and missing data
+		\item The classification must be very high precision so as not to waste astronomer time
+		\item There are very large data volumes - 1 GB/s so classification has to be efficient in space and time complexity
+		\item Most of the received data is not relevant to event detection - the start and end of interesting structures must also be determined by the program
+	\end{enumerate}
+	Both literature directly related to astronomical time series and from other domains are reviewed and discussed in the following sections with the goal of addressing the above problems.
+	
+	\section{Coping with Inconsistencies in Astronomical Time Series}
+	Here is a list of the difficulties inherent in astronomical time series. These complications prevent the application of more well developed classification methods.
+	\begin{itemize}
+		\item Noisy observations 
+		\item Amplitude scaling - the same astronomical event will have a different intensity when observed at different distances
+		\item Missing data - streaming data is not continuous
+		\item Time warping - events may have different durations or unfold slightly differently, but still have very similar structures
+	\end{itemize}
+	The goal of this section is to outline from literature some of the methods developed to remedy these issues, both in astronomical data mining and in other areas.
+	
+	\subsection{Distance Measures for Time Series}
+	\subsubsection{Introduction}
+	Distance measures are integral to several useful classification techniques, including k-Nearest Neighbor and clustering. In addition, preprocessing based on a notion of distance will be necessary for normalising our data for more complex classifiers. This section explores a few distance measures for time series and attempts to alleviate amplitude scaling and time warping, two features inherent within classes of astronomical time series.
+	\subsubsection{Euclidean Distance}
+	The simplest possible distance measure is euclidean distance the sum of differences between the time-indexed values of a series. Euclidean distance is not suitable for our application because it is brittle - any distortion of any kind, let alone some combination of distortions, will introduce a lot of error. More flexible similarity measures are required.
+	\subsubsection{Dynamic Time Warping}
+	Dynamic Time Warping (DTW) is a technique first introduced in \citep{sakoe1978dynamic} and was popularised in 1994 \citep{berndt1994using} with successful application to speech signal classification. Dynamic time warping is a dynamic programming approach to matching two time series which allows the matching to "skip" parts of either time series in order to get a better match. The distance of two time series under DTW is then the minimum across all possible matchings. The two sequences need not be of equal length. The behavior of this distance function suggests it could be suitable for subsequence searching, a problem that needs to be addressed in parts 1 and 5.
+	\begin{itemize}
+		\item Longest common subsequence similarity
+		\item Complexity distance for time series \citep{batista2011complexity}
+		\item Spade, see also streaming methods
+	\end{itemize}
+
+	\subsection{Gaussian Processes for regression and smoothing of time series}
+	\subsubsection{Introduction to Gaussian Processes (GPs)}
+	A Gaussian Process is a statistical model of data that can be used for regression, noise-filtering, classification and prediction. In this section a discussion of the regression and noise-filtering abilities will be presented in the hopes of addressing problem 1 - discontinuities and noise in astronomical data. A thorough introduction and exploration of gaussian processes can be found in \citep{rasmussen2006gpfml}. A brief overview for the purposes of discussion is provided here.
+	\paragraph{}
+	A Gaussian Process consists of a multivariate gaussian distribution, where each dimension of the distribution corresponds to an index (in this case, time index) of an input point, say $x$. Gaussian distributions are defined by a mean and a covariance matrix. Gaussian processes are slightly more general in that the entries of the covariance matrix are determined by a covariance function $k$. 
+	\begin{center}
+	\begin{align*}
+		\mathcal{GP}(m(\mathbf{x}), k(\mathbf{x}, \mathbf{x}^{\prime})) \\
+	\end{align*}
+	\end{center}
+	Covariance functions determine the influence that the points in the distribution have on each other. They are used to control the amount of flexibility and smoothness in the function that the distribution represents. This is done both through the choice of function (popular choices are the squared exponential or the matern functions), and \emph{hyperparameters}. Two commonly used hyperparameters are lengthscale, noise variance and signal variance, varying the strength of the influence points have based on their distance apart as an index, and the expected noise and fluctuation in the signal. Optimising these hyperparamters is key to getting good regression, prediction and noise filtering.
+	
+	\subsubsection{Regression Performance and Astronomical Time Series}
+	An evaluation of Gaussian Processes for regression is carried out in \citep{rasmussen1996evaluation}, demonstrating that gaussian processes are competitive with neural networks on non-linear regression tasks, even performing slightly better when large amounts of noise are present. No study has yet been performed that explicitly uses Gaussian Proesses for Astronomical Time Series regression. However, of 0.2 average squared error on the high-dimensional, noisy, non-linear data presented in the paper suggests that GPs will be useful. This kind of error compares to the performance of support vector machines on similar datasets TOOD reference.
+	
+	\subsubsection{Sparse Gaussian Processes}
+	The time and space complexity of the fundamental gaussian process is prohibitive for large volumes of data. In recent years several versions of gaussian processes with approximations to covariance functions have been developed to cope with these constraints. These improvements give a time complexity of O(mn) for training time where and $O(m^{2})$ for prediction where m is the number of basis functions and $m << n$. The most recent versions of sparse GPs are Sparse Spectrum Gaussian Processes (SSGPs) in \citep{rasmussen2010ssgpr} which use periodic basis functions in the approximation. Sparse Multiscale GPs \citep{walder2008sparse} and Fully Independent Training Conditional (FITC) \citep{snelson2005sgppi} comprise the state of the art. Despite a sensitivity to overfitting on one highly non-linear dataset, SSGP outperforms FITC and SSGP. All implementations approach the error of a full GP as the number of basis functions in the approximation is increased.
+
+	\subsubsection{On-line Gaussian Processes}
+	The training component 
+	
+	\subsubsection{Summary}
+	Gaussian Processes are useful as a tool for noise-filtering and approximating missing data in our astronomical time series. Sparse GPs using online cholesky updates may be sufficiently fast for regression on a sliding window of data. Gaussian Processes are easier to implement and in the sparse versions, faster than Support Vector Machines and other non-linear regression tools, with minor sacrifices in accuracy with sufficient basis functions.
+
+	
+	\section{Approaches to Time Series Classification}
+	Time series classification has received a lot of attention in literature recently due to applications in a wide variety of areas. Not all methods discussed here are applicable to astronomical time series, but no particular piece of literature addresses the problem we have. This survey covers both statistical and machine learning approaches to the problem. This section aims to address points 2, 3 and to some extent 4 by discussion of running times and scalability.
+
+	TODO a paragraph on feature extraction
+	A lot of the methods discussed so far are explicit analysis tools that deal with some particular kind of time series and have varying strengths and weaknesses depending on what is being classified, for example, Fourier transforms for periodic time series. These independent strengths can be leveraged with feature extraction to produce a very powerful and general classifier. 
+	\subsection{Statistical Approaches}
+	\begin{itemize}
+		\item Distance based
+		\item Hidden Markov Models
+		\item Autoregressive moving average models
+		\item Bayesian Models
+	\end{itemize}
+	\subsection{Frequency Domain Approaches}
+	\begin{itemize}
+		\item Discrete fourier transforms
+		\item Kernel Methods
+		\item Periodograms
+	\end{itemize}
+	\subsection{Time Domain Analysis Approaches}
+	\begin{itemize}
+		\item Distance Measures and Clustering
+		\item Shapelets
+		\item Support Vector Machines
+		\item Neural Networks
+		\item Wavelets
+	\end{itemize}
+	\subsection{Temporal Grammars}
+	\subsubsection{Introduction}
+	This section introduces literature on temporal grammars, an explicit, interpretable feature set for time series. Since structured time series have a general set of 
+	\subsubsection{Temporal Grammars}
+	Temporal grammars are first introduced by Keogh TODO when in the hopes of producing features to describe time series that are both effective for classification and possible to interpret for humans users. A typical example of a temporal grammar feature is a steady increase, characterised for example by distance of increase $d$, gradient of increase $m$, start and end heights $s$ and $e$, noise if the section is not completely straight as $n$. Written as ($d$, $m$, $s$, $e$, $n$), this produces a numeric feature vector suitable for input into generic classifiers. This kind of approach is outlined in TODO what paper. The results are promising (TODO what accy). How relevant to Astro time series TODO
+	\subsubsection{Temporal Feature Extraction}
+	Todo talk about papers
+	\begin{itemize}
+	\item Wavelet features for time series stream classification \citep{xing2011extracting}
+	\item Constructing high dimensional feature space for time series classification \citep{eruhimov2007constructing}
+	\item Extracting interpretable features for early classification on time series \citep{xing2011extracting}
+	\item Generalized feature extraction for structural pattern recognition in time series data \citep{olszewski2001generalized}
+	\item Classificaiton of Multivariate Time series and Structure Data using Constructive Induction \citep{kadous2005classification}
+	\item Feature Subset Selection and Feature Ranking for Multivariate Time Series \citep{yoon2005feature}
+	\item Efficient Mining of Understanding Patterns from Multivariate Time Series \citep{morchen2007efficient}
+	\item Mining Sequence Classifiers for Early Prediction \citep{xing2008mining}
+	\item Pattern Extraction for Time Series Classification ACTUALLY TIME DOMAIN --- \citep{geurts2001pattern}
+	\item Time series classification based on qualitative space fragmentation \citep{jagnjic2009time}
+	\item Support Vector Machines of interval based features for time series classification \citep{rodriguez2005support}
+	\end{itemize}
+	
+	\subsubsection{Summary}
+
+	\section{Analysis of time series streams}
+	The final serious complication to be addressed is that the time series data arrives in a stream. Some of the above tools extend to this additional constraint and are outlined below.
+	\subsection{Extensions of time series classification to streams}
+	\begin{itemize}
+		\item \citep{ye2009time} - shapelets for subsequence classification
+		\item \citep{linfast}, \citep{keogh2001derivative}, \citep{berndt1994using} \citep{capitani2007warping} dynamic time warping, efficient implementations and subsequence search as well as invariance to scaling and time stretching
+		\item \citep{xing2011extracting} Extracting features for early classification of time series.
+		\item Towards a real time transient classification engine. 
+		% TODO important See mahabal 2008 for run down of ts classifier methods. uses feature selection for rapid transient detection
+		\item Real-Time Classification of Streaming Sensor Data - SAX and TSB algorithms for classifying time series streams  \citep{kasetty2008real}
+		\item Online Recognition of Fuzzy Time Series Patterns \citep{herbst2009online}
+		\item Novel Online Methods for Time Series Segmentation 
+		\item SpaDe \citep{chen2007spade}
+	\end{itemize}
+	\subsection{Approaches to time series representation for efficiency}
+	\begin{itemize}
+		\item SAX \citep{lin2007experiencing}
+		\item Segmentation and mean calculations \citep{liu2008novel}
+		\item Dimensionality reduction \citep{keogh2001dimensionality}
+	\end{itemize}
+	
+	\section{Summary}
+	\begin{figure}
+	\caption{Comparison of Time Series Classification Approaches}
+	\end{figure}
+	\bibliography{refs}
+\end{document}
