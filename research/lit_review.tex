@@ -50,11 +50,11 @@
 	
 	\subsection{Distance Measures for Time Series}
 	\subsubsection{Introduction}
-	Distance measures are integral to several useful classification techniques, including k-Nearest Neighbor and clustering. In addition, preprocessing based on a notion of distance will be necessary for normalising our data for more complex classifiers. This section explores a few distance measures for time series and attempts to alleviate amplitude scaling and time warping, two features inherent within classes of astronomical time series.
+	Distance measures are integral to several useful classification techniques, including k-Nearest Neighbour and clustering. In addition, preprocessing or transformation based on a notion or distance is an integral part of some more complex classifiers. This section explores a few distance measures for time series and attempts to alleviate amplitude scaling and time warping, two features inherent within classes of astronomical time series.
 	\subsubsection{Euclidean Distance}
 	The simplest possible distance measure is euclidean distance the sum of differences between the time-indexed values of a series. Euclidean distance is not suitable for our application because it is brittle - any distortion of any kind, let alone some combination of distortions, will introduce a lot of error. More flexible similarity measures are required.
 	\subsubsection{Dynamic Time Warping}
-	Dynamic Time Warping (DTW) is a technique first introduced in \citep{sakoe1978dynamic} and was popularised in 1994 \citep{berndt1994using} with successful application to speech signal classification. Dynamic time warping is a dynamic programming approach to matching two time series which allows the matching to "skip" parts of either time series in order to get a better match. The distance of two time series under DTW is then the minimum across all possible matchings. The two sequences need not be of equal length. The behavior of this distance function suggests it could be suitable for subsequence searching, a problem that needs to be addressed in parts 1 and 5.
+	Dynamic Time Warping (DTW) is a technique first introduced in \citep{sakoe1978dynamic} and was popularised in 1994 \citep{berndt1994using} with successful application to speech signal classification. Dynamic time warping is a dynamic programming approach to matching two time series which allows the matching to "skip" parts of either time series in order to get a better match. The distance of two time series under DTW is then the minimum across all possible matchings. The two sequences need not be of equal length. The behaviour of this distance function suggests it could be suitable for subsequence searching, a problem that needs to be addressed in parts 1 and 5.
 	\begin{itemize}
 		\item Longest common subsequence similarity
 		\item Complexity distance for time series \citep{batista2011complexity}
@@ -63,34 +63,34 @@
 
 	\subsection{Gaussian Processes for regression and smoothing of time series}
 	\subsubsection{Introduction to Gaussian Processes (GPs)}
-	A Gaussian Process is a statistical model of data that can be used for regression, noise-filtering, classification and prediction. In this section a discussion of the regression and noise-filtering abilities will be presented in the hopes of addressing problem 1 - discontinuities and noise in astronomical data. A thorough introduction and exploration of gaussian processes can be found in \citep{rasmussen2006gpfml}. A brief overview for the purposes of discussion is provided here.
+	A Gaussian Process is a statistical model of data that can be used for regression, noise-filtering, classification and prediction. In this section a discussion of the regression and noise-filtering abilities will be presented in the hopes of addressing problem 1. A thorough introduction and exploration of gaussian processes can be found in \citep{rasmussen2006gpfml}. A brief overview for the purposes of discussion is provided here.
 	\paragraph{}
 	A Gaussian Process consists of a multivariate gaussian distribution, where each dimension of the distribution corresponds to an index (in this case, time index) of an input point, say $x$. Gaussian distributions are defined by a mean and a covariance matrix. Gaussian processes are slightly more general in that the entries of the covariance matrix are determined by a covariance function $k$. 
-	\begin{center}
-	\begin{align*}
-		\mathcal{GP}(m(\mathbf{x}), k(\mathbf{x}, \mathbf{x}^{\prime})) \\
-	\end{align*}
-	\end{center}
-	Covariance functions determine the influence that the points in the distribution have on each other. They are used to control the amount of flexibility and smoothness in the function that the distribution represents. This is done both through the choice of function (popular choices are the squared exponential or the matern functions), and \emph{hyperparameters}. Two commonly used hyperparameters are lengthscale, noise variance and signal variance, varying the strength of the influence points have based on their distance apart as an index, and the expected noise and fluctuation in the signal. Optimising these hyperparamters is key to getting good regression, prediction and noise filtering.
+%	\begin{center}
+%	\begin{align*}
+%		\mathcal{GP}(m(\mathbf{x}), k(\mathbf{x}, \mathbf{x}^{\prime})) \\
+%	\end{align*}
+%	\end{center}
+	\paragraph{}
+	Covariance functions determine the influence that the points in the distribution have on each other. They are used to control the amount of flexibility and smoothness in the function that the distribution represents. This is done both through the choice of function (popular choices are the squared exponential or the matern functions), and \emph{hyperparameters} to the chosen function. Some commonly used hyperparameters are lengthscale, noise variance and signal variance These correspond respectively to the expected influence of points based on their distance apart in the index, the expected fluctuation in height and expected noise in the data. Optimising the hyperparameters for the dataset is key to getting good regression, prediction and noise filtering.
 	
 	\subsubsection{Regression Performance and Astronomical Time Series}
-	An evaluation of Gaussian Processes for regression is carried out in \citep{rasmussen1996evaluation}, demonstrating that gaussian processes are competitive with neural networks on non-linear regression tasks, even performing slightly better when large amounts of noise are present. No study has yet been performed that explicitly uses Gaussian Proesses for Astronomical Time Series regression. However, of 0.2 average squared error on the high-dimensional, noisy, non-linear data presented in the paper suggests that GPs will be useful. This kind of error compares to the performance of support vector machines on similar datasets TOOD reference.
+	An evaluation of Gaussian Processes for regression is carried out in \citep{rasmussen1996evaluation}, demonstrating that gaussian processes are competitive with neural networks on non-linear regression tasks, even performing slightly better when large amounts of noise are present. No study has yet been performed that explicitly uses Gaussian Proesses for Astronomical Time Series regression. However, of 0.2 average squared error on the high-dimensional, noisy, non-linear data presented in the paper suggests that GPs will be useful.
 	
 	\subsubsection{Sparse Gaussian Processes}
-	The time and space complexity of the fundamental gaussian process is prohibitive for large volumes of data. In recent years several versions of gaussian processes with approximations to covariance functions have been developed to cope with these constraints. These improvements give a time complexity of O(mn) for training time where and $O(m^{2})$ for prediction where m is the number of basis functions and $m << n$. The most recent versions of sparse GPs are Sparse Spectrum Gaussian Processes (SSGPs) in \citep{rasmussen2010ssgpr} which use periodic basis functions in the approximation. Sparse Multiscale GPs \citep{walder2008sparse} and Fully Independent Training Conditional (FITC) \citep{snelson2005sgppi} comprise the state of the art. Despite a sensitivity to overfitting on one highly non-linear dataset, SSGP outperforms FITC and SSGP. All implementations approach the error of a full GP as the number of basis functions in the approximation is increased.
+	The time and space complexity of the fundamental gaussian process is prohibitive for large volumes of data. In recent years several versions of gaussian processes with approximations to covariance functions have been developed to cope with these constraints. These improvements give a time complexity of $O(mn)$ for training time and $O(m^{2})$ for prediction where m is the number of basis functions and $m << n$. The most recent versions of sparse GPs are Sparse Spectrum Gaussian Processes (SSGPs) in \citep{rasmussen2010ssgpr} which use periodic basis functions in the approximation. Sparse Multiscale GPs \citep{walder2008sparse} and Fully Independent Training Conditional (FITC) \citep{snelson2005sgppi} comprise the state of the art. Despite a sensitivity to overfitting on one highly non-linear dataset, SSGP otherwise outperforms FITC and SPGP. With the excepting of the overfitted dataset, all implementations approach the error of a full GP as the number of basis functions ($m$) in the approximation is sufficiently large.
 
 	\subsubsection{On-line Gaussian Processes}
-	The training component 
+	Standard gaussian processes can be altered to allow for on-line updates of the training variables, see \citep{osborne2007gaussian}. Recently, sparse models have also been implemented that also allow for fast on-line updating. In \citep{ranganathan2011online}, a sparse GP is presented giving an $O(n)$ update time per addition of an additional point. These GPs have full predictive power and outperform state-of-the-art sparse GPs on non-linear data sets. There are limitations on this algorithm however, most importantly that optimising the hyperparameters to new data is a costly $O(n^{2})$ step. This is not ideal since we do not know anything about the structure of our unfolding time series and some tuning is necessary for good results. However, if this issue can be overcome, these are an attractive option for solving problem 1.
 	
 	\subsubsection{Summary}
-	Gaussian Processes are useful as a tool for noise-filtering and approximating missing data in our astronomical time series. Sparse GPs using online cholesky updates may be sufficiently fast for regression on a sliding window of data. Gaussian Processes are easier to implement and in the sparse versions, faster than Support Vector Machines and other non-linear regression tools, with minor sacrifices in accuracy with sufficient basis functions.
-
+	Gaussian Processes are useful as a tool for noise-filtering and approximating missing data in our astronomical time series. Gaussian Processes are easier to implement and the various sparse implementations, especially the on-line version, look like promising tools for approaching the issue of our gappy and noisy data.
 	
 	\section{Approaches to Time Series Classification}
-	Time series classification has received a lot of attention in literature recently due to applications in a wide variety of areas. Not all methods discussed here are applicable to astronomical time series, but no particular piece of literature addresses the problem we have. This survey covers both statistical and machine learning approaches to the problem. This section aims to address points 2, 3 and to some extent 4 by discussion of running times and scalability.
+	Time series classification has received a lot of attention in literature recently due to applications in a wide variety of areas. Not all methods discussed here are applicable to astronomical time series but are still pertinent. This survey covers both statistical and machine learning approaches to the problem. This section aims to address points 2, 3 and to some extent 4 by discussion of running times and scalability.
 
-	TODO a paragraph on feature extraction
-	A lot of the methods discussed so far are explicit analysis tools that deal with some particular kind of time series and have varying strengths and weaknesses depending on what is being classified, for example, Fourier transforms for periodic time series. These independent strengths can be leveraged with feature extraction to produce a very powerful and general classifier. 
+%	TODO a paragraph on feature extraction
+%	A lot of the methods discussed so far are explicit analysis tools that deal with some particular kind of time series and have varying strengths and weaknesses depending on what is being classified, for example, Fourier transforms for periodic time series. These independent strengths can be leveraged with feature extraction to produce a very powerful and general classifier. 
 	\subsection{Statistical Approaches}
 	\begin{itemize}
 		\item Distance based
@@ -99,41 +99,57 @@
 		\item Bayesian Models
 	\end{itemize}
 	\subsection{Frequency Domain Approaches}
-	\begin{itemize}
-		\item Discrete fourier transforms
-		\item Kernel Methods
-		\item Periodograms
-	\end{itemize}
+	\subsubsection{Introduction}
+	Frequency domain analysis of is a common technique used to study astronomical time series. In itself it is highly effective for identification and classification of periodic stars - one category of astronomical time series our system needs to deal with. Additionally, the outputs of the various techniques can be used to develop features for machine learners for time series without periodic structures. Of importance is that frequency metrics are less sensitive to noise, amplitude scaling and time warping than time domain analysis. A brief survey of the techniques and how they may be applied to our problem follows.
+	\subsubsection{Discrete Fourier Transforms and the Lomb-Scargle Periodogram}
+	A Fourier transformation is decomposition of a continuous function into sinusoids. The strength of the peak for each component of the decomposition indicates the strength of that component in the original signal. There is a version of the Fourier transform that works for discrete data such as ours, but unfortunately is sensitive to discontinous data. The Lomb Scargle Periodogram, introduced in \citep{lomb1976least} and \citep{scargle1982studies}, is a spectral decomposition that copes with this issue. The method involves fitting a number of sinusoidal basis functions onto a dataset using least squares regression. The output is a spectral decomposition of weighted sinusoids like the Fourier transform.
+	
+	\subsubsection{Kernel Methods}
+	\citep{wachman2009kernels}
+	
 	\subsection{Time Domain Analysis Approaches}
 	\begin{itemize}
 		\item Distance Measures and Clustering
 		\item Shapelets
+		\item Wavelets
 		\item Support Vector Machines
 		\item Neural Networks
-		\item Wavelets
 	\end{itemize}
 	\subsection{Temporal Grammars}
 	\subsubsection{Introduction}
-	This section introduces literature on temporal grammars, an explicit, interpretable feature set for time series. Since structured time series have a general set of 
-	\subsubsection{Temporal Grammars}
-	Temporal grammars are first introduced by Keogh TODO when in the hopes of producing features to describe time series that are both effective for classification and possible to interpret for humans users. A typical example of a temporal grammar feature is a steady increase, characterised for example by distance of increase $d$, gradient of increase $m$, start and end heights $s$ and $e$, noise if the section is not completely straight as $n$. Written as ($d$, $m$, $s$, $e$, $n$), this produces a numeric feature vector suitable for input into generic classifiers. This kind of approach is outlined in TODO what paper. The results are promising (TODO what accy). How relevant to Astro time series TODO
-	\subsubsection{Temporal Feature Extraction}
-	Todo talk about papers
-	\begin{itemize}
-	\item Wavelet features for time series stream classification \citep{xing2011extracting}
-	\item Constructing high dimensional feature space for time series classification \citep{eruhimov2007constructing}
-	\item Extracting interpretable features for early classification on time series \citep{xing2011extracting}
-	\item Generalized feature extraction for structural pattern recognition in time series data \citep{olszewski2001generalized}
-	\item Classificaiton of Multivariate Time series and Structure Data using Constructive Induction \citep{kadous2005classification}
-	\item Feature Subset Selection and Feature Ranking for Multivariate Time Series \citep{yoon2005feature}
-	\item Efficient Mining of Understanding Patterns from Multivariate Time Series \citep{morchen2007efficient}
-	\item Mining Sequence Classifiers for Early Prediction \citep{xing2008mining}
-	\item Pattern Extraction for Time Series Classification ACTUALLY TIME DOMAIN --- \citep{geurts2001pattern}
-	\item Time series classification based on qualitative space fragmentation \citep{jagnjic2009time}
-	\item Support Vector Machines of interval based features for time series classification \citep{rodriguez2005support}
-	\end{itemize}
+	Astronomical time series have forms which make them distinct from each other and from background noise. Peaks, grades of slopes, valleys, bumps and other local features characterise each class. Humans are good at discerning these forms, but to train a machine learning classifier requires some kind of language to express the substructures - a temporal grammar. This section discusses feature extraction methods for temporal grammars that are both robust for classification and are human readable - they can be easily adjusted and reapplied. There are limitations to this technique for our problem in that any features extracted must be invariant to the in-class distortions of astronomical time series. This may be possible if the features are sufficiently abstract.
+	\subsubsection{Early Temporal Grammars and Basic Approach}
+	Early work in this area consists of approximating a pattern using simple shapes, for example, straight line segments as in as in \citep{keogh1998enhanced}. One attempt at a generalisation of temporal grammars is found in \citep{olszewski2001generalized}, and this is a good introduction to the end-to-end approach. This paper utilises a grammar of \{constant, straight, triangular, trapezoid, sinusoid, exponential\} to the task of pattern representation.
+	\paragraph{}
+	Dynamic programming is used to decide on optimal partitions of the pattern by finding the minimal error choices of substructure pieces. These substructures are then represented as numerical feature vectors which are fed into a standard machine learning classifier. The implementation was run on complex non-linear time series datasets including ECG data. 
+	\paragraph{}
+	An implementation of a feature extractor was run and compared with wavelet and Fourier transforms and performed at least as well, typically better. ECG signals are well known to be difficult to classify as even expert humans do not do much better than 85\%. This approach summarises the application of temporal grammars to time series classification. This approach is very poor in time complexity - $O(n^{3})$, and is also not suitable for a time series data stream.
 	
+	\subsubsection{Recent Improvements and Distortion-Invariant Forms}
+	In \citep{kadous2005classification} a more abstract temporal grammar is proposed. In this case, not based on parameterised curve fitting but on more general pattern substructures including plateaus, increasing and decreasing sections and local maxima and minima. The grammar can be extended but it already quite powerful with those features alone. A classifier is built by constructing a decision tree from features extracted from training samples.
+	\paragraph{}
+	The Kadous temporal grammar is applied to similar datasets as in Olszewski: ECG time series and a temporal representation of sign language expressions.  Both datasets are highly nonlinear. Accuracy around the average for professional cardiologists is achieved, notably without any expert background knowledge introduced into the model. The model also outperforms a Hidden Markov Model implementation slightly, with the added bonus that the rules produced are human interpretable (HMM training states are not). This approach is quite fast, as building a decision tree is done with a randomised algorithm. It is still not suitable for streaming time series.
+	\paragraph{}
+	Since the features are more abstract than the parameterised curves of the previous section, proposals for dealing with amplitude scaling and warping seem feasible. For an example, one could look at the distributions of local maxima and minima to find likely matches, then search for constant factor differences in their amplitude for confirmation, similarly for plateau length and height.
+	\subsubsection{Temporal Feature Extraction for Streaming Time Series}
+		Extracting interpretable features for early classification on time series \citep{xing2011extracting}
 	\subsubsection{Summary}
+	There needs to be a summary here
+	
+%	Todo talk about papers
+%	\begin{itemize}
+%	\item Wavelet features for time series stream classification \citep{xing2011extracting}
+%	\item Constructing high dimensional feature space for time series classification \citep{eruhimov2007constructing}
+%
+%	\item Generalized feature extraction for structural pattern recognition in time series data \citep{olszewski2001generalized}
+%	\item Classificaiton of Multivariate Time series and Structure Data using Constructive Induction \citep{kadous2005classification}
+%	\item Feature Subset Selection and Feature Ranking for Multivariate Time Series \citep{yoon2005feature}
+%	\item Efficient Mining of Understanding Patterns from Multivariate Time Series \citep{morchen2007efficient}
+%	\item Mining Sequence Classifiers for Early Prediction \citep{xing2008mining}
+%	\item Pattern Extraction for Time Series Classification ACTUALLY TIME DOMAIN --- \citep{geurts2001pattern}
+%	\item Time series classification based on qualitative space fragmentation \citep{jagnjic2009time}
+%	\item Support Vector Machines of interval based features for time series classification \citep{rodriguez2005support}
+%	\end{itemize}
 
 	\section{Analysis of time series streams}
 	The final serious complication to be addressed is that the time series data arrives in a stream. Some of the above tools extend to this additional constraint and are outlined below.

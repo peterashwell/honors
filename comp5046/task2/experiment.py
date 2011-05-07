@@ -34,7 +34,7 @@ for comb_size in xrange(1,len(feature_sets) + 1):
 		end = 0
 		cm = [[0] * num_classes for i in xrange(num_classes)]
 
-		for fold_mul in xrange(10): # corresponds to 1 cross validation run
+		for fold_num in xrange(10): # corresponds to 1 cross validation run
 			start = end
 			end = start + fold_size
 			if leftover > 0:
@@ -46,7 +46,7 @@ for comb_size in xrange(1,len(feature_sets) + 1):
 			
 			first_round = True # first round of training (add test cases to array)
 			for round in xrange(_NUM_RUNS):	
-				print "CROSSFOLD:", fold_mul, "ROUND:", round 
+				print "CROSSFOLD:", fold_num, "ROUND:", round 
 				for data_file in feature_files:
 					data_file.seek(0) # seek data files to 0 for next training round
 				done = 0
@@ -74,7 +74,7 @@ for comb_size in xrange(1,len(feature_sets) + 1):
 						learner.train(current_line) # get the learner to train on one line
 				first_round = False # stop adding to test cases
 			learner.finish_training()
-			print "results for cross fold", fold_mul
+			print "results for cross fold", fold_num
 			learner.test_on_data(test_data, cm) # TODO make learner accept list of data, make this return metrics
 		write_cm(combination, cm, upto)
 		for fileobj in feature_files:
