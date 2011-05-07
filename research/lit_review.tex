@@ -17,27 +17,49 @@
 \begin{document}
 	\maketitle
 	\section{Introduction}
-	\paragraph{}
-	Astronomical transient detection is the problem of discovering changes in the structure of astronomical observations over time. The observations take the form of a \emph{time series}, referred to by astronomers as \emph{light curves}. Time series are defined as:
+	\subsection{Problem Context}
+	Astronomy is by nature an observational, data-driven science. Over the 20th century to the present the field has been transformed by technology, with software and databases becoming an integral part of data gathering and analysis. As the sophistication of observational equipment has improved the volume of observational data so produced has increased. The ASKAP telescope array, under construction in Western Australia, will produce a gigabyte of data per second. A topic of growing interest has been to automate the analysis of these large amounts of data. The primary goal in this analysis is the detection of \emph{transient events}.
+	\subsection{Transients and Time Series}
+	An astronomical transient event is a structural change in an observation of a stellar object (called a \emph{source}) over time. These observations take the form of \emph{time series}, referred to by astronomers as \emph{light curves}. These time series are the strength of an observed source in potentially multiple frequencies for some points in time. Time series are explicitly defined as:
 	\begin{center}
 	\begin{math}
 		\{(t_i, \mathbf{x}_{i}) \quad i \in \{t_{1} \ldots t_{D}\} \subset \mathbb{R} \quad \mathbf{x}_{i} \in \mathbb{R}^{D} \}
 	\end{math}
 	\end{center}
-	A mapping from unique time indices $t_{i}$ to a $D$ dimensional vector $\mathbf{x}_{i}$. The $t_{i}$ values may represent any real unit of time - seconds, days, years. The sequence of increasing $t_{i}$ is not necessarily evenly distributed.
-	\paragraph{}
-	The problem of astronomical transient detection for this research is the on-line classification of time series data from automated observatories. Data is fed at regular intervals of 5 seconds to the program. At each timestep any new transients need to be reported with a confidence margin. The main goal is the detection of astronomical transients as early as possible, but also with high precision.
-	\paragraph{}
-	Over recent years time series analysis has received a lot of attention in various domains: speech recognition, handwriting analysis, even image outlines can be represented as time series and classified. Unfortunately these well developed techniques do not extend easily to astronomical time series. Here are some of the difficulties inherent to this task:
-	\begin{enumerate}
-		\item The data arrives in a stream, not a complete structure. Classification is needed without complete light curve data. Developed techniques assume the entire curve is available at classification time.
-		\item Astronomical time series have distortions in terms of amplitude scaling, time stretching, noise and missing data
-		\item The classification must be very high precision so as not to waste astronomer time
-		\item There are very large data volumes - 1 GB/s so classification has to be efficient in space and time complexity
-		\item Most of the received data is not relevant to event detection - the start and end of interesting structures must also be determined by the program
-	\end{enumerate}
-	Both literature directly related to astronomical time series and from other domains are reviewed and discussed in the following sections with the goal of addressing the above problems.
+	a mapping from unique time indices $t_{i}$ to a $D$ dimensional vector $\mathbf{x}_{i}$. The $t_{i}$ values may represent any real unit of time - seconds, days, years. The sequence of increasing $t_{i}$ is not necessarily evenly distributed. A typical astronomical time series that is of interest to this research is that of a supernova:
+	\begin{figure}[h!]
+	\centering
+	\mbox{
+	Placeholder for figure of supernova light curve
+	}
+	\caption{Supernova light curve. The y value of the curve indicates the observed intensity over time (x-axis)}
+	\end{figure}
 	
+	\subsection{The Problem}
+	The precise problem to be explored in this research is the development of an algorithm for the classification of streaming time series data. The algorithm will take in data at 5 second intervals, although the observed data may not be usable and will be discarded. The algorithm reports at each time-step any new transients detected, and to what class they belong with a confidence measure. It is possible that a transient may belong to an undetermined class, and this needs to be taken into account. The detection of transients should be done as early as possible but with few as few false positives as possible.
+	
+	\subsection{Time Series Analysis}
+	This problem is primarily one of \emph{time series analysis}. Fortunately, in recent years this field has received a lot of attention in various domains: speech recognition, handwriting analysis, even image outlines can be represented as time series and classified. Unfortunately the well-developed techniques from other areas do not extend immediately to our astronomical data. Here are some of the most serious difficulties inherent to our task:
+	\begin{table*}[h!]
+	\centering
+	$\begin{array}{lp{0.7\textwidth}}
+		\textbf{incompleteness} & Data arrives as a stream, and classification must be done without full knowledge of the curve structure. Most developed techniques assume full structure data is available. \vspace{10pt} \\
+		\textbf{distortions} & Astronomical time series have distortions in terms of amplitude scaling, time warping, noise and missing data. See this figure~\ref{fig:distortions} for some examples of these complications. \vspace{10pt} \\
+		\textbf{precision} & Classifications must have very high precision. Too many false positives will waste astronomer time and make the system useless. \vspace{10pt} \\
+		\textbf{large data volumes} & There are very large data volumes - 1 GB/s, so classification must be fast. \vspace{10pt} \\ 
+		\textbf{redundant data} & Most data is not relevant to event detection. The start and end of interesting structures must also be determined by the program. \\
+	\end{array}$
+	\end{table*}
+	This set of problems is not trivial, and no individual piece of research at present addresses them all. Literature from several domains: machine learning, time series analysis (in astronomy and other fields) and statistics is reviewed and discussed in the following sections with the aim of addressing the above problems.
+		
+%	\begin{enumerate}
+%		\item The data arrives in a stream, not as a full structure. Classification is needed without complete light curve data. Most developed techniques assume the entire curve is available at classification time.
+%		\item Astronomical time series have distortions in terms of amplitude scaling, time stretching, noise and missing data
+%		\item The classification must be very high precision so as not to waste astronomer time
+%		\item There are very large data volumes - 1 GB/s so classification has to be efficient in space and time complexity
+%		\item Most of the received data is not relevant to event detection - the start and end of interesting structures must also be determined by the program
+%	\end{enumerate}
+
 	\section{Coping with Inconsistencies in Astronomical Time Series}
 	Here is a list of the difficulties inherent in astronomical time series. These complications prevent the application of more well developed classification methods.
 	\begin{itemize}
