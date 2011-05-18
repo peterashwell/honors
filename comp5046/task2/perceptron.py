@@ -1,30 +1,28 @@
 import psyco
 psyco.full()
 
+from itertools import izip
 import math
 import random
 import re
 class Perceptron:
-	def __init__(self, init_file=None, num_features=None, num_classes=None, classes=None):
-		if init_file is not None:
-			init_data = open(init_file)
-			self.num_classes = int(init_data.readline().strip())
-			self.num_features = int(init_data.readline().strip())
-			index = 0
-			self.classes = {}
-			for line in init_data:
-				self.classes[line.strip()] = index
-				index += 1
-		else:
-			self.num_features = num_features
-			self.num_classes = num_classes
-			self.classes = classes
+	def __init__(self, num_features, classes):
+		self.num_features = num_features
+		self.num_classes = len(classes)
+		index = 0
+		self.classes = {}
+		for class_str in classes:
+			self.classes[class_str] = index
+			index += 1
 		# initialise training data
 		self.weights = [0] * self.num_classes * self.num_features # initial weights used for classification
 		self.weight_sums = [0] * self.num_classes * self.num_features # sum of weights during training
 		self.rounds = 0.0 # rounds during training
 		#print "classes:", self.classes
 	# train, but do not average
+		self.train_class_counts = {}
+		for c in self.classes.keys():
+			self.train_class_counts[c] = 0
 	
 	def sparse_line(self, line):
 		#print "PROCESSING LINE >>>" + str(line) + "<<<"
@@ -44,17 +42,19 @@ class Perceptron:
 		self.train(train)
 		train_data.close()
 
-	def train(self, line): # passes iterator to trianing data
+	def train(self, indices, values, class_data): # passes iterator to trianing data
 		self.rounds += 1
-		split_line = line.strip().split(',')
-		features = self.sparse_line(split_line[:-2])
-		true_class = self.classes[split_line[-2].strip()]
-		computed_class = self.compute_class(features)
+		if len(indices) == 0 or len(values) == 0:
+			return # do nothing
+		true_class = self.classes[class_data.split(',')[1]]
+		self.train_class_counts[class_data.split(',')[1]] += 1
+		#print "TRUE CLASS NIGGER", true_class
+		computed_class = self.compute_class(indices, values)
 		if true_class != computed_class:
 			weight_start_true = true_class * self.num_features
 			weight_start_comp = computed_class * self.num_features
 				#print features
-			for pos, val in features:
+			for pos, val in izip(indices, values):
 				self.weights[weight_start_true + pos] += val
 				self.weights[weight_start_comp + pos] -= val
 		for index in xrange(self.num_features * self.num_classes):
@@ -66,10 +66,14 @@ class Perceptron:
 	
 	def finish_training(self):
 		for index in xrange(self.num_features * self.num_classes):
-			self.weight_sums[index] /= self.rounds # this is a float
+			self.weight_sums[index] /= (self.rounds * 1.0) # this is a float
 		self.weights = self.weight_sums
+		#print "ASSJISM"
+		#for c in self.train_class_counts.keys():
+		#	print c, self.train_class_counts[c] / self.rounds
+			
 
-	def compute_class(self, features, debug=False):
+	def compute_class(self, indices, values, debug=False):
 		best_score = None
 		best_class = None
 		tied_classes = None
@@ -78,7 +82,7 @@ class Perceptron:
 			#weight_end = (cn + 1) * self.num_features + 1
 			#active_weights = self.weights[weight_start:weight_end]
 			score = 0
-			for pos, val in features:
+			for pos, val in izip(indices, values):
 				weight_start = cn * self.num_features
 				score += val * self.weights[weight_start + pos] 
 			#if debug:
@@ -107,15 +111,19 @@ class Perceptron:
 	def test_on_data(self, data, cm):
 		self.test(data, cm)
 
-	def test(self, test_data, cm):
+	def test(self, index_vectors, feature_vectors, desc_vectors,cm):
+		class_counts = {}
+		for c in self.classes.keys():
+			class_counts[c] = 0
 		correct = 0
 		incorrect = 0
-		for line in test_data:
-			split_line = line.strip().split(',')
-			features = self.sparse_line(split_line[:-2])
-			true_class = self.classes[split_line[-2].strip()]
-			#print "true class:", true_class
-			computed_class = self.compute_class(features, True)
+		for line_num in xrange(len(index_vectors)):
+			indices = index_vectors[line_num]
+			values = feature_vectors[line_num]
+			#print "testing:", desc_vectors[line_num].strip().split(',')[0]
+			#print "HOT ASS", desc_vectors[line_num]
+			true_class = self.classes[desc_vectors[line_num].strip().split(',')[1]]
+			computed_class = self.compute_class(indices, values)
 			if true_class == computed_class:
 				correct += 1
 			else:

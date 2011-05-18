@@ -121,7 +121,7 @@ Hugh_Hefner,Person:Author/Journalist / Writer / Poet
 Martin_Olsen,Person:Sports
 Patrick_Wall,Person:Politician/Advisor
 Michelle_Martin,Person:Sports
-Alexander_O'Handley,Person:Politician/Advisor
+Alexander_O'Handley,Person:Academic / Teacher
 Dustin_Dollin,Person:Sports
 Saddam_Hussein,Person:Politician/Advisor
 Joseph_Stalin,Person:Politician/Advisor
@@ -200,7 +200,7 @@ Rembrandt,Person:Artist
 Richard_Brooker,Person:Actor / Director / Producer
 Millicent_Shelton,Person:Actor / Director / Producer
 Derwyn_Jones,Person:Sports
-Michelle_Obama,Person:Politician/Advisor
+Michelle_Obama,Person:Celebrity
 Carol_Gracias,Person:Celebrity
 Karolina_Jovanović,Person:Sports
 Charles_Plott,Person:Academic / Teacher
@@ -234,7 +234,7 @@ Fritz_Bastian,Person:Sports
 Steve_Hartman,Person:Author/Journalist / Writer / Poet
 Hamadou_Moustapha,Person:Politician/Advisor
 Nikola_Tesla,Person:Medical / Scientist / Researcher
-Marty_Reid,Person:Other
+Marty_Reid,Person:Author/Journalist / Writer / Poet
 Carlos_Castro_Mora,Person:Sports
 Tom_Cruise,Person:Actor / Director / Producer
 Aleksandr_Solzhenitsyn,Person:Author/Journalist / Writer / Poet
@@ -261,7 +261,7 @@ Mark_Salzman,Person:Author/Journalist / Writer / Poet
 Shakira,Person:Musician / Singer
 Nora_Simpson,Person:Artist
 Antonio_Orozco,Person:Musician / Singer
-Joseph_Marion_Hernández,Person:Politician/Advisor
+Joseph_Marion_Hernández,Person:Military / Army / Navy / Airforce
 Kristen_Stewart,Person:Actor / Director / Producer
 John_Hyrcanus,Person:Politician/Advisor
 Maren_Spliid,Person:Uncelebrated / victims / bystander / witnes
@@ -340,7 +340,7 @@ Derrick_Martin,Person:Sports
 Michael_Joseph_Roche,Person:Other
 Selena,Person:Musician / Singer
 Simone_Ghini,Person:Artist
-Kim_In-Sik,Person:Actor / Director / Producer
+Kim_In-Sik,Person:Business
 Uri_Or,Person:Military / Army / Navy / Airforce
 William_F._Brantley,Person:Military / Army / Navy / Airforce
 Liu_Xiang,Person:Sports
@@ -360,7 +360,7 @@ Jack_Dee,Person:Artist
 Luc_Roosen,Person:Sports
 Devin_Setoguchi,Person:Sports
 Thomas_Chalmers_(rugby_union),Person:Sports
-William_Vogt,Person:Medical / Scientist / Researcher
+William_Vogt,Person:Other
 Vagbhata_(Ayurveda),Person:Author/Journalist / Writer / Poet
 John_Fitch_(computer_scientist),Person:Medical / Scientist / Researcher
 Peride_Celal,Person:Author/Journalist / Writer / Poet
@@ -387,7 +387,7 @@ Shawn_Michaels,Person:Sports
 Danny_Hart,Person:Sports
 Nathan_F._Dixon_II,Person:Politician/Advisor
 Georg_Hartung,Person:Other
-Gerardus_Heymans,Person:Medical / Scientist / Researcher
+Gerardus_Heymans,Person:Academic / Teacher
 Lammot_du_Pont_Copeland,Person:Business
 Ward_Darley,Person:Academic / Teacher
 Andrés_Mata,Person:Author/Journalist / Writer / Poet
@@ -541,7 +541,7 @@ Oscar_Blum,Person:Other
 Corey_Taylor,Person:Musician / Singer
 Adrian_Sarkissian,Person:Sports
 The_Game_(rapper),Person:Musician / Singer
-Lawrence_Jasion,Person:Criminal
+Lawrence_Jasion,Person:Other
 Ben_Stiller,Person:Actor / Director / Producer
 Francisco_López_(canoer),Person:Sports
 Lawrence_Bayne,Person:Actor / Director / Producer
@@ -616,13 +616,13 @@ Yao_Ming,Person:Sports
 Saladin,Person:Royalty
 Deskaheh,Person:Politician/Advisor
 Libor_Zábranský,Person:Sports
-Alexander_II_of_Macedon,Person:Other
+Alexander_II_of_Macedon,Person:Royalty
 Jens-Peter_Herold,Person:Sports
 Ted_Kennedy,Person:Politician/Advisor
 Tiësto,Person:Musician / Singer
 Ralph_Francis_Stearley,Person:Military / Army / Navy / Airforce
 Lolo_Lui,Person:Sports
-Julius_Caesar,Person:Politician/Advisor
+Julius_Caesar,Person:Military / Army / Navy / Airforce
 Ricardo_Ycaza,Person:Sports
 Paul_Butler_(lawyer),Person:Politician/Advisor
 Aggi_Ásgerð_Ásgeirsdóttir,Person:Artist
@@ -640,7 +640,7 @@ Torben_Frank,Person:Sports
 Vin_Garbutt,Person:Musician / Singer
 Otto_von_Porat,Person:Sports
 Tecumseh,Person:Military / Army / Navy / Airforce
-Lady_Ottoline_Morrell,Person:Politician/Advisor
+Lady_Ottoline_Morrell,Person:Celebrity
 Abundius_and_Abundantius,Person:Religious / Priest / Minister / Cleric
 Elvis_Presley,Person:Musician / Singer
 Prior_of_Strath_Fillan,Person:Religious / Priest / Minister / Cleric
@@ -658,7 +658,7 @@ Anna_Faris,Person:Actor / Director / Producer
 Sammy_Duddy,Person:Politician/Advisor
 Michael_Morgan_(conductor),Person:Musician / Singer
 Raymond_Apple_(rabbi),Person:Religious / Priest / Minister / Cleric
-Michelle_van_Eimeren,Person:Celebrity
+Michelle_van_Eimeren,Person:Royalty
 Keith_Sintay,Person:Artist
 T.I.,Person:Actor / Director / Producer
 Ashwani_Kumar,Person:Politician/Advisor
@@ -687,7 +687,7 @@ Alexander_Kronlund,Person:Musician / Singer
 Lê_thi_diem_thúy,Person:Author/Journalist / Writer / Poet
 Héctor_Echeverry,Person:Sports
 Cornelius_Coolidge,Person:Business
-DJ_Major_Tom,Person:Musician / Singer
+DJ_Major_Tom,Person:Other
 Jody_Latham,Person:Actor / Director / Producer
 Garo_Gaboudagian,Person:Musician / Singer
 Aimé_Cotton,Person:Medical / Scientist / Researcher
@@ -704,7 +704,7 @@ Joan_Bernott,Person:Author/Journalist / Writer / Poet
 Jackie_Chan,Person:Actor / Director / Producer
 Khalid_El_Amri,Person:Sports
 Pavel_Alikin,Person:Sports
-Mark_Evans_Austad,Person:Other
+Mark_Evans_Austad,Person:Academic / Teacher
 Gordon_O'Connor,Person:Politician/Advisor
 Peter_Woodthorpe,Person:Actor / Director / Producer
 Aurangzeb,Person:Royalty
@@ -752,7 +752,7 @@ Akon,Person:Musician / Singer
 Onofrio_Gabrieli,Person:Artist
 Huma_Bhabha,Person:Artist
 Adam_Copeland,Person:Sports
-Richard_Friederich_Arens,Person:Academic / Teacher
+Richard_Friederich_Arens,Person:Medical / Scientist / Researcher
 Zouc,Person:Actor / Director / Producer
 Denis_Vasilkin,Person:Sports
 Steve_Beaglehole,Person:Sports

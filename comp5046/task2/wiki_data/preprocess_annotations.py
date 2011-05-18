@@ -29,6 +29,24 @@ for line in raw_annotations:
 raw_annotations.close()
 
 correct_out = open("correct_class.csv", 'w')
+class_annot_scores = open("class_annot_scores.csv", 'w')
+class_aggregates = {}
+class_counts = {}
+for title in sorted(class_weights.keys()):
+	for category in class_weights[title].keys():
+		if category not in class_counts.keys():
+			class_counts[category] = 1
+		else:
+			class_counts[category] += 1
+		if category not in class_aggregates.keys():
+			class_aggregates[category] = class_weights[title][category] / 4.0
+		else:
+			class_aggregates[category] += class_weights[title][category] / 4.0
+
+for key in sorted(class_aggregates.keys()):
+	class_annot_scores.write(key.split(':')[1] + "," + str((class_aggregates[key] * 1.0) / class_counts[key]) + '\n')
+class_annot_scores.close()
+
 for title in class_weights.keys():
 	best = None
 	best_score = None
