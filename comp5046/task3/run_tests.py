@@ -7,6 +7,7 @@ from perceptron import Perceptron
 from features import cwFeature
 from features import ptFeature
 from featureset import FeatureSet
+from itertools import izip
 
 ROUNDS = 1
 

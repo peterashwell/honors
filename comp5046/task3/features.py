@@ -36,12 +36,12 @@ class cwFeature:
 		for index, word in enumerate(wordlist):
 			self.word_offset[word.strip()] = index
 		self.size = len(self.word_offset.keys())
-
+		self.keyset = set(self.word_offset.keys())
 	def score(self, sentence, tag, word_pos, prev_tag, vector, feature_offset_val, class_offset):
 		#print "getting score for:", sentence, tag, word_pos, prev_tag, feature_offset_val, class_offset
 		#print "with vector of length:", len(vector)
 		word_weight = None
-		if sentence[word_pos] not in self.word_offset.keys():
+		if sentence[word_pos] not in self.keyset:
 			#print "no weights for word:", sentence[word_pos]
 			word_weight = 0
 		else:
@@ -51,7 +51,7 @@ class cwFeature:
 	def update_sentence(self, sentence, tags_star, tags, vector, feature_offset_val, class_offset):
 		for index, word in enumerate(sentence):
 			if tags_star[index] != tags[index]:
-				if word not in self.word_offset.keys():
+				if word not in self.keyset:
 					print "error: word", word, "has no weight"
 				else:
 					vector[class_offset[tags_star[index]] + feature_offset_val + self.word_offset[word]] -= 1
