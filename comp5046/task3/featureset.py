@@ -1,3 +1,6 @@
+import psyco
+psyco.full()
+
 # Class for performing operations on a vector in an abstract sense
 # Takes an arbitrary set of features and assigns them components of a vector to manage
 
@@ -9,12 +12,12 @@ class FeatureSet:
 		for feature in self.features:
 			self.feature_offset[feature.id] = offset
 			offset += feature.size
-		self.total_size = offset
+		self.size = offset
 		
 	# use each feature class to update the vector given the context
-	def tag_score(sentence, tag, word_pos, prev_tag, vector):
-		return sum([feature.score(sentence, tag, word_pos, prev_tag, vector, self.feature_offset[feature.id]) for feature in self.features])
+	def tag_score(self, sentence, tag, word_pos, prev_tag, vector, class_offset):
+		return sum([feature.score(sentence, tag, word_pos, prev_tag, vector, self.feature_offset[feature.id], class_offset) for feature in self.features])
 	
-	def update_weights(sentence, word_pos, tag_star, tag, vector):
+	def update_weights(self, sentence, tags_star, tags, vector, class_offset):
 		for feature in self.features:
-			feature.update(sentence, tag_star, tag, vector, self.feature_offset[feature.id])
+			feature.update_sentence(sentence, tags_star, tags, vector, self.feature_offset[feature.id], class_offset)

@@ -1,7 +1,12 @@
+import psyco
+psyco.full()
+
 import random
+import time
 from perceptron import Perceptron
-from features.cw_feature import cwFeature
-from features.pt_feature import ptFeature
+from features import cwFeature
+from features import ptFeature
+from featureset import FeatureSet
 
 ROUNDS = 1
 
@@ -10,18 +15,24 @@ cwf = cwFeature("wordlist")
 ptf = ptFeature("taglist")
 fs = FeatureSet([cwf, ptf])
 taglist = open("taglist")
-tags = taglist.read().strip().split('\n')
-percept = Perceptron(fs, tags)
+global_tags = taglist.read().strip().split('\n')
+percept = Perceptron(fs, global_tags)
 
 # Step 2 - train perceptron for however many rounds on training data
 training_data = open("data/eng.train")
 sentence = []
 true_tags = []
+start_time = time.time()
+vit_time = 0
 for r in xrange(ROUNDS):
+	line_num = 0
 	for line in training_data:
+		if line_num != 0 and line_num % 10 == 0:
+			print "done", line_num, "/", 219552, time.time() - start_time, vit_time
+		line_num += 1	
 		line = line.strip()
 		if line == '':
-			percept.train(sentence, tags)
+			vit_time += percept.train(sentence, true_tags)
 			sentence = []
 			true_tags = []
 		else:
