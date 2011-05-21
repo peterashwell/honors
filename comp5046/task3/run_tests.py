@@ -2,23 +2,29 @@ import psyco
 psyco.full()
 
 import random
+import os
 import time
+
 from perceptron import Perceptron
 from features import cwFeature
 from features import ptFeature
 from features import icFeature
 from features import pwFeature
+from features import acFeature
+from features import nwFeature
 from featureset import FeatureSet
 from itertools import izip
 
-ROUNDS = 50
+ROUNDS = 30
 
 # Step 1 - load up features into featureset
 cwf = cwFeature("wordlist")
 ptf = ptFeature("taglist")
 icf = icFeature()
+acf = acFeature()
 pwf = pwFeature("wordlist")
-fs = FeatureSet([cwf, ptf, icf, pwf])
+nwf = nwFeature("wordlist")
+fs = FeatureSet([cwf, ptf, icf, acf, pwf, nwf])
 taglist = open("taglist")
 global_tags = taglist.read().strip().split('\n')
 percept = Perceptron(fs, global_tags)
@@ -49,7 +55,13 @@ training_data.close()
 # Step 3 - classify
 test_data = open("data/eng.testa")
 id_str = '_'.join([f.id for f in fs.features])
-output = open("results/eng" + "_" + str(ROUNDS) + "_" + id_str + ".out", 'w')
+results_file = "eng" + "_" + str(ROUNDS) + "_" + id_str + ".out"
+fnum = 0
+while results_file in os.listdir("results"):
+	results_file = results_file.split('.')[0] + str(fnum) + ".out"
+	fnum += 1
+results_file = "results/" + results_file
+output = open(results_file, 'w')
 test_lines = []
 for line in test_data:
 	line = line.strip()

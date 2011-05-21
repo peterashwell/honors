@@ -1,23 +1,64 @@
 import psyco
 psyco.full()
 
+class acFeature:
+	def __init__(self):
+		self.id = "ac"
+		self.size = 2
+	
+	def score(self, sentence, tag, word_pos, prev_tag, vector, feature_offset_val, class_offset):
+		offset = 0
+		if len(sentence) == 1:
+			return 0
+		if word_pos == 0:
+			if sentence[1].istitle():
+				offset = 1
+		elif word_pos == len(sentence) - 1:
+			if sentence[-2].istitle():
+				offset = 1
+		else:
+			if sentence[word_pos + 1].istitle() or sentence[word_pos - 1].istitle():
+				offset = 1
+		return vector[class_offset[tag] + feature_offset_val + offset]
+	
+	def update_sentence(self, sentence, tag_star, tag, vector, feature_offset_val, class_offset):
+		if len(sentence) == 1:
+			return # do nothing
+		
+		for index, word in enumerate(sentence):
+			offset = 0
+			if tag_star[index] != tag[index]:
+				if index == 0:
+					if sentence[index + 1].istitle(): # at start, second word is cap
+						offset = 1
+				elif index == len(sentence) - 1:
+					if sentence[index - 1].istitle(): # at end, second last word is cap
+						offset = 1
+				else:
+					if sentence[index + 1].istitle() or sentence[index - 1].istitle():
+						offset = 1
+				vector[class_offset[tag_star[index]] + feature_offset_val + offset] -= 1
+				vector[class_offset[tag[index]] + feature_offset_val + offset] += 1
+
 class icFeature:
 	def __init__(self):
 		self.id = "ic"
-		self.size = 1
+		self.size = 2
 	
 	def score(self, sentence, tag, word_pos, prev_tag, vector, feature_offset_val, class_offset):
-		return vector[class_offset[tag] + feature_offset_val]
+		offset = 0
+		if sentence[word_pos].istitle():
+			offset = 1
+		return vector[class_offset[tag] + feature_offset_val + offset]
 		
 	def update_sentence(self, sentence, tag_star, tag, vector, feature_offset_val, class_offset):
 		for index, word in enumerate(sentence):
+			offset = 0
 			if tag_star[index] != tag[index]:
-				# update incorrect and correct feature vectors
-				#print "correcting for tag", tag_star[index], "with", tag[index], "for previous tag >" + prev_tag + "<"
-				#print "updating vector position", class_offset[tag_star[index]] + feature_offset_val + self.tag_offset[prev_tag]
-				vector[class_offset[tag_star[index]] + feature_offset_val] -= 1
-				#print "updating vector position", class_offset[tag[index]] + feature_offset_val + self.tag_offset[prev_tag]
-				vector[class_offset[tag[index]] + feature_offset_val] += 1
+				if word.istitle():
+					offset = 1
+				vector[class_offset[tag_star[index]] + feature_offset_val + offset] -= 1
+				vector[class_offset[tag[index]] + feature_offset_val + offset] += 1
 	
 	def show_weights(self, vector, class_offset_val, feature_offset_val):
 		print "CLASS OFFSET:", class_offset_val
@@ -41,13 +82,17 @@ class pwFeature:
 			self.word_offset[word] = index
 		self.word_offset[''] = index + 1
 		self.size = len(self.word_offset.keys())
-	
+		self.keyset = set(self.word_offset.keys())
+
 	def score(self, sentence, tag, word_pos, prev_tag, vector, feature_offset_val, class_offset):
 		if word_pos == 0:
 			prev_word = ''
 		else:
 			prev_word = sentence[word_pos - 1]
-		return vector[class_offset[tag] + feature_offset_val + self.word_offset[prev_word]]
+		if prev_word not in self.keyset:
+			return 0
+		else:
+			return vector[class_offset[tag] + feature_offset_val + self.word_offset[prev_word]]
 	
 	def update_sentence(self, sentence, tags_star, tags, vector, feature_offset_val, class_offset):
 		for index, word in enumerate(sentence):
@@ -59,9 +104,41 @@ class pwFeature:
 				vector[class_offset[tags_star[index]] + feature_offset_val + self.word_offset[prev_word]] -= 1
 				vector[class_offset[tags[index]] + feature_offset_val + self.word_offset[prev_word]] += 1
 
+class nwFeature:
+	def __init__(self, wordlist_file):
+		self.id = "nw"
+		self.word_offset = {}
+		wordlist = open(wordlist_file)
+		for index, word in enumerate(wordlist):
+			word = word.strip()
+			self.word_offset[word] = index
+		self.word_offset[''] = index + 1
+		self.size = len(self.word_offset.keys())
+		self.keyset = set(self.word_offset.keys())
+	
+	def score(self, sentence, tag, word_pos, prev_tag, vector, feature_offset_val, class_offset):
+		if word_pos == len(sentence) - 1:
+			next_word = ''
+		else:
+			next_word = sentence[word_pos + 1]
+		if next_word not in self.keyset:
+			return 0
+		else:
+			return vector[class_offset[tag] + feature_offset_val + self.word_offset[next_word]]
+	
+	def update_sentence(self, sentence, tags_star, tags, vector, feature_offset_val, class_offset):
+		for index, word in enumerate(sentence):
+			if tags_star[index] != tags[index]:
+				if index == len(sentence) - 1:
+					next_word = ''
+				else:
+					next_word = sentence[index + 1]
+				vector[class_offset[tags_star[index]] + feature_offset_val + self.word_offset[next_word]] -= 1
+				vector[class_offset[tags[index]] + feature_offset_val + self.word_offset[next_word]] += 1
+
 class ptFeature:
 	def __init__(self, taglist_file):
-		self.id = "prevtag_feature"
+		self.id = "pt"
 		self.tag_offset = {}
 		taglist = open(taglist_file)
 		for index, tag in enumerate(taglist):
@@ -103,7 +180,7 @@ class ptFeature:
 
 class cwFeature:
 	def __init__(self, wordlist_file):
-		self.id = "curword_feature"
+		self.id = "cw"
 		self.word_offset = {}
 		wordlist = open(wordlist_file)
 		for index, word in enumerate(wordlist):
@@ -117,10 +194,9 @@ class cwFeature:
 		word_weight = None
 		if sentence[word_pos] not in self.keyset:
 			#print "no weights for word:", sentence[word_pos]
-			word_weight = 0
+			return 0
 		else:
-			word_weight = self.word_offset[sentence[word_pos]]
-		return vector[class_offset[tag] + feature_offset_val + word_weight]
+			return vector[class_offset[tag] + feature_offset_val + self.word_offset[sentence[word_pos]]]
 	
 	def update_sentence(self, sentence, tags_star, tags, vector, feature_offset_val, class_offset):
 		for index, word in enumerate(sentence):
