@@ -7,25 +7,17 @@ import time
 class FeatureSet:
 	def __init__(self, _features):
 		self.features = _features
-		self.feature_offset = {}
-		offset = 0
-		for feature in self.features:
-			self.feature_offset[feature.id] = offset
-			offset += feature.size
-		self.size = offset
 		self.feature_time = 0	
-	# use each feature class to update the vector given the context
-	
 
-	def tag_score(self, sentence, tag, word_pos, prev_tag, vector, class_offset):
+	def tag_score(self, sentence, tag, word_pos, prev_tag):
 		start = time.time()
-		return sum([feature.score(sentence, tag, word_pos, prev_tag, vector, self.feature_offset[feature.id], class_offset) for feature in self.features])
+		return sum([feature.score(sentence, tag, word_pos, prev_tag) for feature in self.features])
 		self.feature_time += time.time() - start
 
-	def update_weights(self, sentence, tags_star, tags, vector, class_offset):
+	def update_weights(self, sentence, tags_star, tags):
 		start = time.time()
 		for feature in self.features:
-			feature.update_sentence(sentence, tags_star, tags, vector, self.feature_offset[feature.id], class_offset)
+			feature.update_sentence(sentence, tags_star, tags)
 		self.feature_time += time.time() - start
 
 	def print_features(self, vector, class_offset, tags):

@@ -18,16 +18,21 @@ from itertools import izip
 ROUNDS = 30
 
 # Step 1 - load up features into featureset
-cwf = cwFeature("wordlist")
-ptf = ptFeature("taglist")
-icf = icFeature()
-acf = acFeature()
-pwf = pwFeature("wordlist")
-nwf = nwFeature("wordlist")
+wordlist_file = open("wordlist")
+wl = wordlist_file.read().splitlines()
+wordlist_file.close()
+taglist_file = open("taglist")
+tl = taglist_file.read().splitlines()
+taglist_file.close()
+print len(wl), len(tl)
+cwf = cwFeature(wl, tl)
+ptf = ptFeature(wl, tl)
+icf = icFeature(wl, tl)
+acf = acFeature(wl, tl)
+pwf = pwFeature(wl, tl)
+nwf = nwFeature(wl, tl)
 fs = FeatureSet([cwf, ptf, icf, acf, pwf, nwf])
-taglist = open("taglist")
-global_tags = taglist.read().strip().split('\n')
-percept = Perceptron(fs, global_tags)
+percept = Perceptron(fs, tl)
 
 # Step 2 - train perceptron for however many rounds on training data
 training_data = open("data/engf.train")
@@ -50,9 +55,11 @@ for r in xrange(ROUNDS):
 			sentence.append(line[0])
 			true_tags.append(line[-1])
 	training_data.seek(0)
+	percept.finish_round()
 training_data.close()
 #percept.finish_training()
 # Step 3 - classify
+percept.finish_training()
 test_data = open("data/eng.testa")
 id_str = '_'.join([f.id for f in fs.features])
 results_file = "eng" + "_" + str(ROUNDS) + "_" + id_str + ".out"
