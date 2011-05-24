@@ -2,6 +2,25 @@ import psyco
 import math
 psyco.full()
 
+def greedy(sentence, global_tags, featureset):
+	prev_tag = ''
+	tags_star = []
+	for word_pos in xrange(len(sentence)):
+		best_tag = None
+		best_score = None
+		for tag in global_tags:
+			if best_tag is None:
+				best_score = featureset.tag_score(sentence, tag, word_pos, prev_tag)
+				best_tag = tag
+			else:
+				new_score = featureset.tag_score(sentence, tag, word_pos, prev_tag)
+				if new_score > best_score:
+					best_score = new_score
+					best_tag = tag
+		tags_star.append(best_tag)
+		prev_tag = best_tag
+	return tags_star
+				
 def viterbi(sentence, global_tags, featureset):	
 	score_matrix = [[-1] * len(global_tags) for i in xrange(len(sentence))]
 	backpointers = [[-1] * len(global_tags) for i in xrange(len(sentence))]

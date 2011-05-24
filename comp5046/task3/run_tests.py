@@ -6,16 +6,11 @@ import os
 import time
 
 from perceptron import Perceptron
-from features import cwFeature
-from features import ptFeature
-from features import icFeature
-from features import pwFeature
-from features import acFeature
-from features import nwFeature
+import features
 from featureset import FeatureSet
 from itertools import izip
 
-ROUNDS = 30
+ROUNDS = 1
 
 # Step 1 - load up features into featureset
 wordlist_file = open("wordlist")
@@ -25,12 +20,18 @@ taglist_file = open("taglist")
 tl = taglist_file.read().splitlines()
 taglist_file.close()
 print len(wl), len(tl)
-cwf = cwFeature(wl, tl)
-ptf = ptFeature(wl, tl)
-icf = icFeature(wl, tl)
-acf = acFeature(wl, tl)
-pwf = pwFeature(wl, tl)
-nwf = nwFeature(wl, tl)
+cwf = features.wpFeature(wl, tl, 0)
+ptf = features.ptFeature(wl, tl)
+icf = features.icFeature(wl, tl)
+acf = features.acFeature(wl, tl)
+pwf = features.wpFeature(wl, tl, -1) # previous word
+nwf = features.wpFeature(wl, tl, 1) # next word
+fac = features.facFeature(wl, tl)
+fbc = features.fbcFeature(wl, tl)
+allc = features.allcFeature(wl, tl)
+hn = features.hnFeature(wl, tl)
+horg = features.horgFeature(wl, tl)
+br = features.brFeature(wl, tl)
 fs = FeatureSet([cwf, ptf, icf, acf, pwf, nwf])
 percept = Perceptron(fs, tl)
 
@@ -40,6 +41,7 @@ sentence = []
 true_tags = []
 start_time = time.time()
 for r in xrange(ROUNDS):
+	print "round:", r
 	line_num = 0
 	for line in training_data:
 		if line_num != 0 and line_num % 10000 == 0:
@@ -54,6 +56,8 @@ for r in xrange(ROUNDS):
 			line = line.split(' ')
 			sentence.append(line[0])
 			true_tags.append(line[-1])
+	# do last line in file
+
 	training_data.seek(0)
 	percept.finish_round()
 training_data.close()
