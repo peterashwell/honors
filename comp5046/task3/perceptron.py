@@ -19,23 +19,23 @@ class Perceptron:
 		self.rounds = 0
 		self.viterbi_time = 0
 
-	def train(self, sentence, tags):
+	def train(self, sentence, poslist, tags):
 		start = time.time()
-		tags_star = viterbi(sentence, self.classes, self.featureset)
+		tags_star = viterbi(sentence, poslist, self.classes, self.featureset)
 		self.viterbi_time += time.time() - start
-		self.featureset.update_weights(sentence, tags_star, tags)
+		self.featureset.update_weights(sentence, poslist, tags_star, tags)
 	
-	def train_greedy(self, sentence, tags):
-		tags_star = greedy(sentence, self.classes, self.featureset)
-		self.featureset.update_weights(sentence, tags_star, tags)		
+	def train_greedy(self, sentence, poslist, tags):
+		tags_star = greedy(sentence, poslist, self.classes, self.featureset)
+		self.featureset.update_weights(sentence, poslist, tags_star, tags)		
 
-	def test(self, sentence):
+	def test(self, sentence, poslist):
 		start = time.time()
-		return viterbi(sentence, self.classes, self.featureset)
+		return viterbi(sentence, poslist, self.classes, self.featureset)
 		self.viterbi_time += time.time() - start
 
-	def test_greedy(self, sentence):
-		return greedy(sentence, self.classes, self.featureset)
+	def test_greedy(self, sentence, poslist):
+		return greedy(sentence, poslist, self.classes, self.featureset)
 			
 	def finish_round(self):
 		for f in self.featureset.features:
