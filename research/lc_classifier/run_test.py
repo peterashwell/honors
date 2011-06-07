@@ -4,4 +4,3 @@ from utils import crossfold
 
 clsf = lcClassifier(lcss)
 
-
