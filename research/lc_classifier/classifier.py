@@ -22,7 +22,7 @@ class lcClassifier:
 			# Update the nearest neighbour
 			distance = self.distance_fn(test_lc, lc)
 			i = 0
-			while distance < best_distances[i]::
+			while distance < best_distances[i]:
 				i += 1
 			best_distances.insert(i, distance)
 			best_matches.insert(i, test_class)
