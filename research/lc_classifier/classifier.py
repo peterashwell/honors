@@ -1,42 +1,64 @@
+import psyco
+psyco.full()
 from operator import itemgetter
+from utils import sample
 
 class lcClassifier:
-	def __init__(self, distance_fn):
-		self._classes = classes
+	def __init__(self, distance_fn, testdir):
 		self._distance_fn = distance_fn
+		self._testdir = testdir
 
-	def nn_classify(self, N, test_lc, test_class, train_files):
-		best_classes = []
+	def nn_classify(self, N, test_lc, train_files):
+		best_matches = []
 		best_distances = []
+		best_files = []
 		# Read index of each lc file
+		upto = 0
 		for filename in train_files:
+			if upto % 200 == 0:
+				print upto
+			upto += 1
 			# Read all the light curve data into an array
-			lc_data = open(filename)
+			lc_data = open(self._testdir + '/' + filename)
+			
+			lc_class = filename.strip().split('_')[0]
 			lc = [[], []]
 			for line in lc_data:
-				line = line.strip().split(' ')
+				line = line.strip().split(',')
 				lc[0].append(float(line[0]))
 				lc[1].append(float(line[1]))
 			lc_data.close()
-			
+			lc = sample(lc, 400)			
 			# Update the nearest neighbour
-			distance = self.distance_fn(test_lc, lc)
-			i = 0
-			while distance < best_distances[i]:
-				i += 1
-			best_distances.insert(i, distance)
-			best_matches.insert(i, test_class)
+			distance = self._distance_fn(test_lc, lc)
+		
+			# Find insert point
 			
+			insert_point = 0
+			found = False
+			for insert_point, bd in enumerate(best_distances):
+				if bd >= distance:
+					found = True
+					break
+			if found or len(best_distances) == 0:
+				best_distances.insert(insert_point, distance)
+				best_matches.insert(insert_point, lc_class)
+				best_files.insert(insert_point, filename)
 			# Pop from the top of the list if it's too long
 			if len(best_distances) > N:
 				best_distances.pop()
 				best_matches.pop()
-					
+				best_files.pop()
+		
 		# Compute nearest neighbor by majority
 		near_count = {}
-		for c in self.best_matches:
+		for c in best_matches:
 			if c not in near_count.keys():
 				near_count[c] = 1
 			else:
 				near_count[c] += 1
-		print sorted(near_count.items(), key=itemgetter(1))[0]
+		print sorted(near_count.items(), key=itemgetter(1))
+		best_matches = []
+		best_distances = []
+		print best_files
+		return sorted(near_count.items(), key=itemgetter(1))[-1][0]
