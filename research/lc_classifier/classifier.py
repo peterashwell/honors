@@ -2,6 +2,8 @@ import psyco
 psyco.full()
 from operator import itemgetter
 from utils import sample
+from utils import normalise
+from utils import distribute
 
 class lcClassifier:
 	def __init__(self, distance_fn, testdir):
@@ -28,7 +30,9 @@ class lcClassifier:
 				lc[0].append(float(line[0]))
 				lc[1].append(float(line[1]))
 			lc_data.close()
+			normalise(lc)
 			lc = sample(lc, 400)			
+			lc = distribute(lc)
 			# Update the nearest neighbour
 			distance = self._distance_fn(test_lc, lc)
 		

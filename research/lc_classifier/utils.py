@@ -3,6 +3,16 @@ from math import fabs
 from math import tan
 from math import radians
 
+def distribute(lc):
+			flux = lc[1]
+			min = 1
+			max = 10
+			new_flux = random.uniform(max ** -2.3, min) ** (1 / -2.3)
+			mean = 1.0 * sum(flux) / len(flux)
+			for obs_num in xrange(len(flux)):
+				flux[obs_num] *= new_flux / mean
+			return [lc[0], flux]
+
 # Find linear approximation of a light curve
 def linearapprox(lc, granularity):
 	approx = []
@@ -23,6 +33,8 @@ def linearapprox(lc, granularity):
 				n = len(interval_times)
 				gradient = (n * S_xy - S_x * S_y) / (n * S_xx - S_x ** 2)
 				#print gradient, interval_points
+			#print interval_points
+			#print gradient
 			if gradient >= tan(radians(75)):
 				grad_symb = 0
 			elif gradient >= tan(radians(45)):
@@ -45,6 +57,17 @@ def linearapprox(lc, granularity):
 			interval_times = []
 			interval_points = []
 	return approx
+
+# Change the intensity of the curve to have mean of new_mean
+def normalise(lc, new_mean=1):
+	# Compute mean of the curve
+	flux_sum = 0
+	for p in lc[1]:
+		flux_sum += p
+	flux_mean = flux_sum / (1.0 * len(lc[1]))
+	# Update the flux measurements
+	for i in xrange(len(lc[1])):
+		lc[1][i] = lc[1][i] / flux_mean * new_mean
 
 def crossfold(folds, dataset):
 	random.shuffle(dataset)
@@ -73,6 +96,7 @@ def crossfold(folds, dataset):
 		train = dataset[:fold_start] + dataset[fold_end:]
 		yield test, train
 
+# In place, take a sample of maxlen of a light curve
 def sample(lc, maxlen):
 	if len(lc[1]) <= maxlen:
 		return lc
