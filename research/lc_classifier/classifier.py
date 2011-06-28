@@ -17,8 +17,8 @@ class lcClassifier:
 		# Read index of each lc file
 		upto = 0
 		for filename in train_files:
-			if upto % 200 == 0:
-				print upto
+			#if upto % 200 == 0:
+			#	print upto
 			upto += 1
 			# Read all the light curve data into an array
 			lc_data = open(self._testdir + '/' + filename)
@@ -61,8 +61,5 @@ class lcClassifier:
 				near_count[c] = 1
 			else:
 				near_count[c] += 1
-		print sorted(near_count.items(), key=itemgetter(1))
-		best_matches = []
-		best_distances = []
-		print best_files
-		return sorted(near_count.items(), key=itemgetter(1))[-1][0]
+		#print sorted(near_count.items(), key=itemgetter(1))
+		return [sorted(near_count.items(), key=itemgetter(1))[-1][0], best_files]

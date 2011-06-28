@@ -2,16 +2,57 @@ import random
 from math import fabs
 from math import tan
 from math import radians
+from math import floor
+from math import sqrt
+import numpy
 
 def distribute(lc):
-			flux = lc[1]
-			min = 1
-			max = 10
-			new_flux = random.uniform(max ** -2.3, min) ** (1 / -2.3)
-			mean = 1.0 * sum(flux) / len(flux)
-			for obs_num in xrange(len(flux)):
-				flux[obs_num] *= new_flux / mean
-			return [lc[0], flux]
+	flux = lc[1]
+	min = 1
+	max = 10
+	new_flux = random.uniform(max ** -2.3, min) ** (1 / -2.3)
+	mean = 1.0 * sum(flux) / len(flux)
+	for obs_num in xrange(len(flux)):
+		flux[obs_num] *= new_flux / mean
+	return [lc[0], flux]
+
+# Make percent of the signal available
+def available(lc, percent):
+	print percent, percent > 0, percent < 100
+	assert percent > 0 and percent < 100
+	#print percent
+	#print len(lc[0])
+	#print percent / 100.0
+	#print floor(len(lc[0]) * (percent / 100.0))
+	avail_range = int(floor(len(lc[0]) * (percent / 100.0)))
+	return [lc[0][:avail_range], lc[1][:avail_range]]
+
+# Add gaussian noise to the signal to the new signal to noise ratio
+def signal_noise(lc, sig_noise_ratio):
+	# First compute signal std dev
+	lc_len = len(lc[0]) * 1.0
+	sigma = sqrt(sum([x ** 2 for x in lc[1]]) / lc_len - (sum(lc[1]) / lc_len) ** 2)
+	print sigma
+
+	# Add random noise
+	noise_amt = (1.0 / sig_noise_ratio) * sigma
+	return [lc[0], [x + numpy.random.normal(0,noise_amt) for x in lc[1]]]
+
+# Remove part of the signal as chunks of size 1, 2, 5
+def gapify(lc, gap_amt):
+	time = lc[0]
+	flux = lc[1]
+	remove_amt = int(floor(len(flux) * gap_amt))
+	removed = 0
+	while removed < remove_amount:
+		gap_size = random.choose([1, 2, 5])
+		if gap_size > remove_amount - removed:
+			gap_size = int(remove_amount - removed)
+		removed += gap_size
+		gap_start = random.randrange(1, len(flux) - gap_size)
+		time = time[:gap_start] + time[gap_start + gap_size:]
+		flux = flux[:gap_start] + flux[gap_start + gap_size:]
+	return [time, flux]	
 
 # Find linear approximation of a light curve
 def linearapprox(lc, granularity):
@@ -68,13 +109,14 @@ def normalise(lc, new_mean=1):
 	# Update the flux measurements
 	for i in xrange(len(lc[1])):
 		lc[1][i] = lc[1][i] / flux_mean * new_mean
+	return lc
 
 def crossfold(folds, dataset):
 	random.shuffle(dataset)
 	fold_size = len(dataset) / folds
 	fold_left = len(dataset) % folds
-	print "fold size:", fold_size
-	print "fold left:", fold_left
+	#print "fold size:", fold_size
+	#print "fold left:", fold_left
 	# For each fold yield fold test and train
 	prev_end = None # keep track of last endpoint for fold
 	for fold_num in xrange(folds):

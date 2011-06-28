@@ -4,10 +4,41 @@ from utils import linearapprox
 
 # Euclidean distance between two light curves
 def euclidean(lc_a, lc_b):
-	return None
+	disparity = abs(len(lc_a[0]) - len(lc_b[0]))
+	# Attempt to minimise distance by comparing at different time shifts
+	
+	# No shifting necessary
+	if disparity == 0:
+		d = 0
+		for i in xrange(len(lc_a[0])):
+			d += (lc_a[1][i] - lc_b[1][i]) ** 2	
+		return sqrt(d)
+	
+	# Shift to find best match
+	# Meaning, attempt matches all along longer curve
+	shift_first = False
+	if len(lc_a[0]) < len(lc_b[0]):
+		shift_first = True
+	
+	smaller_length = min(len(lc_a[0]), len(lc_b[0]))
+	best_d = None
+	for shift_amt in xrange(disparity):
+		d = 0
+		# For all the shifts of the smaller light curve
+		for i in xrange(smaller_length):
+			if shift_first: # Match the first curve along the second
+				d += (lc_a[1][i] - lc_b[1][i + shift_amt]) ** 2
+			else: # Match the second curve along the first
+				d += (lc_a[1][i + shift_amt] - lc_b[1][i]) ** 2
+		d = sqrt(d)
+		if best_d is None:
+			best_d = d
+		else:
+			if d < best_d:
+				best_d = d
+	return best_d
 
 # Simple temporal grammar with linear approximations
-
 def simplegrammar(lc_a, lc_b):
 	#Not using these yet...
 	#INDEL_PENALTY = 1.5

@@ -1,0 +1,111 @@
+\documentclass[10pt]{article}
+
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath}
+\usepackage{array}
+\usepackage{subfigure}
+\usepackage[colorlinks=true,linkcolor=blue]{hyperref}
+\usepackage[all]{hypcap}
+\usepackage{lscape}
+\usepackage{multirow}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{algorithmic}
+\usepackage{algorithm}
+\usepackage{rotating}
+\setlength{\parindent}{0in}
+
+\usepackage[round]{natbib}
+%\usepackage[colorlinks=true,citecolor=blue]{hyperref}
+\usepackage{hypernat}
+
+\bibliographystyle{plainnat}
+
+\title{Exploring simple similarity measures for Astronomical time series}
+\author{Peter Ashwell}
+\date{}
+
+\begin{document}
+	\maketitle
+	\section{Introduction}
+	The goal of this work is to assess the effectiveness of 2 simple similarity measures for time series on Astronomical data: minimum distance measures and dynamic time warping (DTW) \citep{berndt1994using}. The quality of these similarity measures will be assessed by their classification performance on a dataset of simulated light curves with the Nearest Neighbour algorithm. We hope to develop a reasonable baseline with which to compare more effective algorithms and to characterise the main difficulties in classifying Astronomical time series.
+	
+	\section{Data}
+	A dataset comprised of simulated astronomical events in 6 separate classes is to be used. The classes are Extreme Scattering Events (ESEs), Intraday Variables (IDVs), Supernova (SNe), Novae, Flares, and Noise. These classes by no means represent all the potential transients that could arise in reality, nor are they completely accurate representations of the true transient forms. Their structures however are sufficiently similar to the real thing to  afford a preliminary investigation into the difficulties of Astronomical light curve classification. Figure~\ref{fig:classes} shows sample light curves drawn from each class.
+	
+	\begin{figure}[ht!]
+		\centering
+		\label{fig:classes}
+		Placeholder for figure of 6 transient classes
+		\caption{The 6 transient classes used in the classification experiment}
+	\end{figure}
+	
+	In order to examine how real world data issues will affect classification accuracy, the classification procedure will be repeated under a variety of data conditions outlined in table~\ref{tab:conditions}.
+	
+	\begin{table}[ht!]
+	\centering
+	\label{tab:conditions}
+	\begin{tabular}{|l|l|l|} \hline
+		Distortion type & Description & Tested \\ \hline
+		Amplitude distribution & Signal intensity distribution & Normalised or -2.3 power law\\
+		Noise & Signal variance to noise ratio & 1/3 of signal variance \\
+		Gappiness & Randomly missing data chunks & 10, 50, 90\% of signal \\
+		Data available & How much of the signal has been seen & 5, 10, 30, 50\% of signal \\ \hline
+	\end{tabular}
+	\caption{Types of distortion introduced into the data}
+	\end{table}
+	The exact classification procedure is outlined in section~\ref{sec:procedure}.
+	
+	\section{Procedure}
+	\label{sec:procedure}
+	Classification is carried out using the nearest neighbour algorithm. The majority class of the 5 nearest neighbours will be used to decide on a classification for a light curve. The three separate distance measures used will be curve fitting, dynamic time warping and a simple temporal grammar based on gradients and linear approximations. Each of these measures will be applied with nearest neighbour under the different data conditions to evaluate their classification performance, measured in terms of precision, recall and F-score.
+	\subsection{Minimum distance}
+	what is minimum distance, what are its potential strengths and weaknesses, why is it interesting
+	\subsection{Dynamic time warping}
+	what is dynamic time warping, why is it interesting, what are its strengths and weaknesses
+	
+	\section{Results}
+	\begin{table}[ht!]
+	\centering
+	\begin{tabular}{|l|l|lll|}
+		\hline Description & Experiment conditions & Precision & Recall & F-Score \\ \hline 
+		\multirow{4}{*}{Varying distribution} 
+		& norm-n0-a100-m0-s400-dtw-0 & 0.74 & 0.742 & 0.74\\ 
+		& powlaw-n0-a100-m0-s400-dtw-0 & 0.755 & 0.755 & \textbf{0.753}\\ 
+		& norm-n0-a100-m0-s400-euclidean-0 & 0.708 & 0.36 & 0.421\\ 
+		& powlaw-n0-a100-m0-s400-euclidean-0 & 0.655 & 0.325 & 0.382\\ \hline
+		
+		\multirow{8}{*}{Varying available data}
+		& norm-n0-a5-m0-s400-dtw-0 & 0.413 & 0.373 & 0.383\\ 
+		& norm-n0-a10-m0-s400-dtw-0 & 0.518 & 0.465 & 0.478\\ 
+		& norm-n0-a30-m0-s400-dtw-0 & 0.678 & 0.64 & 0.648\\ 
+		& norm-n0-a50-m0-s400-dtw-0 & 0.714 & 0.713 & \textbf{0.713}\\ 
+		& norm-n0-a5-m0-s400-euclidean-0 & 0.22 & 0.108 & 0.132\\ 
+		& norm-n0-a10-m0-s400-euclidean-0 & 0.451 & 0.215 & 0.266\\ 
+		& norm-n0-a30-m0-s400-euclidean-0 & 0.569 & 0.342 & 0.409\\ 
+		& norm-n0-a50-m0-s400-euclidean-0 & 0.781 & 0.412 & 0.473\\ \hline
+		
+		\multirow{2}{*}{Adding noise}
+		& norm-n3-a100-m0-s400-dtw-1 & 0.762 & 0.755 & \textbf{0.757}\\ 
+		& norm-n3-a100-m0-s400-euclidean-0 & 0.691 & 0.338 & 0.401\\ \hline
+		
+		\multirow{6}{*}{All distortions}
+		& powlaw-n3-a10-m0-s400-dtw-0 & 0.546 & 0.517 & 0.523\\ 
+		& powlaw-n3-a30-m0-s400-dtw-0 & 0.687 & 0.668 & 0.675\\ 
+		& powlaw-n3-a50-m0-s400-dtw-0 & 0.72 & 0.705 & \textbf{0.708}\\ 
+		& powlaw-n3-a10-m0-s400-euclidean-0 & 0.604 & 0.303 & 0.359\\ 
+		& powlaw-n3-a30-m0-s400-euclidean-0 & 0.601 & 0.322 & 0.384\\ 
+		& powlaw-n3-a50-m0-s400-euclidean-0 & 0.764 & 0.333 & 0.408\\ \hline
+	\end{tabular}
+	\caption{Classification results. The best F-Scores are marked in bold.}
+	\end{table}
+		
+	\section{Discussion}
+	\subsection{Distortions and classification performance}
+	\subsection{Characteristic errors}
+	\subsection{Suggestions for improvement and future work}
+	
+	\section{Conclusion}
+	
+	\bibliography{../../refs}
+\end{document}
