@@ -6,6 +6,27 @@ from math import floor
 from math import sqrt
 import numpy
 
+# Take the average of the two nearest values that are present to position
+def simple_interpolate(lc):
+	max_length = lc[0][-1]
+	new_lc = [[], []]
+	# Iterato over all time indices that should be there 
+	available_index = 0 # The index of the available time
+	for time in xrange(max_length):
+		#if available_index >= len(lc[0]):
+		#	new_lc[1].append((lc[1][available_index - 1] + 0) / 2.0)
+		if time == lc[0][available_index]:
+			new_lc[0].append(time)
+			new_lc[1].append(lc[1][available_index])
+			available_index += 1
+		else: # Interpolate
+			if available_index == 0 or available_index == lc[0][-1]:
+				pass
+			else:
+				new_lc[0].append(time)
+				new_lc[1].append((lc[1][available_index - 1] + lc[1][available_index]) / 2.0)
+	return new_lc
+
 def distribute(lc):
 	flux = lc[1]
 	min = 1

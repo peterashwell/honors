@@ -1,12 +1,17 @@
 from math import sqrt
 from math import fabs
 from utils import linearapprox
+from utils import simple_interpolate
 
 # Euclidean distance between two light curves
 def euclidean(lc_a, lc_b):
-	disparity = abs(len(lc_a[0]) - len(lc_b[0]))
 	# Attempt to minimise distance by comparing at different time shifts
+	disparity = abs(len(lc_a[0]) - len(lc_b[0]))
 	
+	# Interpolate all missing values if necessary
+	lc_a = simpleinterpolate(lc_a)
+	lc_b = simpleinterpolate(lc_b)
+
 	# No shifting necessary
 	if disparity == 0:
 		d = 0
