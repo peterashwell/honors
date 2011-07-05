@@ -27,44 +27,54 @@
 
 \begin{document}
 	\maketitle
-	\section{Introduction}
-	The goal of this work is to assess the effectiveness of 2 simple similarity measures for time series on Astronomical data: minimum distance measures and dynamic time warping (DTW) \citep{berndt1994using}. The quality of these similarity measures will be assessed by their classification performance on a dataset of simulated light curves with the Nearest Neighbour algorithm. We hope to develop a reasonable baseline with which to compare more effective algorithms and to characterise the main difficulties in classifying Astronomical time series.
 	
-	\section{Data}
-	A dataset comprised of simulated astronomical events in 6 separate classes is to be used. The classes are Extreme Scattering Events (ESEs), Intraday Variables (IDVs), Supernova (SNe), Novae, Flares, and Noise. These classes by no means represent all the potential transients that could arise in reality, nor are they completely accurate representations of the true transient forms. Their structures however are sufficiently similar to the real thing to  afford a preliminary investigation into the difficulties of Astronomical light curve classification. Figure~\ref{fig:classes} shows sample light curves drawn from each class.
+	\section{Introduction}
+		\label{sec:introduction}
+		Similarity measures (chapter~\ref{sec:similarity}) combined with the nearest neighbour algorithm yield a simple approach to classification of astronomical transients. They are a preliminary investigation into the effectiveness of similarity measures for classification, and should also demonstrate some of the fundamental problems in this task. The two similarity measures to be compared are Euclidean, possibly the simplest similarity measure, and Dynamic Time Warping \citep{berndt1994using}, a dynamic programming approach. The results of this experiment will give a baseline with which to compare the performance of more sophisticated classification algorithms. These experiments follow the proecedure outlined in chapter~\ref{chap:experiment} for all the classification tasks. 
+	
+	\section{Procedure}
+		\label{sec:procedure}
+		The nearest neighbour algorithm uses a set of labeled data objects with a distance function, classifying unlabeled objects by the assumption that its true class is the same as its `closest' neighbours. The class in the majority taken from the $N$ nearest neighbours in the data set to the unlabeled object becomes its new label. In this experiment, $N$, the number of nearest neighbours used in the majority vote, will be 5. The algorithm is illustrated visually in figure (TODO add figure).
+		
+		\begin{figure}[ht!]
+			\centering
+			Placeholder for nearest neighbour algorithm figure
+			\caption{Nearest neighbour algorithm in binary classification. The black label is chosen for the new datapoint}
+		\end{figure}
+		
+		The experiment will be carried out under a variety of data conditions (see chapter\ref{chap:experiment}) with 10-fold cross validation to reduce overfitting. Euclidean distance cannot be applied when the time series has randomly missing datapoints, so these results are omitted. Dynamic Time Warping can be applied in all data conditions. Results will take the form of the precision, recall and F-score microaveraged across the individual results for the 6 classes. 
+
+	\section{Euclidean distance}
+		The simplest possible way to evaluate the similarity of two time series $x$ and $y$ is to compare the values $x_{i}$ and $y_{i}$ at each equal time index $i$ and compute the sum of the squared differences:
+		
+		\begin{equation}
+			\sum\limits_{i = 0}^{L}(x_{i} - y_{i})^{2}
+		\end{equation}
+	
+	Where $L$ is the length of $x$ and $y$. This is the Euclidean distance of the two time series, and is highly sensitive to every distortion present in astronomical time series: noise, time warping, amplitude scaling, outlier points. Additionally, this distance is not defined when some data points are missing or when the lengths of the two time series are not equal! In this experiment tests for missing data are not carried out, and a slightly more sophsticated Euclidean distance is used:
+	
+	\begin{equation}
+		\arg\max\limits_{\theta \in \{0, \ldots, l\}}\sum\limits_{i = \theta \bmod l}^{s}(x_{i} - y_{i})^{2}
+	\end{equation}
+	
+	Where $l$ and $s$ are the lengths of the longer and shorter time series respectively. This distance measure computes the Euclidean distance at all phase shifts of the two time series, and is defined when they are of unequal length. The computational complexity of each similarity calculation is $O(ls^{2})$. When used in the nearest neighbour algorithm gives overall complexity of $O(n^{2}ls^{2})$, approximately $O(n^{2}m^{3})$, where n is the number of time series in the dataset to be classified and $m$ is the average length of the time series.
+	
+	\section{Dynamic time warping}
+	Dynamic time warping is a dynamic programming approach to time series classification that finds the optimal pairwise matching of the points in either series. All points in the time series are matched and no lines representing a match may cross. A dynamic time warping matching is represented visually in the figure below (TODO add figure)
 	
 	\begin{figure}[ht!]
 		\centering
-		\label{fig:classes}
-		Placeholder for figure of 6 transient classes
-		\caption{The 6 transient classes used in the classification experiment}
-	\end{figure}
+		Placeholder for figure of dynamic time warping
+		\caption{Optimal matching of time series indices found by dynamic time warping}
+	\end{figure} 
 	
-	In order to examine how real world data issues will affect classification accuracy, the classification procedure will be repeated under a variety of data conditions outlined in table~\ref{tab:conditions}.
-	
-	\begin{table}[ht!]
-	\centering
-	\label{tab:conditions}
-	\begin{tabular}{|l|l|l|} \hline
-		Distortion type & Description & Tested \\ \hline
-		Amplitude distribution & Signal intensity distribution & Normalised or -2.3 power law\\
-		Noise & Signal variance to noise ratio & 1/3 of signal variance \\
-		Gappiness & Randomly missing data chunks & 10, 50, 90\% of signal \\
-		Data available & How much of the signal has been seen & 5, 10, 30, 50\% of signal \\ \hline
-	\end{tabular}
-	\caption{Types of distortion introduced into the data}
-	\end{table}
-	The exact classification procedure is outlined in section~\ref{sec:procedure}.
-	
-	\section{Procedure}
-	\label{sec:procedure}
-	Classification is carried out using the nearest neighbour algorithm. The majority class of the 5 nearest neighbours will be used to decide on a classification for a light curve. The three separate distance measures used will be curve fitting, dynamic time warping and a simple temporal grammar based on gradients and linear approximations. Each of these measures will be applied with nearest neighbour under the different data conditions to evaluate their classification performance, measured in terms of precision, recall and F-score.
-	\subsection{Minimum distance}
-	what is minimum distance, what are its potential strengths and weaknesses, why is it interesting
-	\subsection{Dynamic time warping}
-	what is dynamic time warping, why is it interesting, what are its strengths and weaknesses
+	Time series under dynamic time warping lose all meaning in their time indices but their ordering. Time indices may be treated as having occurred all at once or at any rate so long as they stay in order, and all are matched to the comparison series. This makes dynamic time warping effective in coping with the time warping and time scaling issue present in astronomical time series, but it is sensitive to all other distortions and introduces new problems. The steepness of slopes, defined by a change in intensity over time, is no longer meaningful. Time series that are only defined by the steepness of rise of a particular component, such as Novae and SNe, will not appear dissimilar to DTW.
 	
 	\section{Results}
+	Still to add:
+	\begin{itemize}
+		\item 
+	\end{itemize}
 	\begin{table}[ht!]
 	\centering
 	\begin{tabular}{|l|l|lll|}
@@ -104,6 +114,14 @@
 	\subsection{Distortions and classification performance}
 	\subsection{Characteristic errors}
 	\subsection{Suggestions for improvement and future work}
+		\begin{itemize}
+			\item Convolution, why not?
+			\item Does the total length of the light curve affect classification?
+			\item Novae rise rate vs. Supernovae
+			\item Padding with noise either side of an event	 
+			\item Sampling footprints
+		\end{itemize}
+	 It is the same idea as convolution (TODO add reference), except that in that distance measure the dot product of the two values is used. The perf
 	
 	\section{Conclusion}
 	

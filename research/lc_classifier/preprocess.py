@@ -11,6 +11,7 @@ from utils import normalise
 from utils import distribute
 from utils import available
 from utils import signal_noise
+from utils import gapify
 from os import listdir
 import sys
 import getopt

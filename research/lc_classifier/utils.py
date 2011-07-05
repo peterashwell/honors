@@ -8,7 +8,7 @@ import numpy
 
 # Take the average of the two nearest values that are present to position
 def simple_interpolate(lc):
-	max_length = lc[0][-1]
+	max_length = int(lc[0][-1])
 	new_lc = [[], []]
 	# Iterato over all time indices that should be there 
 	available_index = 0 # The index of the available time
@@ -63,13 +63,15 @@ def signal_noise(lc, sig_noise_ratio):
 def gapify(lc, gap_amt):
 	time = lc[0]
 	flux = lc[1]
-	remove_amt = int(floor(len(flux) * gap_amt))
+	remove_amt = int(floor(len(flux) * gap_amt / 100.0))
+	print "ramt:", remove_amt
 	removed = 0
-	while removed < remove_amount:
-		gap_size = random.choose([1, 2, 5])
-		if gap_size > remove_amount - removed:
-			gap_size = int(remove_amount - removed)
+	while removed < remove_amt:
+		gap_size = random.choice([1, 2, 5])
+		if gap_size > remove_amt - removed:
+			gap_size = remove_amt - removed
 		removed += gap_size
+		print len(flux), gap_size, len(flux) - gap_size
 		gap_start = random.randrange(1, len(flux) - gap_size)
 		time = time[:gap_start] + time[gap_start + gap_size:]
 		flux = flux[:gap_start] + flux[gap_start + gap_size:]

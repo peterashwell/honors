@@ -1,4 +1,4 @@
-from run_test import lcExperiment
+from preprocess import lcExperiment
 lce = lcExperiment()
 lce.parse_options()
 lce.preliminary()
