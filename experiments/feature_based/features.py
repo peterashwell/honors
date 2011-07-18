@@ -2,6 +2,7 @@
 import scipy
 import numpy
 import math
+import lomb
 
 # The standard deviation
 def stddev(lc):
@@ -87,4 +88,11 @@ def max_slope(lc):
 		last_time = time
 	return [best_slope]
 
-
+def spectral_features(lc):
+	time = numpy.array(time)
+	# center the flux
+	flux = numpy.array(flux)
+	flux = (flux - numpy.mean(flux)) / (1.0 * numpy.std(flux))
+	result = lomb.fasper(time, flux, 6.0, 6.0)
+	top_frequencies = sorted(zip(result[0], result[1]), key=itemgetter(0))[-3:]
+	return top_frequencies
