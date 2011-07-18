@@ -28,13 +28,30 @@
 	A variety of features from both the time and frequency domain will be compared in their effectiveness for the automatic classification of simplified Astronomical time series. Classification was carried out with the extracted features on the Weka software suite on a variety of generic supervised learning algorithms.
 	
 	\section{Features}
+	General features:
 	\begin{itemize}
 		\item Wavelets
 		\item LS features
+	\end{itemize}
+	Taken from \emph{On Machine Learned Classification of Variable Stars}:
+	\begin{itemize}
 		\item Amplitude percentiles
 		\item Skew
-		\item 
-	\end{itemize}	
-	
+		\item Amplitude spread
+		\item Kurtosis measure
+		\item Standard deviation
+		\item Standard deviation percentiles (top percentiles)
+		\item Maximum slope over successive magnitudes (least squares fit)
+		\item Close to median percentiles
+		\item Deviation from median 
+	\end{itemize}
+	Other
+	\begin{itemize}
+		\item ARMA coefficients
+		\item Distance to profile light curves under various measures
+		\item Some kind of segmentation profile distance
+		\item Temporal grammar distance to profiles
+		\item Shapelet profile distance
+	\end{itemize}
 			
 \end{document}
