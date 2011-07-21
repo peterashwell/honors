@@ -61,20 +61,29 @@ def signal_noise(lc, sig_noise_ratio):
 
 # Remove part of the signal as chunks of size 1, 2, 5
 def gapify(lc, gap_amt):
+	print lc[0]
+	MINIMUM_POINTS = 5
+	gaps = []
 	time = lc[0]
 	flux = lc[1]
 	remove_amt = int(floor(len(flux) * gap_amt / 100.0))
-	print "ramt:", remove_amt
+	if len(lc[0]) - remove_amt < MINIMUM_POINTS:
+		remove_amt = len(lc[0]) - MINIMUM_POINTS
 	removed = 0
 	while removed < remove_amt:
 		gap_size = random.choice([1, 2, 5])
 		if gap_size > remove_amt - removed:
 			gap_size = remove_amt - removed
 		removed += gap_size
-		print len(flux), gap_size, len(flux) - gap_size
 		gap_start = random.randrange(1, len(flux) - gap_size)
+		gaps.append((gap_start, time[gap_start:gap_start + gap_size]))
 		time = time[:gap_start] + time[gap_start + gap_size:]
 		flux = flux[:gap_start] + flux[gap_start + gap_size:]
+	# reintroduce gaps as '-'
+	for gap in reversed(gaps):
+		start = gap[0]
+		time = time[:start] + gap[1] + time[start:]
+		flux = flux[:start] + ['-'] * len(gap[1]) + flux[start:] 
 	return [time, flux]	
 
 # Find linear approximation of a light curve
@@ -174,3 +183,17 @@ def sample(lc, maxlen):
 				new_lc[0].append(lc[0][i])
 				new_lc[1].append(lc[1][i])
 		return new_lc
+
+def all_distortions(lc, noise, available_pct, missing, powlaw):
+	if powerlaw:
+		lc = distribute(lc)
+	else:
+		lc = normalise(lc)
+	if noise > 0:
+		lc = signal_noise(lc, noise)
+	if available_pct < 100.0:
+		lc = available(lc, available_pct)
+	if missing > 0:
+		lc = gapify(lc, missing)
+	return lc
+		
