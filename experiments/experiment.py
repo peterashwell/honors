@@ -1,8 +1,9 @@
-from distortions import *
-
 import os
 import sys
 import getopt
+
+from distortions import *
+from lightcurve import LightCurve
 
 class lcDistortions:
 	def __init__(self):
@@ -11,10 +12,11 @@ class lcDistortions:
 
 		self.normalise = None # normalise lc
 		self.pl_distribute = None # power law distribution on lc
-		self.missing = None # percentage of data removed
-		self.available_pct = None # percentage of data seen
-		self.noise = None # noise / signal ratio (0 means none)
+		self.missing = 0 # percentage of data removed
+		self.available_pct = 100 # percentage of data seen
+		self.noise = 0 # noise / signal ratio (0 means none)
 		self.file_prefix = None	# directory name for processed light curves
+		self.max_size = 400
 		
 	# print usage
 	def usage(self):
@@ -29,7 +31,6 @@ class lcDistortions:
 
 	# parse command line options
 	def parse_options(self):
-		options = 
 		try:
 			opts, args = getopt.getopt(sys.argv[1:], "dun:a:m:g:")
 		except getopt.GetoptError as (errno, strerror):
@@ -70,42 +71,41 @@ class lcDistortions:
 		self.file_prefix += '_a' + str(self.available_pct)
 		self.file_prefix += '_m' + str(self.missing)
 		self.file_prefix += '_s' + str(self.max_size)
-		self.file_prefix += '_' + self.dm_name
 	
 	def preprocess(self):
 		# Create test data if it is not already there
-		if self.test_dir in os.listdir(self.LC_DIRECTORY):
+		if self.file_prefix in os.listdir(self.LC_DIRECTORY):
 			print 'directory already exists...'
 		else: # does not already exist
-			new_directory = self.LC_DIRECTORY + self.test_dir
+			new_directory = self.LC_DIRECTORY + '/' + self.file_prefix
 			os.mkdir(new_directory)
-			try:
-				for lc_file in os.listdir(self.RAW_LC_DIRECTORY):
-					print 'distorting:', lc_file
-					lc = LightCurve() # see lightcurve.py
-					
-					# read in all lc data
-					lc_data = open(self.RAW_LC_DIRECTORY + lc_file)
-					for line in lc_data:
-						line = line.strip().split(',')
-						lc.time.append(float(line[0]))
-						lc.flux.append(float(line[1]))
-					lc_data.close()
-					
-					# check the parameters
-					if (not self.pl_distribute) and (not self.normalise):
-						print "no distribution chosen..."
-						raise Exception('no distribution chosen')
-					lc = all_distortions(lc) # see distortions.py
-					
-					# write the distorted data out
-					lc_out = open('lightcurves/' + self.test_dir + '/' + lc_file, 'w')
-					lc_out.write('\n'.join([','.join([str(elem) for elem in obj]) for obj in zip(lc[0], lc[1])]))
-					lc_out.close()
-			except:
-				print "removing", new_directory
-				os.rmdir(new_directory)
-				exit(2)
+			for lc_file in os.listdir(self.LC_DIRECTORY + '/' + self.RAW_LC_DIRECTORY):
+				print 'distorting:', lc_file
+				lc = LightCurve() # see lightcurve.py
+				
+				# read in all lc data
+				lc_data = open(self.LC_DIRECTORY + '/' + self.RAW_LC_DIRECTORY + '/' + lc_file)
+				for line in lc_data:
+					line = line.strip().split(',')
+					lc.time.append(float(line[0]))
+					lc.flux.append(float(line[1]))
+				lc_data.close()
+				
+				# check the parameters
+				if (not self.pl_distribute) and (not self.normalise):
+					print "no distribution chosen..."
+					raise Exception('no distribution chosen')
+				lc = all_distortions(lc, self.noise, self.available_pct, self.missing, self.pl_distribute) # see distortions.py
+				
+				# write the distorted data out
+				lc_out = open('lightcurves/' + self.file_prefix + '/' + lc_file, 'w')
+				lc_out.write('\n'.join([','.join([str(elem) for elem in obj]) for obj in zip(lc.time, lc.flux)]))
+				lc_out.close()
+#	except Exception, e:
+#		print e
+#		print "removing", new_directory
+#		os.rmdir(new_directory)
+#		exit(2)
 
 if __name__ == '__main__':
 	lcproc = lcDistortions()
