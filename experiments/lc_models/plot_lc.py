@@ -2,19 +2,11 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 from matplotlib.backends.backend_pdf import PdfPages
 import os
-import sys
-
-if len(sys.argv) < 1:
-	print "<light curve directory> <desired pdf filename>"
-	exit(1)
-lc_dir = sys.argv[1]
-lc_out = sys.argv[2]
-
 
 # default font is too large for subfigures
 mpl.rc('font', size=8)
 	
-pdf = PdfPages(lc_out + '.pdf')
+pdf = PdfPages('lc.pdf')
 
 # space out the subfigures
 fig = plt.figure()
@@ -25,8 +17,8 @@ plot_rows = 4
 plot_cols = 2
 
 lc_num = 0
-for lc_file in os.listdir(lc_dir):
-	filename = lc_dir + "/" + lc_file
+for lc_file in os.listdir("lightcurves"):
+	filename = "lightcurves/" + lc_file
 	print "reading:", filename
 	lc_data = open(filename)
 	
