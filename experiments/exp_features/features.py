@@ -83,11 +83,10 @@ def max_slope(lc):
 	last_time = None
 	for time, elem in zip(lc.time, lc.flux):
 		if last_elem is not None:
-			if math.fabs(time - last_time) < 1e-10:
-				raise ValueError("Time indices are too close together to compute max slope")
-			slope = (elem - last_elem) / ((time - last_time) * 1.0)
-			if slope > best_slope:
-				best_slope = slope
+			if math.fabs(time - last_time) > 1e-10:
+				slope = (elem - last_elem) / ((time - last_time) * 1.0)
+				if slope > best_slope:
+					best_slope = slope
 		last_elem = elem
 		last_time = time
 	return [best_slope]
@@ -100,7 +99,7 @@ def spectral_features(lc):
 	flux = (flux - numpy.mean(flux)) / (1.0 * numpy.std(flux))
 	result = lomb.fasper(time, flux, 6.0, 6.0)
 	# filter out weird frequencies
-	spectral_results = filter(lambda elem: elem[0] < 0.55 and elem[0] > (2.0 / len(lc)), zip(result[0], result[1]))
+	spectral_results = filter(lambda elem: elem[0] < 0.55 and elem[0] > (2.0 / len(lc.time)), zip(result[0], result[1]))
 	wavelengths = []
 	for frequency in sorted(spectral_results, key=itemgetter(1), reverse=True):
 		wavelength = int(round(1.0 / frequency[0]))
