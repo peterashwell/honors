@@ -12,7 +12,7 @@ from extract_features import expdir_to_arff
 NUM_FOLDS = 10
 LC_DIR = '../lightcurves'
 CACHE_FNAME = 'features.cache'
-ARFF_DIR = 'temp_arff'
+ARFF_DIR = 'arff'
 
 def dir_crossfold(train_dir, test_dir, out_dir):
 	# group light curves by class
@@ -69,8 +69,8 @@ def dir_crossfold(train_dir, test_dir, out_dir):
 	# produce the arff files for the light curve files in the crossfolds
 	for fold_num in xrange(NUM_FOLDS):
 		print "file {0} of {1}".format(fold_num + 1, NUM_FOLDS)
-		train_filename = '{0}/train{1}.arff'.format(out_dir, fold_num)
-		test_filename = '{0}/test{1}.arff'.format(out_dir, fold_num)
+		train_filename = '{0}/{1}/train{2}.arff'.format(out_dir, test_dir, fold_num)
+		test_filename = '{0}/{1}/test{2}.arff'.format(out_dir, test_dir, fold_num)
 		cache, cacheset = expdir_to_arff(train_folds[fold_num], train_dir, train_filename, cache, cache_keyset)
 		cache, cacheset = expdir_to_arff(test_folds[fold_num], test_dir, test_filename, cache, cache_keyset)
 		crossfold_files.append((train_filename, test_filename))

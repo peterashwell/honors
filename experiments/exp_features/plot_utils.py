@@ -6,6 +6,7 @@ from lightcurve import *
 LC_TYPES = ['Nova', 'SNe', 'IDV', 'ESE', 'Noise']
 LC_DIR = 'lightcurves'
 
+
 def systematic_name(options, param):
 	param_val = None
 	options = options.strip()
@@ -101,7 +102,7 @@ def produce_figure(file_handle, exp_desc, param_vals, fscores, param_name, basel
 	plt.ylabel("F-Score")
 	plt.ylim([0,1])
 	legends = tuple(['Baseline'] + featnames)
-	plt.legend(legends, loc='lower left')
+	plt.legend(legends, loc='best')
 	plt.savefig('{0}/{1}_fsplot.eps'.format(FIG_DIR, exp_desc.replace(' ', '-').replace('.',',')), format='eps')
 	plt.close()
 	

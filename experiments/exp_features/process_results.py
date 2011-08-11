@@ -3,7 +3,7 @@ import os
 import re
 import math
 
-TEMPRES_DIR = 'temp_results'
+TEMPRES_DIR = 'raw_results'
 RES_DIR = 'results'
 # takes as argument the name of an experiment in temp_results
 # produces a confusion matrix, precision and recall

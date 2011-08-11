@@ -6,7 +6,7 @@ from lightcurve import LightCurve
 from lightcurve import file_to_lc
 from features import *
 
-ARFF_DIR = 'temp_arff'
+ARFF_DIR = 'arff'
 LC_DIR = 'lightcurves'
 CACHE_FNAME = 'features.cache'
 FEATDESC_FNAME = 'features.desc'
@@ -74,6 +74,7 @@ def expdir_to_arff(lc_files, exp_dir, arff_fname, cache, cache_keyset):
 	increment = int(round((to_process / 5)))
 	done = 0
 	for lc_file in lc_files:
+		#print lc_file
 		#if done % increment == 0 and done != 0:
 		#	print "{0}/{1}".format(done, len(lc_files))
 		done += 1

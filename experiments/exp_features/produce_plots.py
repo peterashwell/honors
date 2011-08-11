@@ -89,7 +89,7 @@ for line in exp_file:
 			featname = featname.strip()
 			result_fname = '{0}/{1}/{2}.result'.format(RESULT_DIR, featname.strip(), exp_fname)
 			result_file = open(result_fname)
-			#print result_fname
+			print result_fname
 			# store precision recall and fscore as tuple
 			#precision = result_file.readline().strip().split('\t')[1]
 			#recall = result_file.readline().strip().split('\t')[1]

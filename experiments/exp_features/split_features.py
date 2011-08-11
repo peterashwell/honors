@@ -1,12 +1,15 @@
 import os
+import sys
+
+exp_name = sys.argv[1]
 
 # for each set of arff files, crop and split according to feature sets
 feat_bounds = [] # set of featureset boundaries
 feat_names = []
 
 FEATDESC_FNAME = 'features.desc'
-ARFF_DIR = 'temp_arff'
-SPLITFEAT_DIR = 'temp_splitfeats'
+ARFF_DIR = 'arff'
+SPLITFEAT_DIR = 'split_feats'
 
 # find bounds of feature sets
 featdesc_file = open(FEATDESC_FNAME)
@@ -39,19 +42,20 @@ feat_bounds.append((0, max([item[1] for item in feat_bounds])))
 #print feat_names
 #print feat_bounds
 # split all files in temp_arff into directories for each feature set
-for arff_fname in os.listdir(ARFF_DIR):
+
+for arff_fname in os.listdir('{0}/{1}'.format(ARFF_DIR, exp_name)):
 	for boundnum, featname in enumerate(feat_names):
-		
+		print 'creating directory:', exp_name, featname		
+		if featname not in os.listdir('{0}/{1}'.format(SPLITFEAT_DIR, exp_name)):
+			os.mkdir('{0}/{1}/{2}'.format(SPLITFEAT_DIR, exp_name, featname))
 		lbound = feat_bounds[boundnum][0]
 		rbound = feat_bounds[boundnum][1]
 		#print lbound, rbound
 		# write the arff through with some cols removed
-		if featname not in os.listdir(SPLITFEAT_DIR):
-			os.mkdir('{0}/{1}'.format(SPLITFEAT_DIR, featname))
-		filter_fname = '{0}/{1}/{2}'.format(SPLITFEAT_DIR, featname, arff_fname)
+		filter_fname = '{0}/{1}/{2}/{3}'.format(SPLITFEAT_DIR, exp_name,featname, arff_fname)
 		filter_file = open(filter_fname, 'w')
 		# seek to @DATA section
-		arff_file = open(ARFF_DIR + '/' + arff_fname)
+		arff_file = open('{0}/{1}/{2}'.format(ARFF_DIR, exp_name, arff_fname))
 		attr_num = 0
 		data = False
 		for line in arff_file:
@@ -72,4 +76,4 @@ for arff_fname in os.listdir(ARFF_DIR):
 			else:
 				filter_file.write(line)
 		filter_file.close() # write out this features arff file
-arff_file.close()
+		arff_file.close()
