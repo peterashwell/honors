@@ -3,7 +3,11 @@ import os
 import random
 from lightcurve import *
 
-LC_TYPES = ['Nova', 'SNe', 'IDV', 'ESE', 'Noise']
+LC_TYPES = []
+classes_desc_file = open('classes.desc')
+for line in classes_desc_file:
+	line = line.strip()
+	LC_TYPES.append(line)
 LC_DIR = 'lightcurves'
 
 
@@ -53,18 +57,22 @@ def write_table(file_handle, exp_name, param_name, \
 param_vals, fscores, exp_desc):
 	file_handle.write('\\section{%s}' % (exp_name.replace('%', '\\%')))
 	file_handle.write('\\begin{table}[ht!]\n\t\\centering\n')
+	file_handle.write('\\footnotesize\n')
 	featname_file = open(FEATNAME_FNAME)
 	featnames = []
 	for featname in featname_file:
 		featnames.append(featname.strip())
 	classes = fscores[featname.strip()].keys() # TODO fix this hard coding
 	file_handle.write('\t\\begin{tabular}{|c|c|%s} \\hline' % ('l|' * len(param_vals)))
-	file_handle.write('\t \\textbf{Feature} & \\textbf{Class} & \\multicolumn{%d}{c|}{\\textbf{%s}} \\\\ \hline \n' % (len(param_vals), param_name.lower())) 
+	file_handle.write('\t \\multirow{2}{*}{\\textbf{Feature}} & \\multirow{2}{*}{\\textbf{Class}} \
+	& \\multicolumn{%d}{c|}{\\textbf{%s}} \\\\ \\cline{%s} \n' % (len(param_vals), param_name.title(), '{0}-{1}'.format(3, len(param_vals) + 1))) 
 	file_handle.write('\t  & & {0} \\\\ \\hline'.format(' & '.join(param_vals)))
 	for featname in featnames:
 		file_handle.write('\t\t\\multirow{%d}{*}{%s}\n' %(len(classes), featname.replace('_', '-')))
 		
-		for class_name in sorted(classes):
+		classes.remove('all')
+		classes.append('all')
+		for class_name in classes:
 			file_handle.write('& {0}'.format(class_name))
 			for pn, param_val in enumerate(param_vals):
 				file_handle.write(' & {0}'.format(fscores[featname][class_name][pn]))
@@ -80,7 +88,6 @@ param_vals, fscores, exp_desc):
 	file_handle.write('\t\\end{tabular}\n')
 	file_handle.write('\t\\caption{F-Score of classification per class in the %s experiment}\n' % (exp_desc.lower()))
 	file_handle.write('\\end{table}\n')
-
 FIG_DIR = 'temp_figures'
 import matplotlib.pyplot as plt
 import matplotlib as mpl
@@ -94,9 +101,18 @@ def produce_figure(file_handle, exp_desc, param_vals, fscores, param_name, basel
 	plt.clf()
 	# plot baseline
 	plt.plot(param_vals, len(param_vals) * [baseline_result]) #, label='Baseline')
-	for featname in featnames:
+	linetypes = ['--', ':']
+	markertypes = ['o', 'x', 'd', 's', '^']
+	colors = ['r', 'g', 'c', 'm', 'y', 'k']
+	for lnum, featname in enumerate(featnames):
 		#print fscores[featname]
-		plt.plot(param_vals, fscores[featname]['all']) #, PARAM_NAMES[param])
+		linetype = '--'
+		if lnum > len(markertypes):
+			linetype = ':'
+		markertype = markertypes[lnum % len(markertypes)]
+		color = colors[lnum % len(colors)]
+		linespecs = '{0}{1}{2}'.format(linetype, markertype, color)
+		plt.plot(param_vals, fscores[featname]['all'], linespecs) #, PARAM_NAMES[param])
 	plt.title("F-Score versus {0} in {1}".format(param_name.lower(), exp_desc.replace('%', '\%').lower()))
 	plt.xlabel(param_name)
 	plt.ylabel("F-Score")
@@ -129,12 +145,13 @@ def write_cm(file_handle, param_name, cms, param_vals, cm_orders, exp_desc):
 			% ('\\\\\n'.join(\
 				[chr(num + LET_A_ASCII) + ') ' + cm_order[num][:3] + ' & ' + ' & '.join(li) for num, li in enumerate(cm)])))
 		file_handle.write('\t\\end{tabular}\n')
-		file_handle.write('\t}\n')
+		file_handle.write('}\n')
 	file_handle.write('\\caption{Confusion matrices for the %s experiment}\n' % (exp_desc.lower()))
 	file_handle.write('\\end{figure}\n')
 
 MAX_SUBFIG_COLS = 5
 def exp_subfigs(file_handle, LC_TYPES, exp_fname, param_val):
+	print 'exp_fname:', exp_fname
 	subfig_count = 0
 	width = round(100.0 / MAX_SUBFIG_COLS * 0.88 / 100.0, 3)
 	
@@ -143,6 +160,8 @@ def exp_subfigs(file_handle, LC_TYPES, exp_fname, param_val):
 	file_handle.write('\t\\centering\n\t%s\n\\end{minipage}\n' % (param_val))
 	for lc_num, lc_type in enumerate(LC_TYPES):
 		# load random light curve and save plot
+		print '{0}/{1}'.format(LC_DIR, exp_fname)
+
 		potential_files = os.listdir('{0}/{1}'.format(LC_DIR, exp_fname))
 		potential_files = filter(lambda e: lc_type in e, potential_files)
 		lc_fname = random.choice(potential_files)
@@ -174,6 +193,7 @@ def exp_subfigs(file_handle, LC_TYPES, exp_fname, param_val):
 			file_handle.write('\\\\\n')
 
 def produce_expsamp(file_handle, exp_fnames, params, param_name):
+	print 'exp_fnames', exp_fnames
 	file_handle.write('\\begin{figure}[ht!]\n')
 	file_handle.write('\\centering\n')
 	file_handle.write('\\begin{minipage}[b]{0.1\\linewidth}\n')

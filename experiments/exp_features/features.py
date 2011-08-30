@@ -28,8 +28,16 @@ def kurtosis(lc):
 # Compute the spreads across flux percentile ranges
 def flux_percentiles(lc):
 	features = []
-
+	
+	stddev = numpy.std(lc.flux)
+	mean = numpy.mean(lc.flux)
+	
+	# center the flux
+	for index in range(len(lc.flux)):
+		lc.flux[index] = (lc.flux[index] - mean) / stddev
+	
 	flux_sorted = sorted(lc.flux)
+	
 	# keep only 5-95% range
 	flux_5_95_pos = int(round(len(flux_sorted) * 0.05))
 	flux_5_95 = (flux_sorted[-flux_5_95_pos] - flux_sorted[flux_5_95_pos]) * 1.0
@@ -38,6 +46,7 @@ def flux_percentiles(lc):
 	for flux_range in [10, 17.5, 25, 32.5, 40]:
 		flux_range_pos = int(round((flux_range / 100.0) * len(flux_sorted))) 
 		features.append((flux_sorted[-flux_range_pos] - flux_sorted[flux_range_pos]) * 1.0)
+	
 	return features
 
 # Amplitude spread, normalised
@@ -74,22 +83,21 @@ def slope_pair_trends(lc):
 		last = elem
 	return [increasing_num]
 
-# Largest time-adjacent increase, normalised
+# Largest and smallest point to point gradient (centered)
 def max_slope(lc):
-	best_slope = 0
+	best_increase = 0
+	best_decrease = 0
 	if len(lc.flux) < 2:
 		return [0]
-	last_elem = None
-	last_time = None
-	for time, elem in zip(lc.time, lc.flux):
-		if last_elem is not None:
-			if math.fabs(time - last_time) > 1e-10:
-				slope = (elem - last_elem) / ((time - last_time) * 1.0)
-				if slope > best_slope:
-					best_slope = slope
-		last_elem = elem
-		last_time = time
-	return [best_slope]
+	
+	for fp in xrange(len(lc.flux) - 1):
+		for sp in xrange(fp + 1, len(lc.flux)):
+			slope = (lc.flux[sp] - lc.flux[fp]) / (lc.time[sp] - lc.time[fp])
+			if slope < best_decrease:
+				best_decrease = slope
+			if slope > best_increase:
+				best_increase = slope
+	return [best_increase, best_decrease]
 
 def spectral_features(lc):
 	FIND_FREQUENCIES = 4
@@ -143,31 +151,14 @@ def haar_recursive(flux):
 		return averages + differences
 
 def haar_transform(lc):
-	TOP_COEFFS = 8
+	TOP_COEFFS = 15
 	next_pow_2 = int(math.ceil(math.log(len(lc.time), 2)))
 	# arithmetical error...
 	if 2 ** next_pow_2 < len(lc.time):
 		next_pow_2 += 1
 	filled_lc = LightCurve(lc.time[:], lc.flux[:])
-#	start_time = int(lc.time[0])
-#	end_time = int(start_time + 2 ** next_pow_2)
-		
-#	complete_time = range(start_time, end_time)
-#	comp_position = 0
-#	real_position = 0
-# The curve should have '-' already for missing data
-#	while comp_position < len(complete_time):
-#		if comp_position >= len(lc.time):
-#			break
-#		elif int(lc.time[real_position]) != complete_time[comp_position]: # missing
-#			filled_lc.time.insert(comp_position, complete_time[comp_position])
-#			filled_lc.flux.insert(comp_position, '-')
-#			comp_position += 1
-#		else: # match (move to next real data point)
-#			comp_position += 1
-#			real_position += 1
-	# fill out remainder of curve
-	# doesn't matter that these time indices don't make sense (TODO make them make sense)
+	
+	# fill out lc with blanks '-'
 	remaining = 2 ** next_pow_2 - len(filled_lc.time)
 	filled_lc.time += range(int(lc.time[-1]) + 1, int(lc.time[-1]) + remaining + 1)
 	filled_lc.flux += ['-'] * remaining

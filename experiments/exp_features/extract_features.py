@@ -16,15 +16,21 @@ CLASS_FNAME = 'classes.desc'
 def lc_to_features(lc):
 	lc_with_gaps = lc.copy() # see ../lightcurve.py
 	lc.remove_gaps() # see ../lightcurve.py
+	flux = lc.flux[:]
+	flux_mean = numpy.mean(flux)
+	flux_std = numpy.std(flux)
+	centered_flux = [(e - flux_mean) / (1.0 * flux_std) for e in flux]
+	lc_centered = LightCurve(lc.time[:], centered_flux)
+
 	return \
 		stddev(lc) + \
 		beyond1std(lc) + \
 		skew(lc) + \
 		kurtosis(lc) + \
-		flux_percentiles(lc) + \
-		amplitude_spread(lc) + \
-		median_deviation(lc) + \
-		median_buffer(lc) + \
+		flux_percentiles(lc_centered) + \
+		amplitude_spread(lc_centered) + \
+		median_deviation(lc_centered) + \
+		median_buffer(lc_centered) + \
 		max_slope(lc) + \
 		slope_pair_trends(lc) + \
 		haar_transform(lc_with_gaps) + \

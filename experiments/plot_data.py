@@ -4,6 +4,8 @@ from matplotlib.backends.backend_pdf import PdfPages
 import os
 import sys
 from lightcurve import *
+fixed = None
+fix_axes = None
 if len(sys.argv) < 1:
 	print "<light curve directory> <desired pdf filename>"
 	exit(1)

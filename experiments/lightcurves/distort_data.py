@@ -102,9 +102,15 @@ class lcDistortions:
 				# read in all lc data
 				lc_data = open(self.LC_DIRECTORY + '/' + self.RAW_LC_DIRECTORY + '/' + lc_file)
 				for line in lc_data:
-					line = line.strip().split('\t')
-					lc.time.append(float(line[0]))
-					lc.flux.append(float(line[1]))
+					
+					if '\t' in line:
+						line = line.strip().split('\t')
+					elif ',' in line:
+						line = line.strip().split(',')	
+					time = line[0].replace(',', '')
+					flux = line[1].replace(',', '')
+					lc.time.append(float(time))
+					lc.flux.append(float(flux))
 				lc_data.close()
 				
 				# check the parameters
