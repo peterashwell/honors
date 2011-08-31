@@ -19,72 +19,10 @@
 
 %\begin{document}
 %	\maketitle
-	\section{Introduction}
-	\subsection{Problem Context}
-	Astronomy is by nature an observational, data-driven science. During the last few decades the field was transformed by technology with software and databases becoming an integral part of data gathering and analysis. As the sophistication of observational equipment has improved the volume of observational data available to researchers has increased. The ASKAP\footnote{\url{http://www.atnf.csiro.au/SKA/}} telescope array under construction in Western Australia will produce a gigabyte of processed data per second . A topic of growing interest has been to automate the analysis of these large data volumes. The subject of this research is to develop algorithms for use in an automatic data analysis pipeline for detecting astronomical transient events as part of the VAST\footnote{\url{http://www.physics.usyd.edu.au/sifa/vast/index.php}} project.
-	\subsection{Transients and Time Series}
-	An astronomical transient event is a structural change in the observation of a stellar object such as a star or galaxy, referred to as \emph{sources} by astronomers. These observations take the form of \emph{time series}, or to astronomers, \emph{light curves}. Time series represent the intensity of an observed source in potentially multiple frequencies over some time indices. An explicit definition for time series is:
-	\begin{center}
-	\begin{math}
-		\{(t_i, \mathbf{x}_{i}) \quad i \in \{t_{1} \ldots t_{D}\} \subset \mathbb{R} \quad \mathbf{x}_{i} \in \mathbb{R}^{D} \}
-	\end{math}
-	\end{center}
-	a mapping from unique time indices $t_{i}$ to a $D$ dimensional vector $\mathbf{x}_{i}$. The $t_{i}$ values may represent any real unit of time - seconds, days, years. The sequence of increasing $t_{i}$ is not necessarily evenly distributed. A typical astronomical time series we are looking for is a supernova. A supernova occurs when very large stars reach the end of their life cycle resulting in a catastrophic explosion. These explosions release large amounts of radiation that can be detected from great distances.
-	\begin{figure}[ht!]
-	\centering
-	\includegraphics[width=120mm]{images/supernova.eps}
-	\caption{Supernova light curve. The height of the observations on the y-axis indicates the observed intensity at the given time position}
-	\end{figure}
-	Variability in astronomical time series is not always intrinsic to the source, that is, the result of some change in the source itself such as in a supernova event. Some scintillation will result from the light interacting with the interstellar medium on its journey to earth. This is called extrinsic variation and will complicate the process of analysing the time series.
-	\subsection{The Problem}
-	The precise problem to be explored in this research is the development of an algorithm for the classification of streaming time series data. The algorithm will receive data every 5 seconds. At each time step any new transients will be reported and along with what class they belong to with a measure of confidence.
-		\begin{itemize}
-		\item Extreme scattering events (ESEs) \footnote{\url{http://ese.nrl.navy.mil/}}
-		\item Gamma ray bursts \footnote{\url{http://imagine.gsfc.nasa.gov/docs/science/know_l1/bursts.html}}
-		\item Supernovae
-		\item X-ray binaries \footnote{\url{http://imagine.gsfc.nasa.gov/docs/science/know_l1/binary_stars.html}}
-		\item Intraday variable stars
-	\end{itemize}
-	It is possible that a transient may belong to an undetermined class and this also needs to be taken into account. The detection of transients should be done as early as possible but should not have too many false positives.
-	
-	\subsection{Time Series Analysis}
-	This problem is primarily one of \emph{time series analysis}. Fortunately, in recent years this field has received a lot of attention in various domains: speech recognition \citep{sakoe1978dynamic}, handwriting analysis \citep{bahlmann2002online}, even image outlines can be represented as time series and classified \citep{ye2009time}. However, the well-developed techniques from these other areas do not extend immediately to our astronomical data. The table below outlines the most serious difficulties inherent to this task.
-	\vspace{10pt}
-	\begin{table*}[h!]
 
-	\centering
-	$\begin{array}{lp{0.7\textwidth}}
-		\textbf{incompleteness} & Data arrives as a stream, and classification must be done without full knowledge of the curve structure. Most developed techniques assume full structure data is available. \vspace{10pt} \\
-		\textbf{distortions} & Astronomical time series have distortions in terms of amplitude scaling, time warping, noise and missing data. \vspace{10pt} \\
-		\textbf{precision} & Classifications must have very high precision. Too many false positives will waste astronomer time and make the system useless. \vspace{10pt} \\
-		\textbf{real-time} & There are very large data volumes arriving in a stream - 1 GB/s, so classification must be time and space efficient and at least near-real time. \vspace{10pt} \\ 
-		\textbf{redundant} & Most data is not relevant to event detection. The start and end of interesting structures must also be determined by the program. \vspace{10pt} \\
-		\textbf{periodic} & Some data will come from periodic sources and this will confuse algorithms searching for `one-off' events. Periodic time series may need to be identified and handled separately.
-	\end{array}$
-	\end{table*}
-	
-	This set of problems is not trivial, and no individual piece of research at present addresses them all. Literature from several domains: machine learning, time series analysis (in astronomy and other fields) and statistics is reviewed and discussed in the following sections with the aim of addressing these issues.
-		
-%	\begin{enumerate}
-%		\item The data arrives in a stream, not as a full structure. Classification is needed without complete light curve data. Most developed techniques assume the entire curve is available at classification time.
-%		\item Astronomical time series have distortions in terms of amplitude scaling, time stretching, noise and missing data
-%		\item The classification must be very high precision so as not to waste astronomer time
-%		\item There are very large data volumes - 1 GB/s so classification has to be efficient in space and time complexity
-%		\item Most of the received data is not relevant to event detection - the start and end of interesting structures must also be determined by the program
-%	\end{enumerate}
-
-	\section{Coping with Distortions in Astronomical Time Series}
-	Below is a list of subproblems associated with the issue of \textbf{distortions} in our astronomical time series.
-	\begin{itemize}
-		\item \textbf{noisy observations}. It can be assumed that every point in a light curve has added noise. For simplicity this noise is assumed to be gaussian distributed which is a reasonable approximation of real conditions in astronomical data.
-		\item \textbf{amplitude scaling} - the same astronomical event will have a different intensity when observed at different distances
-		\item \textbf{missing data} - streaming data is not continuous. This may be due to bad weather or shared telescope responsibilities.
-		\item \textbf{time warping} - events may have different durations or unfold slightly differently, but still have very similar structures
-	\end{itemize}
-	The section outlines some of the methods developed to remedy these issues both in astronomical data mining and from other areas.
-	
-	\subsection{Distance Measures for Time Series}
+\subsection{Distance Measures for Time Series}
 	\label{sec:distancemeasures}
+	
 	\subsubsection{Introduction}
 	The most primitive approach to analysing a time series is to overlay it onto another time series with known class and see how well it fits by calculating the Euclidean \emph{distance} between the two curves. A low distance indicates a high similarity. By comparing the test curve to a number of training samples the most likely class is determined as that having the lowest distance (or lowest distance below some threshold). This approach, called a \emph{Nearest Neighbour} classification, can be very effective if the time series are uniform within their class. 
 	\paragraph{}
@@ -100,7 +38,7 @@
 	\begin{figure}[h!]
 			\label{fig:dtwinaction}
 	\centering
-	\includegraphics[width=100mm]{images/dtw.eps}
+	\includegraphics[width=100mm]{users/peter/honors/thesis/litreview/images/dtw.eps}
 	\caption{Dynamic time warping finding a superior alignment for two time series than Euclidean distance. Alignment is indicated where a grey line joins two points of the series.}
 	\end{figure}
 	%Still RODO: \citep{berndt1994using}, \citep{keogh2001derivative}
@@ -112,7 +50,7 @@
 	
 	\begin{figure}[h!]
 	\centering
-	\includegraphics[width=100mm]{images/lcss.eps}
+	\includegraphics[width=100mm]{users/peter/honors/thesis/litreview/images/lcss.eps}
 	\label{fig:lcss}
 	\caption{Longest Common Subsequence Distance match between a test (query) curve and a training sample (data)}
 	\end{figure}
@@ -135,7 +73,7 @@
 	A GP consists of a multivariate gaussian distribution, where each dimension of the distribution corresponds to an index (in this case, time index) of an input point, say $x$. Gaussian distributions are defined by a mean and a covariance matrix. GPs are more general in that the entries of the covariance matrix are determined by a covariance function $k$. 
 	\begin{figure}[ht!]
 	\centering
-	\includegraphics[width=100mm]{images/gpregression.eps}
+	\includegraphics[width=100mm]{users/peter/honors/thesis/litreview/images/gpregression.eps}
 	\label{fig:gaussianprocessregression}
 	\caption{A Gaussian Processes doing Non-Linear Regression on a Time Series. The crosses indicate observations, while the grey bands indicate uncertainty. Some possible underlying functions drawn from processes are shown in green, blue and red}
 	\end{figure}
@@ -150,7 +88,7 @@
 
 	\begin{figure}[ht!]
 	\centering
-	\includegraphics[width=140mm]{images/covariance.eps}
+	\includegraphics[width=140mm]{users/peter/honors/thesis/litreview/images/covariance.eps}
 	\caption{3 Gaussian Process interpretations of the same data with varying lengthscales ($l$). The variance bands of the three plots demonstrate that choosing the right hyperparameters is important for accurate regression.}
 	\label{gaussianprocesshyperparameters}
 	\end{figure}
@@ -166,7 +104,7 @@
 	\subsection{Summary of Distortion Handling Methods}
 	LCSS is the most promising distance measure proposed and may possibly solve our warping and amplitude scaling distance measure problems, whilst also working for subsequence queries as the problem demands. Gaussian Processes seems like a promising solution to missing and noisy data, but whether the sparse, on-line version is suitable for our problem will need to be tested. In all, these are ideas that could potentially remedy all of our \textbf{distortion} complications.
 	
-	\section{Approaches to Time Series Classification}
+	\subsection{Approaches to Time Series Classification}
 	This section gives a general discussion of techniques developed for analysing and classifying time series. Some of the methods will be more useful as \emph{features} for generic machine learners. Falling under this category are wavelets, temporal grammars and periodograms. Others are more directly useful for classification, such as shapelets, support vector machines (SVMs), and phase invariant kernels. Each subsection will aim to discuss the technique in terms of the relevant complications in our problem, namely the \textbf{real-time}, \textbf{precision} and \textbf{periodic} issues. Not all the methods discussed here are appropriate for streams but some modifications or extensions of them could be. A discussion of particular approaches to stream classification is given in section~\ref{sec:timeseriesstreams}.
 	
 %	TODO a paragraph on feature extraction
@@ -185,7 +123,7 @@
 	A Fourier transformation is decomposition of a continuous function into sinusoids. The strength of the peak for each component of the decomposition indicates the strength of that component in the original signal. 
 	\begin{figure}[ht!]
 	\centering
-	\includegraphics[width=110mm]{images/discretefft.eps}
+	\includegraphics[width=110mm]{users/peter/honors/thesis/litreview/images/discretefft.eps}
 	\label{fig:fouriertransform}
 	\caption{Fourier Transform of an astronomical time series. The peaks represent the most significant periodic components. In this case the signal has two clear periodicities.}
 	\end{figure}
@@ -201,14 +139,14 @@
 
 	\begin{figure}[ht!]
 	\centering
-	\includegraphics[width=120mm]{images/haarbasis.eps}
+	\includegraphics[width=120mm]{users/peter/honors/thesis/litreview/images/haarbasis.eps}
 	\caption{The first 8 Haar basis wavelets.}
 	\label{fig:haarwavelets}
 	\end{figure}
 	
 	\begin{figure}[ht!]
 	\centering
-	\includegraphics[width=80mm]{images/haarreconstruction.eps}
+	\includegraphics[width=80mm]{users/peter/honors/thesis/litreview/images/haarreconstruction.eps}
 	\caption{A time series reconstructed from its Haar wavelet decomposition.}
 	\label{fig:haarreconstruction}
 	\end{figure}
@@ -243,7 +181,7 @@
 	The idea of shapelets, first presented in \citep{ye2009time}, is to find motifs in time series that are maximally discriminative amongst the classes of training examples. Once these motifs are extracted, any distance measure can be used to apply the motifs from the various classes to a test case. The training class with the lowest scoring motif is chosen as the label.
 	\begin{figure}[ht!]
 	\centering
-	\includegraphics[width=120mm]{images/shapelet.eps}
+	\includegraphics[width=120mm]{users/peter/honors/thesis/litreview/images/shapelet.eps}
 	\caption{Two time series representing arrowhead shapes with representative shapelets highlighted in red.}
 	\label{fig:shapelets}
 	\end{figure}
@@ -254,7 +192,7 @@
 	Support Vector Machines are machine learning tools that work by computing a so-called maximum margin that separates two classes in a feature space. A simple example of a support vector machine working in euclidean space is presented below. Multi class classification is possible by feeding a test case into an ensemble of binary classifiers, facing them off against each other in a tournament style. The winner of the tournament is chosen as the classification for that test case.
 	\begin{figure}[ht!]
 	\centering
-	\includegraphics[width=120mm]{images/svmmargin.eps}
+	\includegraphics[width=120mm]{users/peter/honors/thesis/litreview/images/svmmargin.eps}
 	\label{svmtrain}
 	\caption{Separation margin for two classes (blue and red dots) produced  by a support vector machine}
 	\end{figure}
@@ -274,7 +212,7 @@
 	Early work in this area consists of approximating a pattern using simple shapes, for example, straight line segments as in as in \citep{keogh1998enhanced}. One attempt at a generalisation of temporal grammars is found in \citep{olszewski2001generalized}, and this is a good introduction to the end-to-end approach. This paper utilises a grammar of \{constant, straight, triangular, trapezoid, sinusoid, exponential\} to the task of pattern representation. This approach is very similar to the shapelet approach except that these features are more abstract, allowing potentially for modifications that cope with stretching and scaling more easily than shapelets. Additionally, the simplified nature of grammar components means that comparing features amongst time series is much faster. 
 	\begin{figure}[ht!]
 	\centering
-	\includegraphics[width=120mm]{images/ozlewskigrammar.eps}
+	\includegraphics[width=120mm]{users/peter/honors/thesis/litreview/images/ozlewskigrammar.eps}
 	\caption{Components of temporal grammars used in the Olszewski paper}
 	\label{oslewskigrammar}
 	\end{figure}
@@ -306,7 +244,7 @@
 %	\item Support Vector Machines of interval based features for time series classification \citep{rodriguez2005support}
 %	\end{itemize}
 
-	\section{Analysis of time series streams}
+	\subsection{Analysis of time series streams}
 	\label{sec:timeseriesstreams}
 	
 	\subsection{Extracting Shapelets and Local Patterns From Streams}
@@ -320,7 +258,7 @@
 	\paragraph{}
 	The implementation in this case uses Euclidean distance in the process of finding discriminatory shapelets for the training data, but any distance measure could be used. Statistical tools for choosing exactly which are presented and evaluated with very high accuracy on benchmark time series data sets, but not on very complex multivariable data. Classification is done similarly to training: choose the training sample whose shapelets best reflect the test case. How long this takes depends on the distance measure, but it can be fast to compute.
 	
-	\section{Astronomical Time Series Classification}
+	\subsection{Astronomical Time Series Classification}
 	Besides many generic approaches to classification presented so far, there are approaches that are astronomy specific. The work presented in \emph{On Machine Learned Classification of Variable Stars}, Butler and Bloom 2011 (draft), demonstrates a simple set of features that may be useful in providing additional discrimination amongst astronomical time series. The features include the standard deviation of the measurements, the distribution of flux amongst linearly spaced buckets across the intensity of the measurements, the maximum and minimum changes in the light curve, and many other simple and fast to compute properties of the data. These non-periodic features provide a 4\% improvement in the error rate for that task, the classification of variable stars. When much of the light curve data is shape based (rather than spectral), these simple features should play a much larger role in classification.
 %	\subsection{Detecting Structural Changes in Time Series}
 %	This section regards the detection of structural breaks that indicate that a transient is taking place through a variety of methods - hidden markov models, period changes, etc.
@@ -347,7 +285,7 @@
 %
 			% TODO important See mahabal 2008 for run down of ts classifier methods. uses feature selection for rapid transient detection
 			
-	\section{Summary and Possible Research Approaches}
+	\subsection{Summary and Possible Research Approaches}
 	Literature from many domains involving time series analysis was reviewed, all giving partial solutions to the astronomical time series classification problem. There are two promising approaches that emerge from this review. The first is to develop an effective distance measure or a Kernel that copes with distortions effectively, and then to apply the Nearest Neighbour algorithm or a feature based classifier such as a Support Vector Machine. No perfect distance measure exists in literature surveyed so far, but several come close, such as Longest Common Subsequence. A simple modification may sufficient to get a practical solution to the problem. The second possible approach to look at local pattern extraction or temporal grammars. The SpaDe paper reviewed in section~\ref{sec:timeseriesstreams} seems to be the closest solution found in literature to all of our problems. It may not be time or space efficient enough to work in practice, and it is more complicated to implement that the distance measure procedure. Spectral domain methods might be leveraged in either approach to boost classification accuracy since they are invariant to amplitude scaling, a serious complication in time domain approaches. Finally, on-line regression will be an essential component of any approach. Gaussian Processes are a promising tool for coping with this issue.
 	
 %	\bibliography{refs}

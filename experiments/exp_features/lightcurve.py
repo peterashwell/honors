@@ -1,1 +1,0 @@
-/Users/peter/honors/experiments/lightcurve.py

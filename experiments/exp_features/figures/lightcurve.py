@@ -1,1 +1,0 @@
-../../lightcurves/lightcurve.py
