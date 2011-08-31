@@ -146,7 +146,7 @@
 	\begin{figure}[ht!]
 		\label{fig:samplestats}
 		\centering
-		\includegraphics[width=\textwidth]{figures/sample_hist.eps}
+		\includegraphics[width=\textwidth]{/Users/peter/honors/thesis/experiments/exp_features/figures/sample_hist.eps}
 		\caption{Skewness, kurtosis, mean and standard deviation for some sample light curves}
 	\end{figure}
 	
@@ -159,7 +159,7 @@
 	\begin{figure}[ht!]
 		\centering
 		\label{fig:histograms}
-		\includegraphics[width=\textwidth]{figures/fluxperc_demo.eps}
+		\includegraphics[width=\textwidth]{/Users/peter/honors/thesis/experiments/exp_features/figures/fluxperc_demo.eps}
 		\caption{Figure of histogram feature extraction}
 	\end{figure}
 	
@@ -196,7 +196,7 @@
 	
 	\begin{figure}[ht!]
 		\label{fig:slopesample}
-		\includegraphics[width=\textwidth]{figures/slope_demo.eps}
+		\includegraphics[height=100mm, width=\textwidth]{/Users/peter/honors/thesis/experiments/exp_features/figures/slope_demo.eps}
 		\caption{Most positive (green) and negative (blue) pairwise slopes for two sample light curves}
 	\end{figure}
 	% TODO add justifications
@@ -209,7 +209,7 @@
 	An implementation of the Lomb-Scargle periodogram based on the work in the paper \href{http://adsabs.harvard.edu/abs/1989ApJ...338..277P}{Fast algorithm for spectral analysis of unevenly sampled data} was taken from \url{http://www.astropython.org/blog/2010/9/Question-period-finding-packages-in-python}. This implementation allows us to extract as features the phase of significant peaks in the light curve and the intensity on these peaks. Computations are taken on centered (mean subtracted, divided by standard deviation) light curves and the top 5 frequences and their intensity are written as \verb#ls_phase(n)# and and \verb#ls_peak(n)# for $n = 1\ldots 5$. \\ % TODO add ref to paper
 	\begin{figure}[ht!]
 		\label{fig:lsspectrum}
-		\includegraphics[width=\textwidth]{figures/lomb_demo.eps}
+		\includegraphics[width=\textwidth]{/Users/peter/honors/thesis/experiments/exp_features/figures/lomb_demo.eps}
 		\caption{Spectrum produced by Lomb-Scargle periodogram for sample light curves}
 	\end{figure}
 	

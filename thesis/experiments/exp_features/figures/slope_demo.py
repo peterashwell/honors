@@ -3,7 +3,6 @@ import features
 from lightcurve import LightCurve
 from operator import itemgetter
 import matplotlib.pyplot as plt
-import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 from scipy.stats import *
 #import maplotlib.mlab as mlab
@@ -15,9 +14,10 @@ mpl.rc('font', size=8)
 
 dir = 'norm_n0.0_a100_m0_s400'
 files = ['IDV_wide_100.data', 'ESE_wide_100.data']#, 'BG_wide_100.data']
-gs = gridspec.GridSpec(1, 2, height_ratios=[1,1])	
-fig = plt.figure()
-fig.subplots_adjust(hspace=0.4, wspace=0.4)
+#gs = gridspec.GridSpec(1, 2)	
+#w,h = plt.figaspect(2)
+#fig = plt.Figure(figsize=(10,5))
+#fig.subplots_adjust(hspace=0.4, wspace=0.4)
 
 for pltnum, fname in enumerate(files):	
 	lcfile = open('../lightcurves/{0}/{1}'.format(dir, fname))
@@ -28,8 +28,8 @@ for pltnum, fname in enumerate(files):
 		time.append(float(line[0]))
 		flux.append(float(line[1]))
 	
-	print "pltnum=", pltnum
-	ax = plt.subplot(gs[pltnum])
+	ax = plt.subplot('12{0}'.format(pltnum + 1)) #, xlim=[0,400], ylim=[-10,10]) #, autoscale_on=False)#, aspect=2.0)
+	#, autoscale_on=False, aspect='equal', xlim=[0,400], ylim=[-10,10]) #, adjustable='box', aspect=100.0)#gs[pltnum])
 	ax.plot(time, flux, 'r+')
 	ticks = [min(time)]
 	steps = 3
@@ -99,5 +99,8 @@ for pltnum, fname in enumerate(files):
 	ax.text(hpos, 0.95, textstr, transform=ax.transAxes, fontsize=8,
         verticalalignment='top', horizontalalignment=halign , bbox=props)
 out_fname = 'slope_demo.eps'.format(c)
+fig = plt.gcf()
+#fig.set_figheight(fig.get_figwidth())
+fig.set_figheight(fig.get_figheight() * 0.6)
 plt.savefig(out_fname, format='eps')
 plt.close()

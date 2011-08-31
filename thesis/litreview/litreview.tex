@@ -38,7 +38,7 @@
 	\begin{figure}[h!]
 			\label{fig:dtwinaction}
 	\centering
-	\includegraphics[width=100mm]{users/peter/honors/thesis/litreview/images/dtw.eps}
+	\includegraphics[width=100mm]{/Users/peter/honors/thesis/litreview/images/dtw.eps}
 	\caption{Dynamic time warping finding a superior alignment for two time series than Euclidean distance. Alignment is indicated where a grey line joins two points of the series.}
 	\end{figure}
 	%Still RODO: \citep{berndt1994using}, \citep{keogh2001derivative}
@@ -50,7 +50,7 @@
 	
 	\begin{figure}[h!]
 	\centering
-	\includegraphics[width=100mm]{users/peter/honors/thesis/litreview/images/lcss.eps}
+	\includegraphics[width=100mm]{/Users/peter/honors/thesis/litreview/images/lcss.eps}
 	\label{fig:lcss}
 	\caption{Longest Common Subsequence Distance match between a test (query) curve and a training sample (data)}
 	\end{figure}
@@ -73,7 +73,7 @@
 	A GP consists of a multivariate gaussian distribution, where each dimension of the distribution corresponds to an index (in this case, time index) of an input point, say $x$. Gaussian distributions are defined by a mean and a covariance matrix. GPs are more general in that the entries of the covariance matrix are determined by a covariance function $k$. 
 	\begin{figure}[ht!]
 	\centering
-	\includegraphics[width=100mm]{users/peter/honors/thesis/litreview/images/gpregression.eps}
+	\includegraphics[width=100mm]{/Users/peter/honors/thesis/litreview/images/gpregression.eps}
 	\label{fig:gaussianprocessregression}
 	\caption{A Gaussian Processes doing Non-Linear Regression on a Time Series. The crosses indicate observations, while the grey bands indicate uncertainty. Some possible underlying functions drawn from processes are shown in green, blue and red}
 	\end{figure}
@@ -88,7 +88,7 @@
 
 	\begin{figure}[ht!]
 	\centering
-	\includegraphics[width=140mm]{users/peter/honors/thesis/litreview/images/covariance.eps}
+	\includegraphics[width=140mm]{/Users/peter/honors/thesis/litreview/images/covariance.eps}
 	\caption{3 Gaussian Process interpretations of the same data with varying lengthscales ($l$). The variance bands of the three plots demonstrate that choosing the right hyperparameters is important for accurate regression.}
 	\label{gaussianprocesshyperparameters}
 	\end{figure}
@@ -123,7 +123,7 @@
 	A Fourier transformation is decomposition of a continuous function into sinusoids. The strength of the peak for each component of the decomposition indicates the strength of that component in the original signal. 
 	\begin{figure}[ht!]
 	\centering
-	\includegraphics[width=110mm]{users/peter/honors/thesis/litreview/images/discretefft.eps}
+	\includegraphics[width=110mm]{/Users/peter/honors/thesis/litreview/images/discretefft.eps}
 	\label{fig:fouriertransform}
 	\caption{Fourier Transform of an astronomical time series. The peaks represent the most significant periodic components. In this case the signal has two clear periodicities.}
 	\end{figure}
@@ -139,14 +139,14 @@
 
 	\begin{figure}[ht!]
 	\centering
-	\includegraphics[width=120mm]{users/peter/honors/thesis/litreview/images/haarbasis.eps}
+	\includegraphics[width=120mm]{/Users/peter/honors/thesis/litreview/images/haarbasis.eps}
 	\caption{The first 8 Haar basis wavelets.}
 	\label{fig:haarwavelets}
 	\end{figure}
 	
 	\begin{figure}[ht!]
 	\centering
-	\includegraphics[width=80mm]{users/peter/honors/thesis/litreview/images/haarreconstruction.eps}
+	\includegraphics[width=80mm]{/Users/peter/honors/thesis/litreview/images/haarreconstruction.eps}
 	\caption{A time series reconstructed from its Haar wavelet decomposition.}
 	\label{fig:haarreconstruction}
 	\end{figure}
@@ -181,7 +181,7 @@
 	The idea of shapelets, first presented in \citep{ye2009time}, is to find motifs in time series that are maximally discriminative amongst the classes of training examples. Once these motifs are extracted, any distance measure can be used to apply the motifs from the various classes to a test case. The training class with the lowest scoring motif is chosen as the label.
 	\begin{figure}[ht!]
 	\centering
-	\includegraphics[width=120mm]{users/peter/honors/thesis/litreview/images/shapelet.eps}
+	\includegraphics[width=120mm]{/Users/peter/honors/thesis/litreview/images/shapelet.eps}
 	\caption{Two time series representing arrowhead shapes with representative shapelets highlighted in red.}
 	\label{fig:shapelets}
 	\end{figure}
@@ -192,7 +192,7 @@
 	Support Vector Machines are machine learning tools that work by computing a so-called maximum margin that separates two classes in a feature space. A simple example of a support vector machine working in euclidean space is presented below. Multi class classification is possible by feeding a test case into an ensemble of binary classifiers, facing them off against each other in a tournament style. The winner of the tournament is chosen as the classification for that test case.
 	\begin{figure}[ht!]
 	\centering
-	\includegraphics[width=120mm]{users/peter/honors/thesis/litreview/images/svmmargin.eps}
+	\includegraphics[width=120mm]{/Users/peter/honors/thesis/litreview/images/svmmargin.eps}
 	\label{svmtrain}
 	\caption{Separation margin for two classes (blue and red dots) produced  by a support vector machine}
 	\end{figure}
@@ -212,7 +212,7 @@
 	Early work in this area consists of approximating a pattern using simple shapes, for example, straight line segments as in as in \citep{keogh1998enhanced}. One attempt at a generalisation of temporal grammars is found in \citep{olszewski2001generalized}, and this is a good introduction to the end-to-end approach. This paper utilises a grammar of \{constant, straight, triangular, trapezoid, sinusoid, exponential\} to the task of pattern representation. This approach is very similar to the shapelet approach except that these features are more abstract, allowing potentially for modifications that cope with stretching and scaling more easily than shapelets. Additionally, the simplified nature of grammar components means that comparing features amongst time series is much faster. 
 	\begin{figure}[ht!]
 	\centering
-	\includegraphics[width=120mm]{users/peter/honors/thesis/litreview/images/ozlewskigrammar.eps}
+	\includegraphics[width=120mm]{/Users/peter/honors/thesis/litreview/images/ozlewskigrammar.eps}
 	\caption{Components of temporal grammars used in the Olszewski paper}
 	\label{oslewskigrammar}
 	\end{figure}
