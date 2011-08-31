@@ -1,0 +1,17 @@
+\documentclass[11pt]{article}
+\title{Results of machine learned transient light curve classification}
+
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{subfigure}
+\usepackage[round]{natbib}
+\usepackage[colorlinks=true,citecolor=blue]{hyperref}
+\usepackage{hypernat}
+\usepackage{multirow}
+
+\author{}
+\date{}
+\begin{document}
+\maketitle

@@ -1,0 +1,58 @@
+#b	Baseline
+norm_n0.0_a100_m0_s400
+#p	Varying distribution
+powlaw_n0.0_a100_m0_s400
+#m	Varying missing data
+norm_n0.0_a100_m0_s400
+norm_n0.0_a100_m10_s400
+norm_n0.0_a100_m30_s400
+norm_n0.0_a100_m50_s400
+norm_n0.0_a100_m70_s400
+norm_n0.0_a100_m90_s400
+#a	Varying observed data
+norm_n0.0_a100_m0_s400
+norm_n0.0_a90_m0_s400
+norm_n0.0_a70_m0_s400
+norm_n0.0_a50_m0_s400
+norm_n0.0_a30_m0_s400
+norm_n0.0_a20_m0_s400
+norm_n0.0_a10_m0_s400
+#n	Varying noise
+norm_n0.0_a100_m0_s400
+norm_n0.5_a100_m0_s400
+norm_n1.0_a100_m0_s400
+norm_n1.5_a100_m0_s400
+norm_n3.0_a100_m0_s400
+#a	All distortions - no missing data
+powlaw_n1.5_a100_m0_s400
+powlaw_n1.5_a90_m0_s400
+powlaw_n1.5_a70_m0_s400
+powlaw_n1.5_a50_m0_s400
+powlaw_n1.5_a30_m0_s400
+powlaw_n1.5_a20_m0_s400
+powlaw_n1.5_a10_m0_s400
+#a	All distortions - 1 in 10 data missing
+powlaw_n1.5_a100_m10_s400
+powlaw_n1.5_a90_m10_s400
+powlaw_n1.5_a70_m10_s400
+powlaw_n1.5_a50_m10_s400
+powlaw_n1.5_a30_m10_s400
+powlaw_n1.5_a20_m10_s400
+powlaw_n1.5_a10_m10_s400
+#a	All distortions - 5 in 10 data missing
+powlaw_n1.5_a100_m50_s400
+powlaw_n1.5_a90_m50_s400
+powlaw_n1.5_a70_m50_s400
+powlaw_n1.5_a50_m50_s400
+powlaw_n1.5_a30_m50_s400
+powlaw_n1.5_a20_m50_s400
+powlaw_n1.5_a10_m50_s400
+#a	All distortions - 9 in 10 data missing
+powlaw_n1.5_a100_m90_s400
+powlaw_n1.5_a90_m90_s400
+powlaw_n1.5_a70_m90_s400
+powlaw_n1.5_a50_m90_s400
+powlaw_n1.5_a30_m90_s400
+powlaw_n1.5_a20_m90_s400
+powlaw_n1.5_a10_m90_s400
+#c	None

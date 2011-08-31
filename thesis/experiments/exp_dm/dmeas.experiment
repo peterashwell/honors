@@ -1,0 +1,52 @@
+2
+L DTW
+R Euclidean
+#No distortions
+!L
+-u -g dtw
+!R
+-u -g euclidean
+#Power law distribution
+!L
+-p -g dtw
+!R
+-p -g euclidean
+#Varying available data
+!L
+-u -a 5 -g dtw
+-u -a 10 -g dtw
+-u -a 30 -g dtw
+-u -a 50 -g dtw
+!R
+-u -a 5 -g euclidean
+-u -a 10 -g euclidean
+-u -a 30 -g euclidean
+-u -a 50 -g euclidean
+#Adding Noise
+!L
+-u -n 3 -g dtw
+-u -n 6 -g dtw
+!R
+-u -n 3 -g euclidean
+-u -n 6 -g euclidean
+#Missing data
+!L
+-u -m 10 -g dtw
+-u -m 50 -g dtw
+-u -m 90 -g dtw
+!R
+-u -m 10 -g euclidean
+-u -m 50 -g euclidean
+-u -m 90 -g euclidean
+#All distortions for DTW
+!L
+-p -n 6 -a 10 -m 10 -g dtw
+-p -n 6 -a 30 -m 10 -g dtw
+-p -n 6 -a 50 -m 10 -g dtw
+!R
+#All distortions for Euclidean
+!L
+!R
+-p -n 6 -a 10 -m 0 -g euclidean
+-p -n 6 -a 10 -m 0 -g euclidean
+-p -n 6 -a 10 -m 0 -g euclidean
