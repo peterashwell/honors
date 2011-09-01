@@ -95,31 +95,55 @@
 		
 		\begin{table}[ht!]
 		\centering
-		\begin{tabular}{|c|l|l|} \hline
+		\begin{tabular}{|c|l|p{0.6\textwidth}|} \hline
 			\textbf{Step} &\textbf{Distortion type} & \textbf{Amounts used} \\ \hline
 			0 & Raw signal from model & \emph{none} \\
 			1 & Distribution type & Either \emph{centered} or \emph{-2.3 power law} \\
-			2 & Noise & \emph{0}, \emph{0.5 times}, \emph{1 times}, \emph{1.5 times} or \emph{3 times} signal variance as noise\\
-			3 & Signal available & \emph{10\%}, \emph{20\%}, \emph{30\%}, \emph{50\%},\emph{70\%}, \emph{90\%} of light curve data \\
-			4 & Gapify signal & \emph{10\%}, \emph{20\%}, \emph{30\%}, \emph{50\%}, \emph{70\%}, \emph{90\%} of signal randomly as 1\%, 2\%, 5\% chunks \\
+			2 & Noise & 0, 0.5, 1, 1.5 or 3 times the signal standard deviation as gaussian distributed noise\\
+			3 & Signal available & 10, 20, 30, 50, 70, 90\% of light curve data \\
+			4 & Gapify signal & 10, 20, 30, 50, 70, 90\% of signal randomly as 1, 2, 5\% chunks \\
 			5 & Stratification and classification & \emph{none} \\ \hline
 		\end{tabular}
 		\caption{Details of data distortion introduction}
 		\end{table}
 		
 		\subsection{Simulating a power law distribution}
-		Centered is performed by subtracting the mean from the light curve and dividing by its standard deviation. The original signal should have no outlier points or noise so this should remove amplitude scaling as a factor in classification. \\ \\
+		Centered is performed by subtracting the mean from the light curve and dividing by its standard deviation. The original signal should have no outlier points or noise so this should remove amplitude scaling as a factor in classification. \\
 		The power law is implemented by drawing random numbers uniformly between $a_{l}^{-2.3}$ and $a_{h}^{-2.3}$, where these values indicate the lower and upper bounds of the amplitudes desired in the power law distribution. The random value so drawn taken to the power -2.3 giving an amplitude in the desired range with values probability distribution corresponding to the power law. %  TODO tidy this up and write discussion section \\
+		
+		\begin{figure}
+			\label{fig:powlaw_sample.eps}
+			Placeholder for figure of power law distribution application
+			\caption{Effect of applying the power law distribution to a light curve}
+		\end{figure}
 		
 		\subsection{Add noise to signal ratio}
 		Noise will be introduced into the signal by computing the signal variance and adding gaussian noise to 0.5, 1, 1.5 or 3 times that amount on top of the signal. \\ \\
 %		TODO move this discussion to sec 2 Astronomers regard signals with intensity at 5 times the expected noise to be significant. Introducing in accordance to variance seems to be a good way to replicate this condition of a 'meaningful' signal in an experimental context. A more natural way in terms of survey data to introduce noise would be to add a constant noise amount such that in a power law distribution bright signals appear clearly, and softer signals blend into the background noise and are indistinguishable. For the purposes of this experiment we wish to examine the effects of noise on classification in general and on each class, and this is difficult when the random distribution of signal amplitudes will interfere with their ability to be classified.
 		
+		\begin{figure}
+			\label{fig:noise_sample.eps}
+			Placeholder for figure of noise addition
+			\caption{Effect of applying the noise distortion to a light curve}
+		\end{figure}
+		
 		\subsection{Removing part of the signal}
 		This step is very straightforward. The latter $k\%$ of the signal is discarded and only the first part kept.
 		
+		\begin{figure}
+			\label{fig:observe_sample.eps}
+			Placeholder for figure of removing part of the signal
+			\caption{Effect of applying the on-line distortion to the signal}
+		\end{figure}
+		
 		\subsection{Introducing gaps into the signal}
-		This part must be done after a contiguous chunk of the signal is removed as in the previous step. This involves discarding randomly sized chunks at 1\%, 2\%, 5\% of total signal length (before step 3) at random locations, until the desired amount of data has been taken out. The procedure does not guarantee that the chunks so removed will not overlap (so larger contiguous sections may be removed than the individual chunks.  % TODO sampling approaches
+		This part must be done after a contiguous chunk of the signal is removed as in the previous step. This involves discarding randomly sized chunks at 1, 2, or 5\% of total signal length (before step 3) at random locations, until the desired amount of data has been taken out. The procedure does not guarantee that the chunks so removed will not overlap (so larger contiguous sections may be removed than the individual chunks.  % TODO sampling approaches
+		
+		\begin{figure}
+			\label{fig:missing_sample.eps}
+			Placeholder for introducing gaps into the signal
+			\caption{Effect of applying the missing data distortion to the signal}
+		\end{figure}
 		
 		% TODO add methodology
 		% RANDOM FOREST

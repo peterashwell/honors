@@ -1,8 +1,8 @@
 \chapter{Introduction}
 
-\subsection{Problem Context}
+\section{Problem Context}
 	Astronomy is by nature an observational, data-driven science. During the last few decades the field was transformed by technology with software and databases becoming an integral part of data gathering and analysis. As the sophistication of observational equipment has improved the volume of observational data available to researchers has increased. The ASKAP\footnote{\url{http://www.atnf.csiro.au/SKA/}} telescope array under construction in Western Australia will produce a gigabyte of processed data per second . A topic of growing interest has been to automate the analysis of these large data volumes. The subject of this research is to develop algorithms for use in an automatic data analysis pipeline for detecting astronomical transient events as part of the VAST\footnote{\url{http://www.physics.usyd.edu.au/sifa/vast/index.php}} project.
-	\subsection{Transients and Time Series}
+\section{Transients and Time Series}
 	An astronomical transient event is a structural change in the observation of a stellar object such as a star or galaxy, referred to as \emph{sources} by astronomers. These observations take the form of \emph{time series}, or to astronomers, \emph{light curves}. Time series represent the intensity of an observed source in potentially multiple frequencies over some time indices. An explicit definition for time series is:
 	\begin{center}
 	\begin{math}
@@ -16,7 +16,7 @@
 	\caption{Supernova light curve. The height of the observations on the y-axis indicates the observed intensity at the given time position}
 	\end{figure}
 	Variability in astronomical time series is not always intrinsic to the source, that is, the result of some change in the source itself such as in a supernova event. Some scintillation will result from the light interacting with the interstellar medium on its journey to earth. This is called extrinsic variation and will complicate the process of analysing the time series.
-	\subsection{The Problem}
+\section{The Problem}
 	The precise problem to be explored in this research is the development of an algorithm for the classification of streaming time series data. The algorithm will receive data every 5 seconds. At each time step any new transients will be reported and along with what class they belong to with a measure of confidence.
 		\begin{itemize}
 		\item Extreme scattering events (ESEs) \footnote{\url{http://ese.nrl.navy.mil/}}
@@ -27,7 +27,7 @@
 	\end{itemize}
 	It is possible that a transient may belong to an undetermined class and this also needs to be taken into account. The detection of transients should be done as early as possible but should not have too many false positives.
 	
-	\subsection{Time Series Analysis}
+\section{Time Series Analysis}
 	This problem is primarily one of \emph{time series analysis}. Fortunately, in recent years this field has received a lot of attention in various domains: speech recognition \citep{sakoe1978dynamic}, handwriting analysis \citep{bahlmann2002online}, even image outlines can be represented as time series and classified \citep{ye2009time}. However, the well-developed techniques from these other areas do not extend immediately to our astronomical data. The table below outlines the most serious difficulties inherent to this task.
 	\vspace{10pt}
 	\begin{table*}[h!]
@@ -41,6 +41,7 @@
 		\textbf{redundant} & Most data is not relevant to event detection. The start and end of interesting structures must also be determined by the program. \vspace{10pt} \\
 		\textbf{periodic} & Some data will come from periodic sources and this will confuse algorithms searching for `one-off' events. Periodic time series may need to be identified and handled separately.
 	\end{array}$
+	\caption{}
 	\end{table*}
 	
 	This set of problems is not trivial, and no individual piece of research at present addresses them all. Literature from several domains: machine learning, time series analysis (in astronomy and other fields) and statistics is reviewed and discussed in the following sections with the aim of addressing these issues.
@@ -53,7 +54,7 @@
 %		\item Most of the received data is not relevant to event detection - the start and end of interesting structures must also be determined by the program
 %	\end{enumerate}
 
-\subsection{Coping with Distortions in Astronomical Time Series}
+\section{Coping with Distortions in Astronomical Time Series}
 	Below is a list of subproblems associated with the issue of \textbf{distortions} in our astronomical time series.
 	\begin{itemize}
 		\item \textbf{noisy observations}. It can be assumed that every point in a light curve has added noise. For simplicity this noise is assumed to be gaussian distributed which is a reasonable approximation of real conditions in astronomical data.

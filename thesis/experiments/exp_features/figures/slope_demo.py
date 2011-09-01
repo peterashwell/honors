@@ -101,6 +101,6 @@ for pltnum, fname in enumerate(files):
 out_fname = 'slope_demo.eps'.format(c)
 fig = plt.gcf()
 #fig.set_figheight(fig.get_figwidth())
-fig.set_figheight(fig.get_figheight() * 0.6)
+fig.set_figheight(fig.get_figheight() * 0.55)
 plt.savefig(out_fname, format='eps')
 plt.close()
