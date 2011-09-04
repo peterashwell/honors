@@ -12,17 +12,21 @@ from lightcurve import LightCurve
 def distribute(lc):
 	lc = normalise(lc) # normalise first
 	flux = lc.flux[:]
+	testval = flux[100]
 	min = 1
-	max = 10
+	max = 1000
 	base_brightness = random.uniform(max ** -2.3, min) ** (1 / -2.3)
+	print "base brightness:", base_brightness
 	new_mean = random.uniform(max ** -2.3, min) ** (1 / -2.3)
+	print "new mean:", new_mean
 	for obs_num in xrange(len(flux)):
 		flux[obs_num] = flux[obs_num] * new_mean + base_brightness
-	return LightCurve(lc.time[:], flux)
+	print "old:", testval, "new:", flux[100]
+	return LightCurve(lc.time[:], flux[:])
 
 # Make percent of the signal available
 def available(lc, percent):
-	assert percent > 0 and percent < 100
+	assert percent > 0 and percent <= 100
 	#print percent
 	#print len(lc.time)
 	#print percent / 100.0
@@ -50,7 +54,6 @@ def gapify(lc, gap_amt):
 	if len(time) - remove_amt < MINIMUM_POINTS:
 		remove_amt = len(time) - MINIMUM_POINTS
 	removed = 0
-	print "finding gaps"
 	while removed < remove_amt:
 		gap_size = random.choice([1, 2, 5])
 		if gap_size > remove_amt - removed:
