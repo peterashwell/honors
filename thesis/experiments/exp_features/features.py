@@ -178,3 +178,13 @@ def haar_transform(lc):
 		norm_transform += [0] * (TOP_COEFFS - len(norm_transform))
 	return norm_transform[:TOP_COEFFS] # return top 8 wavelet coefficients
 
+def complexity_distance(lc):
+	# compute the length of the curve and factor out length
+	sum = 0
+	last_flux = lc.flux[0]
+	last_time = lc.time[0]
+	for t, f in enumerate(lc.time[1:], lc.flux[1:]):
+		sum += math.sqrt((f - last_flux) ** 2 + (t - last_time) ** 2)
+	return sum / (1.0 * len(lc.time))
+
+

@@ -24,7 +24,7 @@
 %\begin{document}
 	%\maketitle
 	
-	\chapter{Baseline Features}
+	\chapter{Baseline Features} % TODO new title
 	\section{Aim}
 		Supervised classifiers are a flexible way to incorporate many features of a data object into a classification scheme. In the context of light curve classification a variety of numerical features may be useful for discriminating between classes, from statistical properties of the flux values observed to coefficients of wavelet transforms. The aim of these experiments is to assess the transient classification performance of numerical features under a variety of single and combined distortions. The Random Forest was chosen as a classification method because of its robustness to contradictory features and overall performance. Each experiment will involve 10-fold cross validation with training features extracted from standardised light curves and tested on the remaining light curves with the distortions applied. Performance will be evaluated in terms of F-Score, Precision and Recall microaveraged across each class. The results will form a baseline of classification to which more sophisticated features and techniques will be compared.
 
@@ -71,6 +71,7 @@
 	
 	% TODO justify the Random Forest
 	% TODO astronomically motivated features vs. basic statistical features, time series analysis techniques
+	% TODO features from "qualitative space fragmentation"
 	
 	\section{Features}
 	\label{sec:features}
@@ -225,7 +226,7 @@
 	%	\item Shapelet profile distance
 	%\end{itemize}
 		
-	%\section{Results}
+	%\section{Results} % TODO subtractive analysis 
 	%\input{results}
 %	\section{Discussion}
 %	\subsection{Baseline results}

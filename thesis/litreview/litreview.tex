@@ -30,6 +30,12 @@
 	\\
 	Overcoming this distance measure issue may yield in itself a solution to our problem. Additionally, distance measures are likely to be integral to data preprocessing or to the application of other approaches such as temporal grammars, support vector machines and shapelets discussed later. The following section is devoted to an exploration of more flexible distance measures than the Euclidean distance.
 	
+	TODO finding outlier light curves in catalogues of periodic variable stars
+	
+	TODO supporting exact indexing of arbitarily rotated shapes and periodic time series under euclidean and warping distance measures 2009
+	\subsection{Landmarks}
+	TODO add description of paper Landmarks: A New Model for Time Series similarity measures
+	
 	\subsection{Dynamic Time Warping}
 	Dynamic Time Warping (DTW) is a technique first introduced in \citep{sakoe1978dynamic} and was popularised in \citep{berndt1994using} with successful application to speech signal classification. The algorithm is a dynamic programming approach to that allows the matching to `skip' parts of either time series in order to align them better. The distance of two time series under DTW is then the minimum across all possible matchings. Figure ~\ref{fig:dtwinaction} shows dynamic time warping finding a better alignment for two sequences than Euclidean distance. Dynamic time warping deals very well with changes in the way transients unfold but is not guaranteed to find a good match in the presence of amplitude scaling. It also seems hard to extend this algorithm to matching subsequences as required by our problem.
 	\\
@@ -285,5 +291,6 @@
 	\section{Summary and Possible Research Approaches}
 	Literature from many domains involving time series analysis was reviewed, all giving partial solutions to the astronomical time series classification problem. There are two promising approaches that emerge from this review. The first is to develop an effective distance measure or a Kernel that copes with distortions effectively, and then to apply the Nearest Neighbour algorithm or a feature based classifier such as a Support Vector Machine. No perfect distance measure exists in literature surveyed so far, but several come close, such as Longest Common Subsequence. A simple modification may sufficient to get a practical solution to the problem. The second possible approach to look at local pattern extraction or temporal grammars. The SpaDe paper reviewed in section~\ref{sec:timeseriesstreams} seems to be the closest solution found in literature to all of our problems. It may not be time or space efficient enough to work in practice, and it is more complicated to implement that the distance measure procedure. Spectral domain methods might be leveraged in either approach to boost classification accuracy since they are invariant to amplitude scaling, a serious complication in time domain approaches. Finally, on-line regression will be an essential component of any approach. Gaussian Processes are a promising tool for coping with this issue.
 	
+% TODO add motivation for random forests and the statistical classifier. 
 %	\bibliography{refs}
 %\end{document}
