@@ -1,7 +1,6 @@
-deviation
-flux_percentiles
-median_spread
-slope_info
-haar_coeffs
+flux_only
+flux_time
+haar_transform
 spectral_features
+motif_features
 all

@@ -1,19 +1,29 @@
-#deviation	Standard deviation, Skew, Kurtosis
-stddev	1
-beyond1std	1
-skew	1
-kurtosis	1
-#flux_percentiles	Flux percentiles and histograms 
-flux_percentiles	5
-#median_spread	Ampliutde spread, median distribution
-amplitude_spread	1
-median_deviation	1
-median_buffer	1
-#slope_info	Maximum slope and slope ratio
-max_slope	2
-slope_pair_ratio	1
-#haar_coeffs	Haar coefficients
-haar_transform	15
+#flux_only	Flux only statistical features
+flux_median
+flux_median_deviation	1
+flux_skew	1
+flux_kurtosis	1
+flux_mean_percentiles	5
+flux_med_percentiles	5
+flux_max
+flux_min
+#flux_time	Time-flux features
+grad_mean 1
+grad_stddev 1
+grad_median 1
+grad_kurtosis 1
+grad_skew 1
+grad_max 1
+grad_min 1
+grad_spread 1
+grad_percentiles 5
+grad_median_deviation 1
+grad_median_percentiles 5
+complexity_distance 1
+#haar_transform	Haar wavelet transform coefficients
+haar_coeffs	15
 #spectral_features	LS periodogram peaks
 spectral_transform	4
+#motif_features	Motif distance features
+motif_distance ?
 #all	All features

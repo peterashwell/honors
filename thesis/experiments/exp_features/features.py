@@ -6,99 +6,66 @@ import math
 from lightcurve import LightCurve
 import lomb
 from operator import itemgetter
-# The standard deviation
-def stddev(lc):
-	return [numpy.std(lc.flux)]
+from itertools import izip
+import matplotlib.pyplot as plt
 
-# The precentage of flux values lying 1 standard deviation beyond the mean
-def beyond1std(lc):
-	stddev = numpy.std(lc.flux)
+def flux_only(lc):
+	# Centered and sorted flux to work with
 	mean = numpy.mean(lc.flux)
-	return [len(filter(lambda elem: math.fabs(elem - mean)\
-		 > stddev, lc.flux)) / (len(lc.flux) * 1.0)]
+	stddev = numpy.stddev(lc.flux)
+	centered_flux = [(f - mean) / (1.0 * stddev) for f in lc.flux]
+	sorted_flux = sorted(centered_flux)
 
-# Compute the skewness of the magnitude distribution
-def skew(lc):
-	return [scipy.stats.skew(lc.flux)]
-
-# Kurtosis is a measure of spikiness in gaussian fit 
-def kurtosis(lc):
-	return [scipy.stats.kurtosis(lc.flux)]
-
-# Compute the spreads across flux percentile ranges
-def flux_percentiles(lc):
-	features = []
+	# Median
+	median_pos = len(sorted_flux) / 2
+	flux_median = sorted_flux[median_pos]
 	
-	stddev = numpy.std(lc.flux)
-	mean = numpy.mean(lc.flux)
+	# Median deviation
+	median_deviations = [elem - flux_median for elem in lc.flux]
+	flux_median_deviation = median_deviations[median_pos]
+
+	# Skew
+	flux_skew = scipy.skew(centered_flux)
+
+	# Kurtosis
+	flux_kurtosis = scipy.kurtosis(centered_flux)
+
+	# Stuff for percentiles
+	stddev = scipy.std(centered_flux) # is 1 but let's just do it again anyway
+	mean = numpy.mean(centered_flux) # is 0 but we'll be explicit
 	
-	# center the flux
-	for index in range(len(lc.flux)):
-		lc.flux[index] = (lc.flux[index] - mean) / stddev
+	# Percentiles - one, fraction of data within regular inc * stddev from MEAN
+	stddev_increments = [0.25, 0.5, 1, 1.5, 2, 3] # fractions of data lying within stddev * this
+	median_percentiles = []
+	for inc in stddev_increments:
+		in_range = 0
+		bound = sttdev * inc
+		for f in centered_flux:
+			if (math.fabs(f) - mean) < bound:
+				in_range += 1
+		median_percentiles.append((in_range * 1.0) / len(centered_flux))
 	
-	flux_sorted = sorted(lc.flux)
+	# Percentiles - two, spread of data within regular inc * stddev from MEDIAN
+	stddev_increments = [0.25, 0.5, 1, 1.5, 2, 3] # fractions of data lying within stddev * this
+	median_percentiles = []
+	for inc in stddev_increments:
+		in_range = 0
+		bound = sttdev * inc
+		for f in centered_flux:
+			if (math.fabs(f) - flux_median) < bound:
+				in_range += 1
+		median_percentiles.append((in_range * 1.0) / len(centered_flux))
+
+	# Maximum and minimum
+	flux_max = max(centered_flux)
+	flux_min = min(centered_flux) 
 	
-	# keep only 5-95% range
-	flux_5_95_pos = int(round(len(flux_sorted) * 0.05))
-	flux_5_95 = (flux_sorted[-flux_5_95_pos] - flux_sorted[flux_5_95_pos]) * 1.0
+	return [flux_median, flux_median_devation, flux_skew, flux_kurtosis] + flux_mean_percentiles + \
+	       flux_med_percentiles + [flux_max, flux_min]	
 
-	# For each flux percentile in range 20 ... 80
-	for flux_range in [10, 17.5, 25, 32.5, 40]:
-		flux_range_pos = int(round((flux_range / 100.0) * len(flux_sorted))) 
-		features.append((flux_sorted[-flux_range_pos] - flux_sorted[flux_range_pos]) * 1.0)
+
+def flux_time(lc):
 	
-	return features
-
-# Amplitude spread, normalised
-def amplitude_spread(lc):
-	return [max(lc.flux) - min(lc.flux)]
-
-# Return the median of the absolute deviations from the median
-def median_deviation(lc):
-	median_pos = int(round(len(lc.flux) / 2.0))
-	median = lc.flux[median_pos]
-	median_deviations = [elem - median for elem in lc.flux]
-	return [sorted(median_deviations)[median_pos]]
-
-# Return the percentage of data points within 10% of the median
-def median_buffer(lc):
-	buf_pct = 10.0
-	median_pos = int(round(len(lc.flux) / 2.0))
-	median = lc.flux[median_pos]
-	return [len(filter(lambda elem: math.fabs(elem - median) \
-		< (elem * (buf_pct / 100.0)), lc.flux)) / (len(lc.flux) * 1.0)]
-
-# Returns the fraction of increasing pairs of slope data points
-def slope_pair_trends(lc):
-	increasing_num = 0
-	if len(lc.flux) < 2:
-		return [increasing_num]
-	last = None
-	for elem in lc.flux:
-		if last is None:
-			pass
-		else:
-			if elem > last:
-				increasing_num += 1
-		last = elem
-	return [increasing_num]
-
-# Largest and smallest point to point gradient (centered)
-def max_slope(lc):
-	best_increase = 0
-	best_decrease = 0
-	if len(lc.flux) < 2:
-		return [0]
-	
-	for fp in xrange(len(lc.flux) - 1):
-		for sp in xrange(fp + 1, len(lc.flux)):
-			slope = (lc.flux[sp] - lc.flux[fp]) / (lc.time[sp] - lc.time[fp])
-			if slope < best_decrease:
-				best_decrease = slope
-			if slope > best_increase:
-				best_increase = slope
-	return [best_increase, best_decrease]
-
 def spectral_features(lc):
 	FIND_FREQUENCIES = 4
 	time = numpy.array(lc.time)
@@ -150,7 +117,7 @@ def haar_recursive(flux):
 	else:
 		return averages + differences
 
-def haar_transform(lc):
+def haar_coeffs(lc):
 	TOP_COEFFS = 15
 	next_pow_2 = int(math.ceil(math.log(len(lc.time), 2)))
 	# arithmetical error...
@@ -178,13 +145,118 @@ def haar_transform(lc):
 		norm_transform += [0] * (TOP_COEFFS - len(norm_transform))
 	return norm_transform[:TOP_COEFFS] # return top 8 wavelet coefficients
 
-def complexity_distance(lc):
-	# compute the length of the curve and factor out length
-	sum = 0
-	last_flux = lc.flux[0]
-	last_time = lc.time[0]
-	for t, f in enumerate(lc.time[1:], lc.flux[1:]):
-		sum += math.sqrt((f - last_flux) ** 2 + (t - last_time) ** 2)
-	return sum / (1.0 * len(lc.time))
+# return a list of linear segments of lc as (time, flux, time, flux) pairs
+NUM_SEGS = 10
+def linear_segmentation(lc):
+	# Start with segments all adjoined
+	segments = [[i, i+1] for i in xrange(len(lc.time) - 1)]
+	# Compute cost in terms of least-squared
+	costs = []
+	current = segments[0]
+	for next in segments[1:]:
+		# Compute the cost of the merged segment and store in "costs"
+		seg_indices = range(current[1], next[-1] + 1)
+		seg_times = [lc.time[i] for i in seg_indices]
+		seg_flux = [lc.flux[i] for i in seg_indices]
+		coeffs = numpy.polyfit(seg_times, seg_flux, 1)
+		costs.append(sum([(coeffs[0] * t  + coeffs[1] - v) ** 2 for t, v in izip(seg_times, seg_flux)]))
+		current = next
+	while len(segments) > NUM_SEGS:
+		min_index = costs.index(min(costs))
+		
+		lmerge = None
+		rmerge = None
+		
+		# If we are not at leftmost point, recompute cost of merging with left index
+		if min_index != 0: # find lmerge
+			new_min = segments[min_index - 1][0]
+			new_max = segments[min_index][1]
+			seg_indices = range(new_min, new_max + 1) # Include the endpoint
+			seg_times = [lc.time[i] for i in seg_indices]
+			seg_flux = [lc.flux[i] for i in seg_indices]
+			coeffs = numpy.polyfit(seg_times, seg_flux, 1)
+			lmerge = sum([(coeffs[0] * t + coeffs[1] - v) ** 2 for t, v in izip(seg_times, seg_flux)])
+		
+		# If we are not at rightmost point, recompute cost of merging with right index
+		if min_index != len(costs) - 1:
+			# Remove first two cost values and replace with one
+			new_min = segments[min_index][0]
+			new_max = segments[min_index + 2][1] # The index beyond the one with which we merged
+			seg_indices = range(new_min, new_max + 1) # Include the endpoint
+			seg_times = [lc.time[i] for i in seg_indices]
+			seg_flux = [lc.flux[i] for i in seg_indices]
+			coeffs = numpy.polyfit(seg_times, seg_flux, 1)
+			rmerge = sum([(coeffs[0] * t + coeffs[1] - v) ** 2 for t, v in izip(seg_times, seg_flux)])
+		
+		# Now remove the old segments, replacing with one new, longer segment
+		new_min = segments[min_index][0]
+		new_max = segments[min_index + 1][1]
+		segments = segments[:min_index] + [[new_min, new_max]] + segments[min_index + 2:] # One beyond the merge point
 
+		# Handle the cost update cases
+		if lmerge is None:
+			costs = [rmerge] + costs[2:]
+		elif rmerge is None:
+			costs = costs[:-2] + [lmerge]
+		else:
+			costs = costs[:min_index - 1] + [lmerge, rmerge] + costs[min_index + 2:]
+	for seg in segments:
+		min_index = min(seg)
+		max_index = max(seg)
+		times = []
+		flux = []
+		for i in xrange(min_index, max_index + 1):
+			times.append(lc.time[i])
+			flux.append(lc.flux[i])
+		plt.plot(times, flux)
+	plt.show()
+	return segments
 
+def linsegfeatures(lc):
+	stddev = numpy.std(lc.flux)
+	mean = numpy.mean(lc.flux)
+	
+	# center the flux
+	for index in range(len(lc.flux)):
+		lc.flux[index] = (lc.flux[index] - mean) / stddev
+	
+	segments = linear_segmentation(lc)
+	segment_indices = [range(seg[0], seg[1] + 1) for seg in segments]
+	segment_times = [[lc.time[i] for i in indices] for indices in segment_indices]
+	segment_flux = [[lc.flux[i] for i in indices] for indices in segment_indices]
+	coeffs = [numpy.polyfit(ts, fs, 1) for ts, fs in izip(segment_times, segment_flux)]
+	line_values = [[coeff[0] * t + coeff[1] for t in s_t] for s_t, coeff in izip(segment_times, coeffs)]
+	
+	for t, v in izip(segment_times, line_values):
+		plt.plot(t, v)
+	plt.plot(lc.time, lc.flux)
+	plt.show()
+	# Complexity distance of the segmentation
+	length = 0
+	last = None
+	for times, vals in izip(segment_times, line_values):
+		#print "seg indices:", vals[-1], vals[0], times[-1], times[0]
+		#print "seg length:", math.sqrt((vals[-1] - vals[0]) ** 2 + (times[-1] - times[0]) ** 2)
+		length += math.sqrt((vals[-1] - vals[0]) ** 2 + (times[-1] - times[0]) ** 2)
+		if last is not None:
+			#print "jump indices:", last[0], times[0], last[1], vals[1]
+			#print "jump length:", math.sqrt((last[0] - times[0]) ** 2 + (last[1] - vals[0]) ** 2)
+			length += math.sqrt((last[0] - times[0]) ** 2 + (last[1] - vals[0]) ** 2)
+		last = [times[-1], vals[-1]]
+	length = length / (1.0 * (lc.time[-1] - lc.time[0]))
+	
+	# Gradient statistical metrics
+	gradient_hist = []
+	for seg, coeff in izip(segments, coeffs):
+		gradient_hist += [coeff[0] for t in xrange(seg[1] + 1)]
+	grad_mean = numpy.mean(gradient_hist)
+	grad_median = numpy.median(gradient_hist)
+	grad_deviation = numpy.std(gradient_hist)
+	grad_kurtosis = scipy.stats.kurtosis(gradient_hist)
+	grad_skew = scipy.stats.skew(gradient_hist)
+	grad_max = max(gradient_hist)
+	grad_min = min(gradient_hist)
+
+	features = [grad_mean, grad_median, grad_deviation, grad_kurtosis,\
+		grad_skew, grad_max, grad_min, length]
+	return features	
