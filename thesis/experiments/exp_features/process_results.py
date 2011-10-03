@@ -7,7 +7,7 @@ TEMPRES_DIR = 'raw_results'
 RES_DIR = 'results'
 # takes as argument the name of an experiment in temp_results
 # produces a confusion matrix, precision and recall
-
+classes = []
 cm = None
 experiment_name = sys.argv[1]
 feat_name = sys.argv[2]
@@ -36,6 +36,7 @@ for filename in os.listdir('{0}/{1}'.format(TEMPRES_DIR, feat_name)):
 			# add to ordered class cm position
 			cm[ord_map[unord_map[j]]][ord_map[unord_map[i]]] += int(elem)
 	cm_file.close()
+print classes
 if feat_name not in os.listdir(RES_DIR):
 	os.mkdir('{0}/{1}'.format(RES_DIR, feat_name))
 result_filename = '{0}/{1}/{2}'.format(RES_DIR, feat_name, experiment_name + '.result')

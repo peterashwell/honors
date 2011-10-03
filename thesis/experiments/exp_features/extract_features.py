@@ -2,6 +2,7 @@ import sys
 import os
 import string
 import traceback
+import sqlite3
 from lightcurve import LightCurve
 from lightcurve import file_to_lc
 from features import *
@@ -23,18 +24,7 @@ def lc_to_features(lc):
 	lc_centered = LightCurve(lc.time[:], centered_flux)
 
 	return \
-		stddev(lc) + \
-		beyond1std(lc) + \
-		skew(lc) + \
-		kurtosis(lc) + \
-		flux_percentiles(lc_centered) + \
-		amplitude_spread(lc_centered) + \
-		median_deviation(lc_centered) + \
-		median_buffer(lc_centered) + \
-		max_slope(lc) + \
-		slope_pair_trends(lc) + \
-		haar_transform(lc_with_gaps) + \
-		spectral_features(lc)
+		flux_only(lc_centered) + time_flux(lc_centered) + haar_coeffs(lc_with_gaps) + spectral_features(lc_centered)
 
 # takes as input
 #		lc_files - light curve filenames to produce an arff from (relative address)
@@ -42,16 +32,17 @@ def lc_to_features(lc):
 #		cache_keyset - the corresponding keyset
 #	produces as output
 #		arff_filename - filename for output file
-def expdir_to_arff(lc_files, exp_dir, arff_fname, cache, cache_keyset):
+def expdir_to_arff(lc_files, dyncache, dyncache_keyset, exp_dir, arff_fname):
 	# Load up the description of each feature (name and #) to use to write the arff
 	featdesc_file = open(FEATDESC_FNAME)
-	feat_struct = {}
+	feat_names = []
+	feat_counts = {}
 	for line in featdesc_file:
 		if line[0] == '#':
 			continue
 		line = line.strip().split('\t')
-		feat_struct[line[0]] = int(line[1])
-	
+		feat_names.append(line[0])
+		feat_counts[line[0]] = int(line[1])
 	# and the classes
 	class_file = open(CLASS_FNAME)
 	classes = []
@@ -63,22 +54,26 @@ def expdir_to_arff(lc_files, exp_dir, arff_fname, cache, cache_keyset):
 	arff_file = open(arff_fname, 'w')
 	arff_file.write("% Light curve classification features\n\n")
 	arff_file.write("@RELATION {0}\n\n".format(exp_dir))
-	for feat_name in feat_struct.keys():
-		if feat_struct[feat_name] == 1: # only 1 feature
+	for feat_name in feat_names:
+		if feat_counts[feat_name] == 1: # only 1 feature
 			arff_file.write('@ATTRIBUTE {0} NUMERIC\n'.format(feat_name))
 		else:
-			for i in xrange(feat_struct[feat_name]):
+			for i in xrange(feat_counts[feat_name]):
 				arff_file.write('@ATTRIBUTE {0}{1} NUMERIC\n'.format(feat_name, str(i)))
 	arff_file.write('@ATTRIBUTE class {' + ', '.join(classes) + '}\n\n')
 	arff_file.write('@DATA\n')
 	
 	# extract features if not in cache and append
-	cache_file = open(CACHE_FNAME, 'a')
+	# TODO replace cache_file = open(CACHE_FNAME, 'a')
 	to_process = len(lc_files)
 	lc_file = None
 #	try: # to stop corruption of the cache
 	increment = int(round((to_process / 5)))
 	done = 0
+	
+	conn = sqlite3.connect('feat_cache.db')
+	c = conn.cursor()
+
 	for lc_file in lc_files:
 		#print lc_file
 		#if done % increment == 0 and done != 0:
@@ -86,28 +81,35 @@ def expdir_to_arff(lc_files, exp_dir, arff_fname, cache, cache_keyset):
 		done += 1
 
 		# look for cache hit
+		
 		lc_class = lc_file.split('_')[0]
 		features = None
 		lc_path = '{0}/{1}/{2}'.format(LC_DIR, exp_dir, lc_file)
-		if lc_path in cache_keyset: #cache hit
-			features = cache[lc_path]
-		else: # update the cache
-			lc = file_to_lc(lc_path)
-			features = lc_to_features(lc)
-			cache[lc_path] = features
-			cache_file.write('{0},{1}\n'.format(lc_path, ','.join([str(obj) for obj in features])))
-			cache_keyset.add(lc_path)
-		# write the features to the arff
+		#print "extracting features from:", lc_path
+		
+		# check to see if features are in dynamic cache first
+		if lc_path in dyncache_keyset:
+			features = dyncache[lc_path]
+		else: # do db lookup
+			search_cursor = c.execute('''select * from featcache where key=?''', [lc_path])
+			search_result = search_cursor.fetchall()
+			if len(search_result) == 0: # cache miss, extract features
+				print "db miss"
+				lc = file_to_lc(lc_path)
+				features = lc_to_features(lc)
+				c.execute('''insert into featcache values {0}'''.format(tuple([lc_path] + features)))
+			else:
+				print "found in db"
+				features = search_result[0][1:] # fetch features and remove key
+			# either if extracted or fetched from db, add to dynamic cache
+			dyncache[lc_path] = features
+			dyncache_keyset.add(lc_path)
+		# finally, write in the features
 		arff_file.write(','.join([str(obj) for obj in features]) + ',' + lc_class + '\n')
-#	except Exception, e:
-#		print 'error occurred while processing', lc_file, e
-#		traceback.print_stack()
-#		cache_file.close() # prevent corruption to cache
-	# done	
-	cache_file.close()
+	conn.commit()
+	conn.close()
 	arff_file.close()
-	return (cache, cache_keyset)
-
+	return (dyncache, dyncache_keyset)
 #if __name__ == '__main__':
 #	if len(sys.argv) <= 1 or len(sys.argv) > 2:
 #		print '{0} <dir> produce arff file representing files from <dir> to <dir>.arff'.format(sys.argv[0])

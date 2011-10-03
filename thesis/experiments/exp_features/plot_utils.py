@@ -6,11 +6,12 @@ from lightcurve import *
 LC_TYPES = []
 classes_desc_file = open('classes.desc')
 for line in classes_desc_file:
+	print line
 	line = line.strip()
 	LC_TYPES.append(line)
+print 'lct:', LC_TYPES
 LC_DIR = 'lightcurves'
 FIG_DIR = '/users/peter/honors/thesis/experiments/exp_features/temp_figures'
-
 
 def systematic_name(options, param):
 	param_val = None
@@ -66,7 +67,7 @@ param_vals, fscores, exp_desc):
 	classes = fscores[featname.strip()].keys() # TODO fix this hard coding
 	file_handle.write('\t\\begin{tabular}{|c|c|%s} \\hline' % ('l|' * len(param_vals)))
 	file_handle.write('\t \\multirow{2}{*}{\\textbf{Feature}} & \\multirow{2}{*}{\\textbf{Class}} \
-	& \\multicolumn{%d}{c|}{\\textbf{%s}} \\\\ \\cline{%s} \n' % (len(param_vals), param_name.title(), '{0}-{1}'.format(3, len(param_vals) + 1))) 
+	& \\multicolumn{%d}{c|}{\\textbf{%s}} \\\\ \\cline{%s} \n' % (len(param_vals), param_name.title(), '{0}-{1}'.format(3, len(param_vals) + 2))) 
 	file_handle.write('\t  & & {0} \\\\ \\hline'.format(' & '.join(param_vals)))
 	for featname in featnames:
 		file_handle.write('\t\t\\multirow{%d}{*}{%s}\n' %(len(classes), featname.replace('_', '-')))
@@ -151,7 +152,7 @@ def write_cm(file_handle, param_name, cms, param_vals, cm_orders, exp_desc):
 	file_handle.write('\\end{figure}\n')
 
 MAX_SUBFIG_COLS = 5
-def exp_subfigs(file_handle, LC_TYPES, exp_fname, param_val):
+def exp_subfigs(file_handle, exp_fname, param_val):
 	print 'exp_fname:', exp_fname
 	subfig_count = 0
 	width = round(100.0 / MAX_SUBFIG_COLS * 0.88 / 100.0, 3)
@@ -209,7 +210,7 @@ def produce_expsamp(file_handle, exp_fnames, params, param_name):
 		#file_handle.write('\\begin{figure}[ht!]\n')
 		#file_handle.write('\t\\centering\n')
 	
-		exp_subfigs(file_handle, LC_TYPES, exp_fname, params[exp_num])
+		exp_subfigs(file_handle, exp_fname, params[exp_num])
 			
 		#old stuff - writes out subfigs
 		#file_handle.write('\\caption{%s with %s at %s}\n' \

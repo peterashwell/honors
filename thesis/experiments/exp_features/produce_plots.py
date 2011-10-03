@@ -6,6 +6,7 @@ import re
 
 from plot_utils import *
 
+
 BASELINE_EXP='norm_n0_a100_m0_s400'
 RESULT_DIR = 'results'
 PARAM_NAMES = {'a':'Observed data', 'n':'Noise', 'm':'Missing data', 'p':'Power law distribution'}

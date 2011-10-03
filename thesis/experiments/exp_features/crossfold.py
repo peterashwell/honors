@@ -1,7 +1,6 @@
 import os
 import sys
 from extract_features import expdir_to_arff
-
 # crossfold producing code
 # takes as input
 #		train_dir - the directory of the training data
@@ -26,19 +25,22 @@ def dir_crossfold(train_dir, test_dir, out_dir):
 			lc_by_class[lc_class] = new_list
 	#print lc_by_class
 	
-	print "loading cache..."
+	# initialise cache
+	dyncache = {}
+	dyncache_keyset = set()
+	#print "loading cache..."
 	# load cache from CACHE_FNAME
-	cache = {}
-	cachefile = open(CACHE_FNAME)
-	for line in cachefile:
-		line = line.strip().split(',')
-		lc_filename = line[0] #'{0}/{1}/{2}'.format(LC_DIR, exp_dir, line[0])
-		if lc_filename not in cache.keys():
-			features = [float(obj) for obj in line[1:]]
-			cache[lc_filename] = features
-	cache_keyset = set(cache.keys())
-	cachefile.close()
-		
+	#cache = {}
+	#cachefile = open(CACHE_FNAME)
+	#for line in cachefile:
+	#	line = line.strip().split(',')
+	#	lc_filename = line[0] #'{0}/{1}/{2}'.format(LC_DIR, exp_dir, line[0])
+	#	if lc_filename not in cache.keys():
+	#		features = [float(obj) for obj in line[1:]]
+	#		cache[lc_filename] = features
+	#cache_keyset = set(cache.keys())
+	#cachefile.close()
+	
 	# get the number of residue light curves for each class
 	residues_by_class = {}
 	for c in lc_by_class.keys():
@@ -66,13 +68,14 @@ def dir_crossfold(train_dir, test_dir, out_dir):
 			fold_start = fold_end
 
 	crossfold_files = []
+	
 	# produce the arff files for the light curve files in the crossfolds
 	for fold_num in xrange(NUM_FOLDS):
 		print "file {0} of {1}".format(fold_num + 1, NUM_FOLDS)
 		train_filename = '{0}/{1}/train{2}.arff'.format(out_dir, test_dir, fold_num)
 		test_filename = '{0}/{1}/test{2}.arff'.format(out_dir, test_dir, fold_num)
-		cache, cacheset = expdir_to_arff(train_folds[fold_num], train_dir, train_filename, cache, cache_keyset)
-		cache, cacheset = expdir_to_arff(test_folds[fold_num], test_dir, test_filename, cache, cache_keyset)
+		dyncache, dyncache_keyset = expdir_to_arff(train_folds[fold_num], dyncache, dyncache_keyset, train_dir, train_filename)
+		dyncache, dyncache_keyset = expdir_to_arff(test_folds[fold_num], dyncache, dyncache_keyset, test_dir, test_filename)
 		crossfold_files.append((train_filename, test_filename))
 	return crossfold_files
 

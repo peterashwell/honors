@@ -4,7 +4,7 @@ EXPERIMENT_FILE='../experiment_names'
 ARFF_DIR='arff'
 RES_DIR='raw_results'
 SPLITFEAT_DIR='split_feats'
-NUM_CLASSES=7
+NUM_CLASSES=8
 section='#'
 CACHEFILE='features.cache'
 
@@ -50,7 +50,6 @@ do
 		# Produce the arff files for this experiment's lightcurves
 		python crossfold.py $normal_lc_dir $exp_name $ARFF_DIR
 		
-		#
 		if [[ -d ${SPLITFEAT_DIR}/${exp_name} ]]; then
 			rm -r ${SPLITFEAT_DIR}/${exp_name}
 			echo 'removing' ${SPLITFEAT_DIR}/${exp_name}
@@ -58,7 +57,7 @@ do
 		mkdir ${SPLITFEAT_DIR}/${exp_name}
 		
 		# Split up the arff files according to each feature
-		python split_features.py $exp_name 
+		python split_feats.py $exp_name 
 
 		# Classify the arff data based on the feature using RandomForest
 		while read feat_name
@@ -89,3 +88,8 @@ done < $EXPERIMENT_FILE
 # Produce the report
 python produce_plots.py
 pdflatex results.tex
+rm -f *.log
+rm -f *.dvi
+rm -f *.ps
+rm -f *.aux
+rm -f *.out

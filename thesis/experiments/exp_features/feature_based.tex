@@ -24,66 +24,61 @@
 %\begin{document}
 	%\maketitle
 	
-	\chapter{Baseline Features} % TODO new title
+	\chapter{Supervised classification with statistical features} % TODO new title
 	\section{Aim}
-		Supervised classifiers are a flexible way to incorporate many features of a data object into a classification scheme. In the context of light curve classification a variety of numerical features may be useful for discriminating between classes, from statistical properties of the flux values observed to coefficients of wavelet transforms. The aim of these experiments is to assess the transient classification performance of numerical features under a variety of single and combined distortions. The Random Forest was chosen as a classification method because of its robustness to contradictory features and overall performance. Each experiment will involve 10-fold cross validation with training features extracted from standardised light curves and tested on the remaining light curves with the distortions applied. Performance will be evaluated in terms of F-Score, Precision and Recall microaveraged across each class. The results will form a baseline of classification to which more sophisticated features and techniques will be compared.
+		Supervised classifiers are an powerful and easily extensible way to incorporate many features of a data object into a classification scheme. In the context of light curve classification a variety of numerical features may be useful for discriminating between classes, from statistical properties of the flux values observed to coefficients extracted from wavelet transforms. The aim of these experiments is to assess the transient classification performance of numerical features within the experimental framework outlined in chapter (TODO ref chapter). As outlined in the framework chapter, each experiment will involve 10-fold cross validation with training features extracted from standardised light curves and tested on the remaining light curves with the distortions applied. The Random Forest is used as a classifier because of its robustness to confused and even contradictory features (as will occur frequently when the data is distorted) and good performance relative to other options (TODO ref). Performance will be evaluated in terms of F-Score, Precision and Recall microaveraged across each class. Running times for the classification post feature extraction will also be included. The results will form a baseline of classification performance to which more sophisticated features and techniques will be compared.
 
-	\section{Procedure}
-	\subsection{Data}
-	Each fold of the 10-fold cross validation will produce a training set and a test set from the raw simulation light curves, with the proportion of classes being even in each. The training set will be left as is and provided to the Random Forest to produce a set of rules. The test set will have some distortions applied according to table ~\ref{tab:experiments}. Each row of the table forms an experiment with the goal of exploring transient classification under the designated parameter values. \\
+	\section{Method}
+	This experiment follows the experimental framework outlined in chapter (TODO ref chapter). 10-fold cross validation is used on the set of light curves, the training light curves being undistorted and complete, and the test light curves with distortions applied as per the framework. For the implementation details see the relevant chapter.
+	
+%
+% MOVE ALL THIS SHIT TO THE EXPERIMENTAL CONDITIONS SECTION
+%
+%	\subsection{Data}
+%	Each fold of the 10-fold cross validation will produce a training set and a test set from the raw simulation light curves, with the proportion of classes being even in each. The training set will be left as is and provided to the Random Forest to produce a set of rules. The test set will have some distortions applied according to table ~\ref{tab:experiments}. Each row of the table forms an experiment with the goal of exploring transient classification under the designated parameter values. \\
+%
+%	\begin{table}[ht!]
+%		\label{tab:experiments}
+%		\centering
+%		\begin{tabular}{|p{0.3\textwidth}|l|p{0.45\textwidth}|} \hline
+%			\textbf{Experiment name} & \textbf{Distortion} & \textbf{Amounts used} \\ \hline
+%			Baseline & \emph{none} & \emph{none} \\
+%			Varying distribution & \emph{amplitude scaling} & Either \emph{centered} or \emph{-2.3 power law} \\
+%			Varying noise & \emph{noise} & \emph{0}, \emph{0.5}, \emph{1}, \emph{1.5} or \emph{3} signal variance added as gaussian distributed noise onto signal\\
+%			Varying observed data & \emph{on-line} & first \emph{10\%}, \emph{20\%}, \emph{30\%}, \emph{50\%},\emph{70\%}, \emph{90\%} datapoints available to classifier \\
+%			Varying missing data & \emph{missing data} & \emph{10\%}, \emph{20\%}, \emph{30\%}, \emph{50\%}, \emph{70\%}, \emph{90\%} removed randomly as 1\%, 2\%, 5\% chunks \\ \hline
+%		\end{tabular}
+%		\caption{Details of data distortion introduction}
+%	\end{table}
+%	
+%		\begin{table}[ht!]
+%		\label{tab:experiments}
+%		\centering
+%		\begin{tabular}{|p{0.3\textwidth}|l|p{0.45\textwidth}|} \hline
+%			\textbf{Experiment name} & \textbf{Distortion} & \textbf{Amounts used} \\ \hline
+%			All distortions - no missing data & \emph{on-line}, \emph{all} & first \emph{10\%}, \emph{20\%}, \emph{30\%}, \emph{50\%},\emph{70\%}, \emph{90\%} datapoints available to classifier \\ \hline
+%			All distortions - 1 in 10 data points missing & \emph{on-line}, \emph{all} & first \emph{10\%}, \emph{20\%}, \emph{30\%}, \emph{50\%},\emph{70\%}, \emph{90\%} datapoints available with 1 in 10 datapoints removed \\ \hline
+%			All distortions - 5 in 10 data points missing & \emph{on-line}, \emph{all} & first \emph{10\%}, \emph{20\%}, \emph{30\%}, \emph{50\%},\emph{70\%}, \emph{90\%} datapoints available with 5 in 10 datapoints removed \\ \hline
+%			All distortions - 9 in 10 data points missing & \emph{on-line}, \emph{all} & first \emph{10\%}, \emph{20\%}, \emph{30\%}, \emph{50\%},\emph{70\%}, \emph{90\%} datapoints available with 9 in 10 datapoints removed \\ \hline
+%		\end{tabular}
+%		\caption{Details of data distortion introduction}
+%	\end{table}
 
-	\begin{table}[ht!]
-		\label{tab:experiments}
-		\centering
-		\begin{tabular}{|p{0.3\textwidth}|l|p{0.45\textwidth}|} \hline
-			\textbf{Experiment name} & \textbf{Distortion} & \textbf{Amounts used} \\ \hline
-			Baseline & \emph{none} & \emph{none} \\
-			Varying distribution & \emph{amplitude scaling} & Either \emph{centered} or \emph{-2.3 power law} \\
-			Varying noise & \emph{noise} & \emph{0}, \emph{0.5}, \emph{1}, \emph{1.5} or \emph{3} signal variance added as gaussian distributed noise onto signal\\
-			Varying observed data & \emph{on-line} & first \emph{10\%}, \emph{20\%}, \emph{30\%}, \emph{50\%},\emph{70\%}, \emph{90\%} datapoints available to classifier \\
-			Varying missing data & \emph{missing data} & \emph{10\%}, \emph{20\%}, \emph{30\%}, \emph{50\%}, \emph{70\%}, \emph{90\%} removed randomly as 1\%, 2\%, 5\% chunks \\ \hline
-		\end{tabular}
-		\caption{Details of data distortion introduction}
-	\end{table}
+		The supervised classification method used is the Random Forest. The Random Forest classifier is a variant of the decision tree classifier that allows the discriminative powers of the features to be exploited more fully. Instead of a single decision tree producing a class output based on a set of rules, a series of decision trees (called a \emph{Forest}) working on a few randomly chosen features each provides a vote for the class of the subject. If a pair of features have contradictory classifications for a certain class but are good at discriminating amongst others, the Random Forest will allow them to be useful at once. In preliminary experiments (TODO ref appendix) the Random Forest performed favorably to other supervised classifiers such as (TODO what).\\ % TODO add a reference for decision tree, random forest, and this explanation (maybe a diagram)
+
+	As per the evaluation section in chapter (TODO ref chapter) experimental results will be presented as confusion matrices, tables of precision, recall and F-score, and plots of F-score versus the distortion parameter within each experiment.
 	
-		\begin{table}[ht!]
-		\label{tab:experiments}
-		\centering
-		\begin{tabular}{|p{0.3\textwidth}|l|p{0.45\textwidth}|} \hline
-			\textbf{Experiment name} & \textbf{Distortion} & \textbf{Amounts used} \\ \hline
-			All distortions - no missing data & \emph{on-line}, \emph{all} & first \emph{10\%}, \emph{20\%}, \emph{30\%}, \emph{50\%},\emph{70\%}, \emph{90\%} datapoints available to classifier \\ \hline
-			All distortions - 1 in 10 data points missing & \emph{on-line}, \emph{all} & first \emph{10\%}, \emph{20\%}, \emph{30\%}, \emph{50\%},\emph{70\%}, \emph{90\%} datapoints available with 1 in 10 datapoints removed \\ \hline
-			All distortions - 5 in 10 data points missing & \emph{on-line}, \emph{all} & first \emph{10\%}, \emph{20\%}, \emph{30\%}, \emph{50\%},\emph{70\%}, \emph{90\%} datapoints available with 5 in 10 datapoints removed \\ \hline
-			All distortions - 9 in 10 data points missing & \emph{on-line}, \emph{all} & first \emph{10\%}, \emph{20\%}, \emph{30\%}, \emph{50\%},\emph{70\%}, \emph{90\%} datapoints available with 9 in 10 datapoints removed \\ \hline
-		\end{tabular}
-		\caption{Details of data distortion introduction}
-	\end{table}
-	
-	\subsection{Classifier}
-	The Random Forest classifier is a variant of the decision tree classifier that allows the discriminative powers of the features to be exploited more fully. Instead of a single decision tree producing a class output based on a set of rules, a series of decision trees (called a `Forest') working on a few randomly chosen features each provides a vote for the class of the subject. If a pair of features have contradictory classifications for a certain class but are good at discriminating amongst others, the Random Forest will allow them to be useful at once. \\ % TODO add a reference for decision tree, random forest, and this explanation (maybe a diagram)
-	
-	\subsection{Features and eliminating simulation artefacts}
-	The feature sets used in the experiment are outlined in section \ref{sec:features}. Features span from basic statistical metrics (skew, kurtosis) to more sophisticated approaches used in astrophysics (periodograms and wavelet transforms). The classifier will be trained and tested on each subset as well as the whole set in order to compare classification performance and distinguish the most useful features in a practical manner. \\ \\
-	With the use of simulated data care must be taken to prevent generic properties of a simulated class from leaking into the classifier. For example, if a particular class, say that of the Extreme Scattering Event (ESE) were a transient event occuring within a 200-day period, with all the other classes having time scales of 400, several features would allow to classifier to spot this arbitrary and unrealistic choice of time scales and would classify the ESE class much more accurately than it should. 
-	
-	\subsection{Evaluation}
-	Refer to section 2. For this experiment confusion matrices will be provided for each experiment, and from these the F-Score for each class will be computed with a break down for each feature set as outlined in table~\ref{tab:features}. Additionally plots of microaveraged F-Score amongst all feature sets will be produced. F-Score is the harmonic mean of the false positive and false negative rates, both of which are vital metrics in the transient classification problem
-	
-	% TODO justify the Random Forest
-	% TODO astronomically motivated features vs. basic statistical features, time series analysis techniques
-	% TODO features from "qualitative space fragmentation"
+	Additionally, each result table and plot will include subtractive analysis of the features with the removal of certain logical subsets. This will enable an effective comparison of the features used in terms of both overall and inter-class discrimination.
 	
 	\section{Features}
-	\label{sec:features}
-	\subsection{Baseline feature summary}
-	A summary of the baseline features and the subsets used in the experiments is given in table~\ref{tab:features}. For descriptions and discussions of each of the subsets see the following subsections. 
-	The simplest features that could be useful in discriminating between light curves are metrics taken from the distribution of the flux, disregarding the time domain. Information about the variability and dynamics of a transient event is encoded in the shape of the flux histogram. In order to make the features consistent when amplitude scaling is present, feature extraction will take place after the light curve has its mean subtracted and each datapoint is divided by the standard deviation (referred to as \emph{centering}).
+	\label{sec:baselinefeatures}
+	The feature sets used in the experiment are outlined in section \ref{sec:features}. Features span from basic statistical metrics (skew, kurtosis) to more sophisticated approaches such as wavelet transforms and periodograms, and statistical features extracted from a linear segmentation of the light curve.
 	
 	\begin{table}
 	\centering
 		\label{tab:features}
 	
-		\begin{tabular}{|l|l|p{0.35\textwidth}|} \hline
+		\begin{tabular}{|l|p{0.25\textwidth}|p{0.4\textwidth}|} \hline
 		\textbf{Feature set} & \textbf{Short name} & \textbf{Description}\\ \hline
 		\multirow{3}{*}{Basic statistical features} & \verb#stddev# & Standard deviation of flux distribution \\
 		& \verb#skew# & Skew of flux distribution \\
@@ -112,6 +107,21 @@
 		\end{tabular}
 		\caption{Basic feature set}
 	\end{table}	
+
+%	This should be in the simulated data section
+%	With the use of simulated data care must be taken to prevent generic properties of a simulated class from leaking into the classifier. For example, if a particular class, say that of the Extreme Scattering Event (ESE) were a transient event occuring within a 200-day period, with all the other classes having time scales of 400, several features would allow to classifier to spot this arbitrary and unrealistic choice of time scales and would classify the ESE class much more accurately than it should. 
+	
+
+	
+	% TODO justify the Random Forest
+	% TODO astronomically motivated features vs. basic statistical features, time series analysis techniques
+	% TODO features from "qualitative space fragmentation"
+
+	\subsection{Flux histogram statistical features}
+	
+	A summary of the baseline features and the subsets used in the experiments is given in table~\ref{tab:features}. For descriptions and discussions of each of the subsets see the following subsections. 
+	The simplest features that could be useful in discriminating between light curves are metrics taken from the distribution of the flux, disregarding the time domain. Information about the variability and dynamics of a transient event is encoded in the shape of the flux histogram. In order to make the features consistent when amplitude scaling is present, feature extraction will take place after the light curve has its mean subtracted and each datapoint is divided by the standard deviation (referred to as \emph{centering}).
+	
 %	\subsection{Extended feature summary}
 %	\begin{center}
 %	\begin{tabular}{|l|l|} \hline
@@ -122,9 +132,6 @@
 %	\verb#lomb_peak(n)# for $n = 1 \ldots 4$ & Size of top 4 peaks of centered light curve periodogram \\ \hline
 %	\end{tabular}
 %	\end{center}
-	
-
-	\subsubsection{Basic statistical features}
 	\emph{Skew} and \emph{Kurtosis} are two statistical measures of the shape of a data distribution. Skew measures the degree of evenness in the distribution either side of the mean and for a set of flux values $f$ with mean $\bar{f}$ the skew is computed as:
 	\begin{equation}
 		\frac{\frac{1}{n}\sum\limits^{n}_{i=1}(f_{i} - \bar{f})^{3}}
@@ -151,7 +158,7 @@
 	
 	
 	
-	\subsubsection{Flux histogram percentiles}
+	\subsection{Flux histogram percentiles}
 	% TODO reference "Using multi-scale histograms to answer pattern existence and shape match queries over time series data"
 	For most light curves the flux distribution will not be very similar to the normal distribution. As a result skew and kurtosis will be inadequate to describe the shape of the histogram. Consider figure~\ref{fig:histograms}, showing the flux distribution of an Intra-day variable (IDV) and a supernova.  \\
 	
@@ -172,17 +179,7 @@
 		\item $a$, $b$ and $c$ are added as features to the classifier.
 	\end{enumerate}
 
-	
-	\subsubsection{Median histogram percentiles}
-	Statistical metrics that use the median of a flux distribution are typically less sensitive to noise and outlier points, one of the problems of astronomical data. Two features fall into this category: flux distribution percentiles centered on the median, and the median absolute deviation.  \\
 
-	Median absolute deviation is defined for a centered flux distribution $f$ as:
-	\begin{equation}
-		\mbox{median}(\{|f_{i} - \mbox{median}(f)|\} \quad i=1\ldots\mbox{len}(f))
-	\end{equation}
-	The median of the set of absolute values of the flux points with the median or the original flux distribution subtracted. \\
-	
-	In addition to the median absolute deviation, the percentage of flux values lying within 10\% of the value of the median is used as a feature, \verb#median\_spread#.
 %	The flux distribution percentiles centered on the median are computed for a centered flux distribution $f$, as:
 %	\begin{enumerate}
 %		\item for $m$ in [0.1, 0.25, 0.5, 0.75, 1.0, 1.5]
@@ -190,7 +187,7 @@
 %	\end{enumerate} 
 %	This is very similar to the features extracted as discrete differences of the flux distribution, except that it is more robust to noise and is better at discriminating between similar sources that are slowly varying (points clustering around the median) rather than those with sudden changes like Supernovae.
 	
-	\subsubsection{Slope properties}
+	\subsection{Linear segmentation features}
 	In an effort to include some time-domain analysis into a simple feature set, some basic properties of the slopes of the light curves was computed. These features include the most positive and the most negative slope across any pairs of time points, not considering any intermittent turning points. Another simple slope-related feature is the ratio of increasing to decreasing adjacent flux points. Although this should be useful for finding sudden changes and dramatic events, it will likely be very sensitive to noise.
 	
 	\begin{figure}[ht!]
@@ -200,11 +197,11 @@
 	\end{figure}
 	% TODO add justifications
 	
-	\subsubsection{Haar coefficients}
+	\subsection{Haar coefficients}
 	The Haar wavelet transform produces a representation of the variance in a signal that is robust to noise. Square-wave shaped haar wavelets of decreasing granularity(see literature review) are fitted to data, the coefficients of each wavelet providing a means to reconstruct the original signal. Provided that the width of the signal being transformed is the same, coefficients can be compared to evaluate the similarity of a signal and its variance at different levels. \\ \\ % TODO add chapter reference
 	The first 4 levels of granularity of Haar Wavelets will be used, giving 15 features in total (1 for the 1st level, 2 for the 2nd, 4 for the 3rd, and 8 for the 4th), as \verb#haar_n# for $n = 1 \ldots 15$. The transform requires that all datapoints are equally spaced in the time domain, the width of the signal is a power of 2, and there are no gaps. Both missing data and the short ends of the signal with be filled with 0s.
 	
-	\subsubsection{Lomb-Scargle periodogram}
+	\subsection{Lomb-Scargle periodogram}
 	An implementation of the Lomb-Scargle periodogram based on the work in the paper \href{http://adsabs.harvard.edu/abs/1989ApJ...338..277P}{Fast algorithm for spectral analysis of unevenly sampled data} was taken from \url{http://www.astropython.org/blog/2010/9/Question-period-finding-packages-in-python}. This implementation allows us to extract as features the phase of significant peaks in the light curve and the intensity on these peaks. Computations are taken on centered (mean subtracted, divided by standard deviation) light curves and the top 5 frequences and their intensity are written as \verb#ls_phase(n)# and and \verb#ls_peak(n)# for $n = 1\ldots 5$. \\ % TODO add ref to paper
 	\begin{figure}[ht!]
 		\label{fig:lsspectrum}
@@ -214,7 +211,16 @@
 	
 	As they have little relation to the structure of the light curves, harmonics of wavelength less than 20 days and greater than 200 days are omitted.
 	
+	\section{Results}
+	
+	\section{Discussion}
+	\subsection{No distortions}
+	\subsection{Power law}
+	\subsection{Sparse data}
+	\subsection{On-line}
+	\subsection{All distortions}
 
+	\section{Conclusion}
 	
 	% TODO 
 	%\section{Other features}

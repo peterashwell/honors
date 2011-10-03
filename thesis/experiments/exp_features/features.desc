@@ -1,29 +1,22 @@
 #flux_only	Flux only statistical features
-flux_median
-flux_median_deviation	1
+flux_median	1
 flux_skew	1
 flux_kurtosis	1
-flux_mean_percentiles	5
-flux_med_percentiles	5
-flux_max
-flux_min
+flux_max	1
+flux_min	1
+flux_mean_percentiles	12
 #flux_time	Time-flux features
-grad_mean 1
-grad_stddev 1
-grad_median 1
-grad_kurtosis 1
-grad_skew 1
-grad_max 1
-grad_min 1
-grad_spread 1
-grad_percentiles 5
-grad_median_deviation 1
-grad_median_percentiles 5
-complexity_distance 1
+grad_mean	1
+grad_stddev	1
+grad_median	1
+grad_skew	1
+grad_kurtosis	1
+grad_max	1
+grad_min	1
+complexity_dist	1
+grad_mean_percentiles	12
 #haar_transform	Haar wavelet transform coefficients
 haar_coeffs	15
 #spectral_features	LS periodogram peaks
 spectral_transform	4
-#motif_features	Motif distance features
-motif_distance ?
 #all	All features

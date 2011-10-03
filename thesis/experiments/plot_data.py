@@ -31,7 +31,7 @@ plot_cols = 2
 
 lc_num = 0
 for lc_file in os.listdir(lc_dir):
-	filename = lc_dir + "/" + lc_file
+	filename = lc_dir + lc_file
 	print "reading:", filename
 	lc = file_to_lc(filename)
 	lc.remove_gaps()
@@ -39,7 +39,7 @@ for lc_file in os.listdir(lc_dir):
 	if fix_axes:
 		plt.ylim([-1, 10])
 	plt.plot(lc.time, lc.flux, 'r+')
-	plt.title(filename)
+	plt.title(filename.split('/')[-1])
 	
 	lc_num += 1
 	if lc_num % (plot_rows * plot_cols) == 0: # start new page

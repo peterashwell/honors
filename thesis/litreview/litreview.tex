@@ -261,6 +261,122 @@
 	\\
 	The implementation in this case uses Euclidean distance in the process of finding discriminatory shapelets for the training data, but any distance measure could be used. Statistical tools for choosing exactly which are presented and evaluated with very high accuracy on benchmark time series data sets, but not on very complex multivariable data. Classification is done similarly to training: choose the training sample whose shapelets best reflect the test case. How long this takes depends on the distance measure, but it can be fast to compute.
 	
+	
+	\pagebreak % TODO remove
+	
+	\section{Motifs and Shapelets}
+	\subsection{Introduction}
+	Motifs are defined across the domain of pattern matching as subsequences that occur frequently within either a singular sequence, or a collection of sequence objects. Shapelets \citep{ye2009time} are a related concept to motifs, and are defined as subsequences found in a collection of sequence objects that discriminate best between the classes in that collection.
+	
+	\begin{figure}[ht!]
+		\label{fig:timeseriesmotif}
+		\centering
+		\includegraphics[width=100mm]{/Users/peter/honors/thesis/litreview/images/timeseriesmotif.png}
+		\caption{Figure of a motif in a time series taken from \citet{lin2002finding}}
+	\end{figure}
+	
+	Motifs and shapelets are of interest to addressing the problem posed in this thesis because they contain information about an astronomical transient without any reference to a start or end point for the event, a complication encapsulated in the \textbf{subsequence} distortion. Attempting to match a full time series from our training data to a fraction of a complete event light curve suffers from a variety of problems. Distance measures such as the Euclidean and Dynamic Time Warping distance (see \ref{sec:distancemeasures} suffer greatly in the presence of noise and missing data. They are also not well defined when the test case is an incomplete version of the training curve. Classification methods such as Gaussian processes, support vector machines as well as many potentially useful features such as the Haar wavelet transform require advanced knowledge of the start and end points of an event.
+	
+	Additionally, because subsequences which are best at discriminating a particular class from others are also those which are less likely to be totally corrupted by added noise, we can expect an improvement in accuracy over standard distance measures when noise distortion is present.
+	
+%	\begin{figure}[ht!]
+%		\label{fig:anytimedistortion}
+%		\centering
+%		TODO Placeholder for figure of anytime distortion
+%		\caption{Figure of the `anytime' distortion in simulated astronomical time series data}
+%	\end{figure}
+	Finally, although not a distortion explicitly examined within our experimental framework, in a real-world context both motifs and shapelets will be helpful in coping with local variations in training data. Finding regions of light curves that are consistent in structure within a class as opposed to regions of high variability decreases inter-class confusion in the classifier. Local variations are exhibited by some of the light curves in our experimental dataset, in \verb#XRB#s and both kinds of flare stars.
+	
+	Strict definitions of motifs in the context of time series lead to algorithms for their extraction and use in classification.
+	
+	\subsection{Motifs}
+	Algorithms for motif extraction are well developed in the field of Bioinformatics, where motifs are defined as frequently repeated strings in long sequences of the discrete symbols `G', `A', `T' and `C' representing DNA. The maturity of these algorithms influences the aproach in \citet{lin2002finding} which utilises the Piecewise Aggregate Approximation (see section \ref{sec:piecewiseaggregateapproximation}) to transform a time series to a symbolic representation. Once a sequence of discrete symbols the aforementioned algorithms are made applicable for motif extraction. There are complications to this approach however, in that the PAA transformation is not always a good representation of the original time series. This is especially true in the presence of noise. An additional issue is that no consideration is given to the meaning of adjacency between symbols. Adjacency is meaningless for DNA, but very important for time series data.
+	
+	Motifs are useful in a context where large amounts of a sequence are highly variable within or independent of the class of event producing the sequence (as in DNA). In real-world astronomical data this may well be the case, but in the context of our simulated data the light curves are very generic within a given class. Under these definitions of similarity and frequently occurring subsequences then, it is very likely a motif finding algorithm would declare the entire sequence as a motif for a class! What is needed is a slightly different idea: a subsequence which not only occurs frequently within a particular class, but also one which does not appear in any \emph{other} classes within a multi-class classificaton context. The concept of a shapelet (see below) meets our requirements.
+
+	\subsection{Shapelets}
+	The idea of shapelets, first presented in \citet{ye2009time}, is to find subsequences in time series that are maximally discriminative amongst the classes of the dataset. The algorithm proposed in this paper gives a brute force approach to extracting shapelets from a dataset, using entropy as a natural choice of measuring inter-class discriminative power. Once extracted, shapelets can be incorporated into classification in a variety of ways. The Ye paper proposes a decision tree approach where logical rules using the (Euclidean) distances of each of the shapelets extracted from the dataset to a test case are used to determine its class label. Another obvious approach is to use the nearest neighbor algorithm combined with any sensible distance measure such as subsequence Euclidean distance or constrained dynamic time warping (see section \ref{sec:distancemeasures}.
+	
+	\begin{figure}[ht!]
+		\label{fig:timeseriesshapelets}
+		\centering
+		\includegraphics[width=140mm]{/Users/peter/honors/thesis/litreview/images/shapelet.eps}
+		\caption{Figure of time series shapelets extracted from time series representing arrowheads, taken from \citet{ye2009time}}
+	\end{figure}
+	
+	 Shapelets are extracted as follows: For every single subsequence of any length in the dataset, the subsequence distance (see section ~\ref{sec:distancemeasures}) is computed to every element of the dataset. This collection of distances is split into two subsets $D_{left}$ and $D_{right}$ by user specified threshold $\tau$. The $\tau$ parameter determines the variance allowed for a particular shapelet being extracted from the dataset. The expressiveness of the shapelet within a class is then measured by the information gain:
+	\begin{equation}
+		I(s,\tau) = E(D) - \frac{N_{1}}{N}E(D_{left}) - \frac{N_{2}}{N}E(D_{right})
+	\end{equation}
+	where $N_{1} = |D_{left}|$, $N_{2} = |D_{right}|$, and $E(D)$, the entropy of a dataset, is defined as:
+	\begin{equation}
+		E(D) = -\sum^{C}_{i=1}\frac{n_{i}}{N}log(\frac{n_{i}}{N})
+	\end{equation}
+	where $n_{i}$ is the number of time series labeled with class $i$ and is $C$ the number of class labels in the dataset.
+	
+	Choosing good shapelets for the purposes of classification simply involves choosing those which have the highest information gain. Ties (or close ties) can be resolved by looking at the actual distances across the split of $D_{left}$ and $D_{right}$. The Ye paper proposes a suitable method for doing this. The threshold $\tau$ is context-specific. A too tight or too loose choice of this parameter will give no sensible outputs. For our purposes visual inspection of the output will serve fine, but if necessary good thresholds could be determined automatically by searching for values that give shapelets meeting a predefined minimum information gain.
+	
+	Unfortunately since our dataset has very high intra-class uniformity, this approach will, like motif finding algorithms,  most likely return an entire training sequence as the most discriminative subsequence. Short, expressive subsequences are more likely to be robust to noise and are important for on-line and subsequence classification. Extending the Ye shapelet extraction algorithm to have a range of lengths is trivial, but what lengths are useful for the purposes of classification will need to be found by experiment.
+	
+	The work in \citet{ye2009time} is extended in \citet{mueen2011logical}, giving a faster algorithm for finding shapelets. The improvment comes both from the caching of distance computations and early abandonment of shapelet evaluation using a theoretical limit on information gain difference for adjacent subsequences (subsequences that are mostly overlapping). Taking advantage of this improved performance, the authors also propose an extension of the classification component of the Ye paper. This extension involves using combinations of shapelets linked by the \emph{and} and \emph{or} logical operators, meaning respectively both or either shapelet provides good discrimination to a class (see figure \ref{fig:logicalshapelets}). Finding these logical combinations fits naturally into the shapelet extraction algorithm by evaluating the \emph{and} and \emph{or} respectively as the maximum and minimum of the information gain of the individual components in the expression. Whether or not this modified approach will improve classification on our dataset depends on how distinct each shapelet is to each class, and will need to be tested by experiment.
+	 
+	\begin{figure}[ht!]
+		\label{fig:logicalshapelets}
+		\centering
+		\includegraphics[width=140mm]{/Users/peter/honors/thesis/litreview/images/logicalshapelets.png}
+		\caption{Figure of logical shapelets providing a better discrimination amongst a dataset with similar subsequences, taken from \citet{mueen2011logical}}
+	\end{figure}
+	
+	\subsection{Shapelets and streams}
+	Although this thesis involves classification of static data objects mimicing a sliding window approach, the ASKAP telescope array in will involve a data stream. It is worth including into this literature review then the work in \citet{xing2011extracting}. This paper takes the defintion of a shapelet outlined in \citet{ye2009time} and gives a measure of quality in \emph{earliness of classification}.
+	
+	\subsection{Summary}
+	In summary, shapelets are clearly preferable to motifs both in the context of this thesis and in real-world astronomical data. In \citet{ye2009time} and \citet{mueen2011logical} both clear defintions of shapelets and fast algorithms for their extraction are laid out. Classification is proposed using decision trees, but nearest neighbour with a suitably defined distance measure such as subsequence distance (see \ref{sec:subsequencedistance}) would work as well. They are potentially useful both as a stand-alone classification method, and for incorporating as features into a complex feature-extraction based classifier.
+%		Motifs are subsequences which are strongly associated with a class, but are probably not very useful since the entire class's lightcurves are a motif in our generic experimental data context.
+%		Shapelets are a newer idea which are definitely useful. They can provide robustness to a variety of distortions
+		
+		\pagebreak %TODO REMOVE
+		
+		
+		 
+%	 In a multiclass classification context the motifs of each class are subsequences of training examples of that class which best discriminate between it and other training examples of the same class. Exactly how \emph{discrimination} is defined is the subject of the research discussed in this section. Motifs can be of arbitrary length and a motif can be represented by small variations on the same pattern centered around some representative structure, as polynomials with gaussian variance fitted, and even as symbolic representations of the continuous time series data. An example of a motif for a time series is visually illustrated in figure~\ref{fig:timeseriesmotif}.
+%	
+%	\subsection{Motifs as strongly distinct clusters}
+%	A more explicit definition of motifs and a cluster-like approach to finding motifs of a predefined length $n$ is outlined in \emph{Finding motifs in Time Series} (2002) Keogh, Lin. In addition to a provided length $n$ for the size of the motif, a distance measure for time series, $D$, and a range $R$ need to be given. Exactly what $D$ and $R$ will be depends on the application. In the paper, the distance measure used is the Euclidean distance, a standard metric for comparing time series that was introduced in section~\ref{sec:euclideandistance}. $R$ must be determined by the user and specifies the variation allowed in a motif cluster.
+%	
+%	Motifs are discovered by finding groupings of datapoints which are at most $R$ away in the distance measure. A simple brute force approach presented in the paper compares all subsequences against each other, each run of the algorithm producing the group with the largest number of co-occurrences of a motif. The elements of each motif so extracted are excluded from any run following to ensure motif distinctness. The authors present a much faster hash-based algorithm that uses a symbolic representation of the time series subsequences and hashing to find candidate motifs in linear time.
+%	
+%	The issues with this approach to motif extraction are the $n$ and $R$ parameters that need to be defined by the user. Motif length should be determined as the largest possible useful motif for classification purposes. This is not necessarily easy to define either, as it depends on the variability of the time series in question. This algorithm will return many motifs which are subsequences of larger, more significant, possibly more important motifs. Exactly how to define a cut-off point is a serious problem in the application of these ideas to my work.
+%	
+%	\subsection{Information theoretic definition of motifs}
+%	\emph{Discovery of time series motif from multi-dimensional data based on MDL principle}
+%	\begin{enumerate}
+%		\item PAA transformation of entire time series
+%		\item Symbolic representation (SAX) from PAA
+%		\item Information theoretic analysis of subsequences of fixed length. Takes into account frequency of subsequence amongst corpora and within the time series itself
+%	\end{enumerate}
+%	
+%	The problems with this approach are that the paper does not explain how to extend motifs to their full length. The symbolic representation reduces the granularity and the discretization is not necessarily a good representation of the original time series. 
+%	Uses DTW to somehow find motifs of varying lengths, but explains very poorly how this is done.
+%	
+%	Clustering of time series subsequences is meaningless (2004), Keogh, Lin: implications for previous and future research
+%		- do not use all subsequences as a data points for clustering (duhhh)
+%		- use motifs instead: defined as subsequences with high information for a class (duh)
+%		- gives a definition of a motif that is functional
+%
+%	Early Classification of Time Series (2011), Xing, Pei, Yu
+%		- Uses hierarchical clustering, 1NN and Euclidean distance with some hacks related to support as a parameter for early classification (support assigned to clusters)
+%		- Not really all that interesting
+%		- Uses length 0 ... L from start of time series to build clusters. Needs notion of defined start and end to work
+%		- Has some good ideas on producing user defined trade offs between earliness of classification and accuracy
+%	
+% On-line motif detection in time series with SwiftMotif (2009), Fuchs, sGruber, Nitschke, Sick
+%		- Defines motifs
+%		- Fusion of probabilistic modelling methods and least-squares approximation techniques
+%		- Consists of least squares of fitting of polynomials to breakpoints in the time series defined by turning points
+%		- Defines a metric for comparing the similarity of two time series defined by segments of polynomials
+%
+%	
 	\section{Astronomical Time Series Classification}
 	Besides many generic approaches to classification presented so far, there are approaches that are astronomy specific. The work presented in \emph{On Machine Learned Classification of Variable Stars}, Butler and Bloom 2011 (draft), demonstrates a simple set of features that may be useful in providing additional discrimination amongst astronomical time series. The features include the standard deviation of the measurements, the distribution of flux amongst linearly spaced buckets across the intensity of the measurements, the maximum and minimum changes in the light curve, and many other simple and fast to compute properties of the data. These non-periodic features provide a 4\% improvement in the error rate for that task, the classification of variable stars. When much of the light curve data is shape based (rather than spectral), these simple features should play a much larger role in classification.
 %	\subsection{Detecting Structural Changes in Time Series}

@@ -3,7 +3,7 @@ NUM_LCS=100
 #LCS=(ESE Novae Noise IDV SNe) # read from classes.desc instaed
 FOOTPRINT="wide"
 EXP_FILE="experiment_commands"
-RAW_DIR="raw_lightcurves"
+RAW_DIR="final_lcs"
 
 
 #if [ -d lightcurves/$RAW_DIR ]; then

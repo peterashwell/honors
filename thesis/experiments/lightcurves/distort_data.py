@@ -10,7 +10,7 @@ from lightcurve import LightCurve
 class lcDistortions:
 	def __init__(self):
 		self.LC_DIRECTORY = "lightcurves" # directory with all lcs
-		self.RAW_LC_DIRECTORY = "raw_lightcurves" # raw light curves
+		self.RAW_LC_DIRECTORY = "final_lcs" # raw light curves
 
 		self.normalise = None # normalise lc
 		self.pl_distribute = None # power law distribution on lc
@@ -91,9 +91,9 @@ class lcDistortions:
 			if not incomplete:
 				os.mkdir(new_directory)
 			done = 0
-			increment = 5
+			increment = 50
 			for lc_file in os.listdir(self.LC_DIRECTORY + '/' + self.RAW_LC_DIRECTORY):
-				if done % (len(os.listdir(self.LC_DIRECTORY + '/' + self.RAW_LC_DIRECTORY))) == 0:
+				if done % increment == 0:
 					print "{0}/{1}".format(done, len(os.listdir(self.LC_DIRECTORY + '/' + self.RAW_LC_DIRECTORY)))
 				done += 1
 				lc = 'a'
@@ -102,7 +102,6 @@ class lcDistortions:
 				# read in all lc data
 				lc_data = open(self.LC_DIRECTORY + '/' + self.RAW_LC_DIRECTORY + '/' + lc_file)
 				for line in lc_data:
-					
 					if '\t' in line:
 						line = line.strip().split('\t')
 					elif ',' in line:
@@ -119,12 +118,12 @@ class lcDistortions:
 					raise Exception('no distribution chosen')
 				lc = all_distortions(lc, self.noise, self.available_pct, self.missing, self.pl_distribute) # see distortions.py
 				# write the distorted data out
-				print "writing file..."
+				#print "writing file..."
 				lc_out = open('lightcurves/' + self.file_prefix + '/' + lc_file, 'w')
 				for index in xrange(len(lc.time)):
 					lc_out.write('{0}\t{1}\n'.format(str(lc.time[index]), str(lc.flux[index])))
 				lc_out.close()
-				print "done writing"
+				#print "done writing"
 
 #	except Exception, e:
 #		print e
