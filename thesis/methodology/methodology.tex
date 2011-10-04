@@ -136,7 +136,40 @@
 		\end{tabular}
 		\caption{Details of data distortion introduction}
 		\end{table}
-		
+			
+%
+% COPIED FROM FEATURE BASED CLASSIFICATION
+%
+%	\subsection{Data}
+%	Each fold of the 10-fold cross validation will produce a training set and a test set from the raw simulation light curves, with the proportion of classes being even in each. The training set will be left as is and provided to the Random Forest to produce a set of rules. The test set will have some distortions applied according to table ~\ref{tab:experiments}. Each row of the table forms an experiment with the goal of exploring transient classification under the designated parameter values. \\
+%
+%	\begin{table}[ht!]
+%		\label{tab:experiments}
+%		\centering
+%		\begin{tabular}{|p{0.3\textwidth}|l|p{0.45\textwidth}|} \hline
+%			\textbf{Experiment name} & \textbf{Distortion} & \textbf{Amounts used} \\ \hline
+%			Baseline & \emph{none} & \emph{none} \\
+%			Varying distribution & \emph{amplitude scaling} & Either \emph{centered} or \emph{-2.3 power law} \\
+%			Varying noise & \emph{noise} & \emph{0}, \emph{0.5}, \emph{1}, \emph{1.5} or \emph{3} signal variance added as gaussian distributed noise onto signal\\
+%			Varying observed data & \emph{on-line} & first \emph{10\%}, \emph{20\%}, \emph{30\%}, \emph{50\%},\emph{70\%}, \emph{90\%} datapoints available to classifier \\
+%			Varying missing data & \emph{missing data} & \emph{10\%}, \emph{20\%}, \emph{30\%}, \emph{50\%}, \emph{70\%}, \emph{90\%} removed randomly as 1\%, 2\%, 5\% chunks \\ \hline
+%		\end{tabular}
+%		\caption{Details of data distortion introduction}
+%	\end{table}
+%	
+%		\begin{table}[ht!]
+%		\label{tab:experiments}
+%		\centering
+%		\begin{tabular}{|p{0.3\textwidth}|l|p{0.45\textwidth}|} \hline
+%			\textbf{Experiment name} & \textbf{Distortion} & \textbf{Amounts used} \\ \hline
+%			All distortions - no missing data & \emph{on-line}, \emph{all} & first \emph{10\%}, \emph{20\%}, \emph{30\%}, \emph{50\%},\emph{70\%}, \emph{90\%} datapoints available to classifier \\ \hline
+%			All distortions - 1 in 10 data points missing & \emph{on-line}, \emph{all} & first \emph{10\%}, \emph{20\%}, \emph{30\%}, \emph{50\%},\emph{70\%}, \emph{90\%} datapoints available with 1 in 10 datapoints removed \\ \hline
+%			All distortions - 5 in 10 data points missing & \emph{on-line}, \emph{all} & first \emph{10\%}, \emph{20\%}, \emph{30\%}, \emph{50\%},\emph{70\%}, \emph{90\%} datapoints available with 5 in 10 datapoints removed \\ \hline
+%			All distortions - 9 in 10 data points missing & \emph{on-line}, \emph{all} & first \emph{10\%}, \emph{20\%}, \emph{30\%}, \emph{50\%},\emph{70\%}, \emph{90\%} datapoints available with 9 in 10 datapoints removed \\ \hline
+%		\end{tabular}
+%		\caption{Details of data distortion introduction}
+%	\end{table}
+
 		\subsection{Simulating a power law distribution}
 		Centered is performed by subtracting the mean from the light curve and dividing by its standard deviation. The original signal should have no outlier points or noise so this should remove amplitude scaling as a factor in classification. \\
 		The power law is implemented by drawing random numbers uniformly between $a_{l}^{-2.3}$ and $a_{h}^{-2.3}$, where these values indicate the lower and upper bounds of the amplitudes desired in the power law distribution. The random value so drawn taken to the power -2.3 giving an amplitude in the desired range with values probability distribution corresponding to the power law. %  TODO tidy this up and write discussion section \\

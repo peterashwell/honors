@@ -30,39 +30,7 @@
 
 	\section{Method}
 	This experiment follows the experimental framework outlined in chapter (TODO ref chapter). 10-fold cross validation is used on the set of light curves, the training light curves being undistorted and complete, and the test light curves with distortions applied as per the framework. For the implementation details see the relevant chapter.
-	
-%
-% MOVE ALL THIS SHIT TO THE EXPERIMENTAL CONDITIONS SECTION
-%
-%	\subsection{Data}
-%	Each fold of the 10-fold cross validation will produce a training set and a test set from the raw simulation light curves, with the proportion of classes being even in each. The training set will be left as is and provided to the Random Forest to produce a set of rules. The test set will have some distortions applied according to table ~\ref{tab:experiments}. Each row of the table forms an experiment with the goal of exploring transient classification under the designated parameter values. \\
-%
-%	\begin{table}[ht!]
-%		\label{tab:experiments}
-%		\centering
-%		\begin{tabular}{|p{0.3\textwidth}|l|p{0.45\textwidth}|} \hline
-%			\textbf{Experiment name} & \textbf{Distortion} & \textbf{Amounts used} \\ \hline
-%			Baseline & \emph{none} & \emph{none} \\
-%			Varying distribution & \emph{amplitude scaling} & Either \emph{centered} or \emph{-2.3 power law} \\
-%			Varying noise & \emph{noise} & \emph{0}, \emph{0.5}, \emph{1}, \emph{1.5} or \emph{3} signal variance added as gaussian distributed noise onto signal\\
-%			Varying observed data & \emph{on-line} & first \emph{10\%}, \emph{20\%}, \emph{30\%}, \emph{50\%},\emph{70\%}, \emph{90\%} datapoints available to classifier \\
-%			Varying missing data & \emph{missing data} & \emph{10\%}, \emph{20\%}, \emph{30\%}, \emph{50\%}, \emph{70\%}, \emph{90\%} removed randomly as 1\%, 2\%, 5\% chunks \\ \hline
-%		\end{tabular}
-%		\caption{Details of data distortion introduction}
-%	\end{table}
-%	
-%		\begin{table}[ht!]
-%		\label{tab:experiments}
-%		\centering
-%		\begin{tabular}{|p{0.3\textwidth}|l|p{0.45\textwidth}|} \hline
-%			\textbf{Experiment name} & \textbf{Distortion} & \textbf{Amounts used} \\ \hline
-%			All distortions - no missing data & \emph{on-line}, \emph{all} & first \emph{10\%}, \emph{20\%}, \emph{30\%}, \emph{50\%},\emph{70\%}, \emph{90\%} datapoints available to classifier \\ \hline
-%			All distortions - 1 in 10 data points missing & \emph{on-line}, \emph{all} & first \emph{10\%}, \emph{20\%}, \emph{30\%}, \emph{50\%},\emph{70\%}, \emph{90\%} datapoints available with 1 in 10 datapoints removed \\ \hline
-%			All distortions - 5 in 10 data points missing & \emph{on-line}, \emph{all} & first \emph{10\%}, \emph{20\%}, \emph{30\%}, \emph{50\%},\emph{70\%}, \emph{90\%} datapoints available with 5 in 10 datapoints removed \\ \hline
-%			All distortions - 9 in 10 data points missing & \emph{on-line}, \emph{all} & first \emph{10\%}, \emph{20\%}, \emph{30\%}, \emph{50\%},\emph{70\%}, \emph{90\%} datapoints available with 9 in 10 datapoints removed \\ \hline
-%		\end{tabular}
-%		\caption{Details of data distortion introduction}
-%	\end{table}
+
 
 		The supervised classification method used is the Random Forest. The Random Forest classifier is a variant of the decision tree classifier that allows the discriminative powers of the features to be exploited more fully. Instead of a single decision tree producing a class output based on a set of rules, a series of decision trees (called a \emph{Forest}) working on a few randomly chosen features each provides a vote for the class of the subject. If a pair of features have contradictory classifications for a certain class but are good at discriminating amongst others, the Random Forest will allow them to be useful at once. In preliminary experiments (TODO ref appendix) the Random Forest performed favorably to other supervised classifiers such as (TODO what).\\ % TODO add a reference for decision tree, random forest, and this explanation (maybe a diagram)
 
@@ -72,34 +40,31 @@
 	
 	\section{Features}
 	\label{sec:baselinefeatures}
-	The feature sets used in the experiment are outlined in section \ref{sec:features}. Features span from basic statistical metrics (skew, kurtosis) to more sophisticated approaches such as wavelet transforms and periodograms, and statistical features extracted from a linear segmentation of the light curve.
+	The features used in the experiment are outlined in table \ref{tab:features} and organised into logical subsets. Features span from basic statistical metrics from histograms of flux values and linear segmentations of the light curve, to more sophisticated approaches such as wavelet transforms and periodograms, and statistical features extracted from a linear segmentation of the light curve. Justifications, visualizations and detailed descriptions of computation for the features are given in the following section.
 	
-	\begin{table}
+	\begin{table}[ht!]
 	\centering
 		\label{tab:features}
 	
 		\begin{tabular}{|l|p{0.25\textwidth}|p{0.4\textwidth}|} \hline
 		\textbf{Feature set} & \textbf{Short name} & \textbf{Description}\\ \hline
-		\multirow{3}{*}{Basic statistical features} & \verb#stddev# & Standard deviation of flux distribution \\
-		& \verb#skew# & Skew of flux distribution \\
-		& \verb#kurtosis# & Kurtosis of flux distribution \\
-		& \verb#beyond1std# &  Percent of flux distribution beyond one standard deviation \\ % TODO remove comments about mean, stddev
+		\multirow{8}{*}{Flux statistical features}
+		& \verb#flux_median# & Median deviation of flux distribution \\ \cline{2-3}
+		& \verb#flux_skew# & Skew of flux distribution \\ \cline{2-3}
+		& \verb#flux_kurtosis# & Kurtosis of flux distribution \\ \cline{2-3}
+		& \verb#flux_min# & Minimum of flux distrubtion \\ \cline{2-3} % TODO remove comments about mean, stddev
+		& \verb#flux_max# & Maximum of flux distribution \\ \cline{2-3}
+		& \verb#flux_hist_pos(inc)#  for $inc$ 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.75, 1, 1.5, 2, 3 & Fraction of \emph{positive} $z$-normalised flux values within $inc$ of the mean  \\ \cline{2-3}
+		& \verb#flux_hist_neg(inc)# for $inc$ 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.75, 1, 1.5, 2, 3 & Fraction of \emph{negative} $z$-normalised flux values within $inc$ of the mean  \\
 		\hline
-		\multirow{5}{*}{Flux Percentiles}
-		& \verb#flux_5_95# & Difference of 5th and 95th percentiles \\
-		& \verb#flux_15_85# & Difference of 15th and 85th percentiles \\
-		& \verb#flux_25_75# & Difference of 25th and 75th percentiles \\
-		& \verb#flux_35_65# & Difference of 35th and 65th percentiles \\
-		& \verb#flux_45_55# & Difference of 45th and 55th percentiles \\
-		\hline
-		\multirow{3}{*}{Median spreads}
-		& \verb#median_deviation# & Median absolute deviation \\
-		& \verb#median_buffer# & Percent of flux within 10\% of median($F$) \\
-		\hline
-		\multirow{2}{*}{Slope and variability}
-		& \verb#amplitude_spread# & Amplitude spread \\ % TODO update code
-		& \verb#max_slope# & Maximum slope over all pairs of points \\
-		& \verb#slope_ratio# & Increasing / decreasing slope ratio \\
+	\multirow{8}{*}{Gradient statistical features}
+		& \verb#grad_median# & Median of gradient distribution \\ \cline{2-3}
+		& \verb#grad_skew# & Skew of gradient distribution \\ \cline{2-3}
+		& \verb#grad_kurtosis# & Kurtosis of flux distribution \\ \cline{2-3}
+		& \verb#grad_min# & Minimum of gradient distribution \\ \cline{2-3} % TODO remove comments about mean, stddev
+		& \verb#grad_max# & Maximum of gradient distribution \\ \cline{2-3}
+		& \verb#grad_hist_pos(inc)#  for $inc$ in 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.75, 1, 1.5, 2, 3 & Fraction of \emph{positive} gradient values within $inc$ of the mean  \\ \cline{2-3}
+		& \verb#grad_hist_neg(inc)# for $inc$ in 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.75, 1, 1.5, 2, 3 & Fraction of \emph{negative} gradient values within $inc$ of the mean  \\
 		\hline
 		\multirow{1}{*}{Haar wavelet transform} & \verb#haar_coeffs(n)# for $n = 1 \ldots 15$ & Haar wavelet transform computed on centered light curve \\
 		\hline
@@ -117,21 +82,10 @@
 	% TODO astronomically motivated features vs. basic statistical features, time series analysis techniques
 	% TODO features from "qualitative space fragmentation"
 
-	\subsection{Flux histogram statistical features}
+	\subsection{Flux statistical features}
+	The absolute simplest features that could be useful in discriminating between astronomical light curves are statistical properties of the distribution of the magnitude or \emph{flux} of its elements. Information about the variability and dynamics of a transient is encoded in the shape of a histogram produced from the flux values. As with all feature extraction approaches in this thesis the light curves will undergo a $z$-normalisation (TODO ref) beforehand to eliminate the effects of amplitude scaling in the signal. The statistical properties we are interested in are the \emph{median}, \emph{kurtosis}, \emph{skew}, \emph{minimum} and \emph{maximum}, and the fractions of positive and negative elements of the flux set falling within predefined fractions of the standard deviation. These simple statistical features are fast to extract, very expressive, and should be somewhat robust to noise and missing data. The shape of the histogram will be affected far less under a noise distortion than features working on a point-by-point basis, such as distance measures. TODO add some references
 	
-	A summary of the baseline features and the subsets used in the experiments is given in table~\ref{tab:features}. For descriptions and discussions of each of the subsets see the following subsections. 
-	The simplest features that could be useful in discriminating between light curves are metrics taken from the distribution of the flux, disregarding the time domain. Information about the variability and dynamics of a transient event is encoded in the shape of the flux histogram. In order to make the features consistent when amplitude scaling is present, feature extraction will take place after the light curve has its mean subtracted and each datapoint is divided by the standard deviation (referred to as \emph{centering}).
-	
-%	\subsection{Extended feature summary}
-%	\begin{center}
-%	\begin{tabular}{|l|l|} \hline
-%	\textbf{Short name} & \textbf{Description}\\ \hline
-%	\verb#grad_percentiles# & Histogram constructed from gradients sampled at particular intervals \\
-%	\verb#complexity_dist# & Length of light curve divided by time scale \\
-%	\verb#flux_percentiles_whole# & Flux percentiles distributed evenly from max to min, not around median \\
-%	\verb#lomb_peak(n)# for $n = 1 \ldots 4$ & Size of top 4 peaks of centered light curve periodogram \\ \hline
-%	\end{tabular}
-%	\end{center}
+	\subsubsection{Skew and Kurtosis}
 	\emph{Skew} and \emph{Kurtosis} are two statistical measures of the shape of a data distribution. Skew measures the degree of evenness in the distribution either side of the mean and for a set of flux values $f$ with mean $\bar{f}$ the skew is computed as:
 	\begin{equation}
 		\frac{\frac{1}{n}\sum\limits^{n}_{i=1}(f_{i} - \bar{f})^{3}}
@@ -145,9 +99,9 @@
 	\end{equation}
 	
 	Figure~\ref{fig:samplestats} shows two sample light curves, their flux histograms and the corresponding skew and kurtosis.  It illustrates the discriminatory power of these simple features.
-	Skew is highest (in magnitude) for sources with sudden pesaks and troughs emerging from background noise in one direction. As a result, the Supernovae light curve has a very positive skew. The Extreme Scattering Event has a slightly negative skew because of the relative intensity of the central dip to the peaks either side. For sources that are slowly varying or consistent, and skew will be closest to zero. \\ \\
-	Kurtosis will be highest for signals that are extremely consistent or have very sudden variations. Signals that oscillate a great deal with have much lower kurtosis. Again, the supernovae, characterised by sudden sharp increases in flux, has a very high kurtosis. The ESE also has sudden variations, but not as strong as the Supernova. \\ \\
-	By also computing the fraction of datapoints that lie beyond 1 standard deviation of the mean as \emph{1stddev}, the classifier can discriminate between a high kurtosis which is either the result of outliers or as the result of a very consistent signal.
+	Skew is highest (in magnitude) for sources with sudden pesaks and troughs emerging from background noise in one direction. As a result, the Supernovae light curve has a very positive skew. The Extreme Scattering Event has a slightly negative skew because of the relative intensity of the central dip to the peaks either side. For sources that are slowly varying or consistent, and skew will be closest to zero. \\
+	
+	Kurtosis will be highest for signals that are extremely consistent or have very sudden variations. Signals that oscillate a great deal with have much lower kurtosis. Again, the supernovae, characterised by sudden sharp increases in flux, has a very high kurtosis. The ESE also has sudden variations, but not as strong as the Supernova. \\
 		
 	\begin{figure}[ht!]
 		\label{fig:samplestats}
@@ -156,11 +110,9 @@
 		\caption{Skewness, kurtosis, mean and standard deviation for some sample light curves}
 	\end{figure}
 	
-	
-	
-	\subsection{Flux histogram percentiles}
-	% TODO reference "Using multi-scale histograms to answer pattern existence and shape match queries over time series data"
-	For most light curves the flux distribution will not be very similar to the normal distribution. As a result skew and kurtosis will be inadequate to describe the shape of the histogram. Consider figure~\ref{fig:histograms}, showing the flux distribution of an Intra-day variable (IDV) and a supernova.  \\
+		
+	\subsubsection{Positive and negative flux histogram bands}
+		For most light curves the flux distribution will not be very similar to the normal distribution. As a result skew and kurtosis will be inadequate to describe the shape of the histogram. Consider figure~\ref{fig:histograms}, showing the flux distribution of an Intra-day variable (IDV) and a supernova.  \\
 	
 	\begin{figure}[ht!]
 		\centering
@@ -169,37 +121,32 @@
 		\caption{Figure of histogram feature extraction}
 	\end{figure}
 	
-	The skew and kurtosis have little meaning for the IDV histogram, unlike for the SNe. An alternative to skew and kurtosis that will be more effective for classifying these kind of transients are extracting properties of the flux histogram at discrete intervals. A simple way to do this is to compute the differences of the sorted, standardised flux data at fixed points. These features are referred to as \emph{flux\_s\_e} with $s$ and $e$ being the percentages of the sorted flux on which the difference is computed:
+	The skew and kurtosis have little meaning for the IDV histogram, unlike for the SNe. An alternative to skew and kurtosis that will be more effective for classifying these kind of transients are extracting properties of the flux histogram at discrete intervals. Another simple feature that captures  information about the dynamics of the light curve are the fractions of both the positive and negative components of the ($z$-normalised) flux lying within predefined increments of the standard deviation from the mean. Note that under $z$-normalisation, the mean is 0 and the standard deviation is 1. Each fraction forms a single feature and the group of fractions forms a full feature set called \verb#flux_hist_pos# and \verb#flux_hist_neg# for the positive and negative components of the histogram respectively. The individual features are referred to as \verb#flux_hist_(pos)(neg)(inc)# for values of $inc$ at 5, 10, 20, 30, 40, 50, 60, 75, 100, 200, and 300 percent of the standard deviation.
 	
-	\begin{enumerate}
-		\item Let $F$ be the vector of flux values, divided by its standard deviation and mean subtracted (centered), then \textbf{sorted}
-		\item Set the difference of the 5th and 95th values from $F$ as $a$
-		\item Set the difference of the 20th and 80th values from $F$ as $b$
-		\item Set the difference of the 35th and 65th values from $F$ as $c$
-		\item $a$, $b$ and $c$ are added as features to the classifier.
-	\end{enumerate}
-
-
-%	The flux distribution percentiles centered on the median are computed for a centered flux distribution $f$, as:
-%	\begin{enumerate}
-%		\item for $m$ in [0.1, 0.25, 0.5, 0.75, 1.0, 1.5]
-%		\item take percentage of points in $f$ lying within $m\cdot\mbox{median}(f)$ of median$(f)$ as feature \verb#flux_median_<m>#\
-%	\end{enumerate} 
-%	This is very similar to the features extracted as discrete differences of the flux distribution, except that it is more robust to noise and is better at discriminating between similar sources that are slowly varying (points clustering around the median) rather than those with sudden changes like Supernovae.
+	% TODO reference "Using multi-scale histograms to answer pattern existence and shape match queries over time series data"
 	
 	\subsection{Linear segmentation features}
-	In an effort to include some time-domain analysis into a simple feature set, some basic properties of the slopes of the light curves was computed. These features include the most positive and the most negative slope across any pairs of time points, not considering any intermittent turning points. Another simple slope-related feature is the ratio of increasing to decreasing adjacent flux points. Although this should be useful for finding sudden changes and dramatic events, it will likely be very sensitive to noise.
+	In noisy, gappy data, extracting information about the time-domain behaviour of an event is difficult. A potential method for refining poor quality data into a useful set of simple shapes outlining its behaviour is the piecewise linear segmentation proposed in \citet{keogh2001online}. A bottom up segmentation of a time series into linear functions is produced, starting from every pair of adjacent points and progressively merging those points which give the lowest error in a line of best fit until the desired number of segments is reached. A visualization of the algorithm on a light curve from our dataset is presented in figure \ref{fig:linearsegmentation}.
 	
-	\begin{figure}[ht!]
-		\label{fig:slopesample}
-		\includegraphics[width=\textwidth]{/Users/peter/honors/thesis/experiments/exp_features/figures/slope_demo.eps}
-		\caption{Most positive (green) and negative (blue) pairwise slopes for two sample light curves}
+	\begin{figure}
+		\label{fig:linsegexample}
+		\centering
+		Placeholder for image of linear segmentation of a lightcurve from the dataset
+		\caption{Linear segmentation of a lightcurve from our dataset}
 	\end{figure}
-	% TODO add justifications
+	
+	A histogram of gradients will be built from the linear segmentation. Each segment of a particular gradient will contribute a unit of that gradient value to the histogram for each time index falling under it. Note that this means longer events with the same structure should have the same histogram, making this feature time-scale invariant provided the start and end points of the event are known. All of the features extracted for the feature histogram are also extracted for this gradient histogram, as outlined in table~\ref{tab:features}.
 	
 	\subsection{Haar coefficients}
-	The Haar wavelet transform produces a representation of the variance in a signal that is robust to noise. Square-wave shaped haar wavelets of decreasing granularity(see literature review) are fitted to data, the coefficients of each wavelet providing a means to reconstruct the original signal. Provided that the width of the signal being transformed is the same, coefficients can be compared to evaluate the similarity of a signal and its variance at different levels. \\ \\ % TODO add chapter reference
+	The Haar wavelet transform produces a representation of the variance in a signal that is robust to noise. Square-wave shaped haar wavelets of decreasing granularity(see literature review) are fitted to data, the coefficients of each wavelet providing a means to reconstruct the original signal. Provided that the width of the signal being transformed is the same, coefficients can be compared to evaluate the similarity of a signal and its variance at different levels. \\
 	The first 4 levels of granularity of Haar Wavelets will be used, giving 15 features in total (1 for the 1st level, 2 for the 2nd, 4 for the 3rd, and 8 for the 4th), as \verb#haar_n# for $n = 1 \ldots 15$. The transform requires that all datapoints are equally spaced in the time domain, the width of the signal is a power of 2, and there are no gaps. Both missing data and the short ends of the signal with be filled with 0s.
+	
+	\begin{figure}
+		\label{fig:haarwaveletexample}
+		\centering
+		Placeholder for image of Haar wavelet transformation of a lightcurve from the dataset
+		\caption{Haar wavelet transformation of a lightcurve from our dataset}
+	\end{figure}
 	
 	\subsection{Lomb-Scargle periodogram}
 	An implementation of the Lomb-Scargle periodogram based on the work in the paper \href{http://adsabs.harvard.edu/abs/1989ApJ...338..277P}{Fast algorithm for spectral analysis of unevenly sampled data} was taken from \url{http://www.astropython.org/blog/2010/9/Question-period-finding-packages-in-python}. This implementation allows us to extract as features the phase of significant peaks in the light curve and the intensity on these peaks. Computations are taken on centered (mean subtracted, divided by standard deviation) light curves and the top 5 frequences and their intensity are written as \verb#ls_phase(n)# and and \verb#ls_peak(n)# for $n = 1\ldots 5$. \\ % TODO add ref to paper
@@ -214,11 +161,11 @@
 	\section{Results}
 	
 	\section{Discussion}
-	\subsection{No distortions}
-	\subsection{Power law}
-	\subsection{Sparse data}
-	\subsection{On-line}
-	\subsection{All distortions}
+%	\subsection{No distortions}
+%	\subsection{Power law}
+%	\subsection{Sparse data}
+%	\subsection{On-line}
+%	\subsection{All distortions}
 
 	\section{Conclusion}
 	

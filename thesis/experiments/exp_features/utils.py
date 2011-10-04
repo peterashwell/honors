@@ -65,6 +65,8 @@ def linear_segmentation(lc):
 			flux.append(lc.flux[i])
 	return segments
 
+# TODO fix this the fucking timescales are all wrong, retard
+# Replace with a proper haar wavelet transform
 def haar_transform(flux):
 	# assume list is power of two long
 	averages = []
