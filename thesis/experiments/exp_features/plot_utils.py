@@ -65,6 +65,7 @@ param_vals, fscores, exp_desc):
 	for featname in featname_file:
 		featnames.append(featname.strip())
 	classes = fscores[featname.strip()].keys() # TODO fix this hard coding
+	print "pv:", param_vals
 	file_handle.write('\t\\begin{tabular}{|c|c|%s} \\hline' % ('l|' * len(param_vals)))
 	file_handle.write('\t \\multirow{2}{*}{\\textbf{Feature}} & \\multirow{2}{*}{\\textbf{Class}} \
 	& \\multicolumn{%d}{c|}{\\textbf{%s}} \\\\ \\cline{%s} \n' % (len(param_vals), param_name.title(), '{0}-{1}'.format(3, len(param_vals) + 2))) 
@@ -119,6 +120,12 @@ def produce_figure(file_handle, exp_desc, param_vals, fscores, param_name, basel
 	plt.xlabel(param_name)
 	plt.ylabel("F-Score")
 	plt.ylim([0,1])
+	# fix subtractive naming in featnames
+	for index, fn in enumerate(featnames):
+		if 'all' in fn:
+			pass
+		else:
+			featnames[index] = 'all {' + featnames[index] + '}'
 	legends = tuple(['Baseline'] + featnames)
 	plt.legend(legends, loc='best')
 	plt.savefig('{0}/{1}_fsplot.eps'.format(FIG_DIR, exp_desc.replace(' ', '-').replace('.',',')), format='eps')
@@ -138,7 +145,7 @@ def write_cm(file_handle, param_name, cms, param_vals, cm_orders, exp_desc):
 	file_handle.write('\\begin{figure}[ht!]\n')
 	file_handle.write('\t\\centering\n')
 	for cm, param_val, cm_order in zip(cms, param_vals, cm_orders):
-		file_handle.write('\t\\subfigure[%s at %s] {\n'\
+		file_handle.write('\ttiny{\\subfigure[%s at %s] {\n'\
 			 % (param_name, param_val))
 	
 		file_handle.write('\t\\begin{tabular}{|%s|} \hline\n' % ('l|' + 'l' * len(cm)))
@@ -147,7 +154,7 @@ def write_cm(file_handle, param_name, cms, param_vals, cm_orders, exp_desc):
 			% ('\\\\\n'.join(\
 				[chr(num + LET_A_ASCII) + ') ' + cm_order[num][:3] + ' & ' + ' & '.join(li) for num, li in enumerate(cm)])))
 		file_handle.write('\t\\end{tabular}\n')
-		file_handle.write('}\n')
+		file_handle.write('}}\n')
 	file_handle.write('\\caption{Confusion matrices for the %s experiment}\n' % (exp_desc.lower()))
 	file_handle.write('\\end{figure}\n')
 
@@ -194,7 +201,7 @@ def exp_subfigs(file_handle, exp_fname, param_val):
 		if subfig_count % len(LC_TYPES) == 0 and subfig_count != 0:
 			file_handle.write('\\\\\n')
 
-def produce_expsamp(file_handle, exp_fnames, params, param_name):
+def produce_expsamp(file_handle, exp_fnames, params, param_name, exp_desc):
 	print 'exp_fnames', exp_fnames
 	file_handle.write('\\begin{figure}[ht!]\n')
 	file_handle.write('\\centering\n')
@@ -216,5 +223,5 @@ def produce_expsamp(file_handle, exp_fnames, params, param_name):
 		#file_handle.write('\\caption{%s with %s at %s}\n' \
 		#	% (exp_fname.replace('_', '-').replace('.',','), param_name, params[exp_num]))
 		#file_handle.write('\\end{figure}\n')	
-	file_handle.write('\\caption{Sample lightcurves for the %s experiment}\n' % (param_name.lower()))
+	file_handle.write('\\caption{Sample lightcurves for the %s experiment}\n' % (exp_desc.lower()))
 	file_handle.write('\\end{figure}\n')

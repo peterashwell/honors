@@ -17,6 +17,14 @@
 -u -n 0.0 -a 30 -m 0
 -u -n 0.0 -a 20 -m 0
 -u -n 0.0 -a 10 -m 0
+#as	Varying available data, cropped training data
+-u -n 0.0 -a 100 -m 0
+-u -n 0.0 -a 90 -m 0
+-u -n 0.0 -a 70 -m 0
+-u -n 0.0 -a 50 -m 0
+-u -n 0.0 -a 30 -m 0
+-u -n 0.0 -a 20 -m 0
+-u -n 0.0 -a 10 -m 0
 #n	Varying noise
 -u -n 0.0 -a 100 -m 0
 -u -n 0.5 -a 100 -m 0
@@ -24,6 +32,14 @@
 -u -n 1.5 -a 100 -m 0
 -u -n 3.0 -a 100 -m 0
 #a	All distortions - 5 in 10 data missing
+-d -n 1.5 -a 100 -m 50
+-d -n 1.5 -a 90 -m 50
+-d -n 1.5 -a 70 -m 50
+-d -n 1.5 -a 50 -m 50
+-d -n 1.5 -a 30 -m 50
+-d -n 1.5 -a 20 -m 50
+-d -n 1.5 -a 10 -m 50
+#as	All distortions - 5 in 10 data missing, cropped training data
 -d -n 1.5 -a 100 -m 50
 -d -n 1.5 -a 90 -m 50
 -d -n 1.5 -a 70 -m 50

@@ -24,17 +24,17 @@
 %\begin{document}
 	%\maketitle
 	
-	\chapter{Supervised classification with statistical features} % TODO new title
+	\chapter{Supervised classification with statistical features, linear segmentation and wavelet transforms} % TODO new title
 	\section{Aim}
-		Supervised classifiers are an powerful and easily extensible way to incorporate many features of a data object into a classification scheme. In the context of light curve classification a variety of numerical features may be useful for discriminating between classes, from statistical properties of the flux values observed to coefficients extracted from wavelet transforms. The aim of these experiments is to assess the transient classification performance of numerical features within the experimental framework outlined in chapter (TODO ref chapter). As outlined in the framework chapter, each experiment will involve 10-fold cross validation with training features extracted from standardised light curves and tested on the remaining light curves with the distortions applied. The Random Forest is used as a classifier because of its robustness to confused and even contradictory features (as will occur frequently when the data is distorted) and good performance relative to other options (TODO ref). Performance will be evaluated in terms of F-Score, Precision and Recall microaveraged across each class. Running times for the classification post feature extraction will also be included. The results will form a baseline of classification performance to which more sophisticated features and techniques will be compared.
+		Supervised classifiers are an powerful and easily extensible way to incorporate many features of a data object into a classification scheme. In the context of light curve classification a variety of numerical features may be useful for discriminating between classes, from statistical properties of the flux values observed to coefficients extracted from wavelet transforms. The aim of these experiments is to assess the transient classification performance of numerical features within the experimental framework outlined in chapter~\ref{chap:experimentalframework}. As outlined in the framework chapter, each experiment will involve 10-fold cross validation with training features extracted from standardised light curves and tested on the remaining light curves with the distortions applied. The Random Forest is used as a classifier because of its robustness to confused and even contradictory features (as will occur frequently when the data is distorted) and good performance relative to other options. Performance will be evaluated in terms of F-Score, Precision and Recall microaveraged across each class. Running times for the classification post feature extraction will also be included. The results will form a baseline of classification performance to which more sophisticated features and techniques will be compared. % TODO what other classifiers did random forest beat
 
 	\section{Method}
-	This experiment follows the experimental framework outlined in chapter (TODO ref chapter). 10-fold cross validation is used on the set of light curves, the training light curves being undistorted and complete, and the test light curves with distortions applied as per the framework. For the implementation details see the relevant chapter.
+	This experiment follows the experimental framework outlined in chapter~\ref{chap:experimentalframework}. 10-fold cross validation is used on the set of light curves, the training light curves being undistorted and complete, and the test light curves with distortions applied as per the framework. For the implementation details see the relevant chapter.
 
 
-		The supervised classification method used is the Random Forest. The Random Forest classifier is a variant of the decision tree classifier that allows the discriminative powers of the features to be exploited more fully. Instead of a single decision tree producing a class output based on a set of rules, a series of decision trees (called a \emph{Forest}) working on a few randomly chosen features each provides a vote for the class of the subject. If a pair of features have contradictory classifications for a certain class but are good at discriminating amongst others, the Random Forest will allow them to be useful at once. In preliminary experiments (TODO ref appendix) the Random Forest performed favorably to other supervised classifiers such as (TODO what).\\ % TODO add a reference for decision tree, random forest, and this explanation (maybe a diagram)
+		The supervised classification method used is the Random Forest. The Random Forest classifier is a variant of the decision tree classifier that allows the discriminative powers of the features to be exploited more fully. Instead of a single decision tree producing a class output based on a set of rules, a series of decision trees (called a \emph{Forest}) working on a few randomly chosen features each provides a vote for the class of the subject. If a pair of features have contradictory classifications for a certain class but are good at discriminating amongst others, the Random Forest will allow them to be useful at once. In preliminary experiments the Random Forest performed as well as or better than other supervised classifiers.\\ % TODO add a reference for decision tree, random forest and experiments, and this explanation (maybe a diagram), other classifiers it did better than.
 
-	As per the evaluation section in chapter (TODO ref chapter) experimental results will be presented as confusion matrices, tables of precision, recall and F-score, and plots of F-score versus the distortion parameter within each experiment.
+	As per the evaluation section in chapter~\ref{chap:experimentalframework} experimental results will be presented as confusion matrices, tables of precision, recall and F-score, and plots of F-score versus the distortion parameter within each experiment.
 	
 	Additionally, each result table and plot will include subtractive analysis of the features with the removal of certain logical subsets. This will enable an effective comparison of the features used in terms of both overall and inter-class discrimination.
 	
@@ -57,7 +57,7 @@
 		& \verb#flux_hist_pos(inc)#  for $inc$ 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.75, 1, 1.5, 2, 3 & Fraction of \emph{positive} $z$-normalised flux values within $inc$ of the mean  \\ \cline{2-3}
 		& \verb#flux_hist_neg(inc)# for $inc$ 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.75, 1, 1.5, 2, 3 & Fraction of \emph{negative} $z$-normalised flux values within $inc$ of the mean  \\
 		\hline
-	\multirow{8}{*}{Gradient statistical features}
+	\multirow{8}{*}{Segmentation statistical features}
 		& \verb#grad_median# & Median of gradient distribution \\ \cline{2-3}
 		& \verb#grad_skew# & Skew of gradient distribution \\ \cline{2-3}
 		& \verb#grad_kurtosis# & Kurtosis of flux distribution \\ \cline{2-3}
@@ -83,7 +83,7 @@
 	% TODO features from "qualitative space fragmentation"
 
 	\subsection{Flux statistical features}
-	The absolute simplest features that could be useful in discriminating between astronomical light curves are statistical properties of the distribution of the magnitude or \emph{flux} of its elements. Information about the variability and dynamics of a transient is encoded in the shape of a histogram produced from the flux values. As with all feature extraction approaches in this thesis the light curves will undergo a $z$-normalisation (TODO ref) beforehand to eliminate the effects of amplitude scaling in the signal. The statistical properties we are interested in are the \emph{median}, \emph{kurtosis}, \emph{skew}, \emph{minimum} and \emph{maximum}, and the fractions of positive and negative elements of the flux set falling within predefined fractions of the standard deviation. These simple statistical features are fast to extract, very expressive, and should be somewhat robust to noise and missing data. The shape of the histogram will be affected far less under a noise distortion than features working on a point-by-point basis, such as distance measures. TODO add some references
+	The absolute simplest features that could be useful in discriminating between astronomical light curves are statistical properties of the distribution of the magnitude or \emph{flux} of its elements. Simple statistical features were used effectively to classify periodic astronomical light curve data in \citet{richards2011machine}. Information about the variability and dynamics of a transient is encoded in the shape of a histogram produced from the flux values. As with all feature extraction approaches in this thesis the light curves will undergo a $z$-normalisation beforehand to eliminate the effects of amplitude scaling in the signal. The statistical properties we are interested in are the \emph{median}, \emph{kurtosis}, \emph{skew}, \emph{minimum} and \emph{maximum}, and the fractions of positive and negative elements of the flux set falling within predefined fractions of the standard deviation. These simple statistical features are fast to extract, very expressive, and should be somewhat robust to noise and missing data. The shape of the histogram will be affected far less under a noise distortion than features working on a point-by-point basis, such as distance measures. % (TODO ref z-normalisation) 
 	
 	\subsubsection{Skew and Kurtosis}
 	\emph{Skew} and \emph{Kurtosis} are two statistical measures of the shape of a data distribution. Skew measures the degree of evenness in the distribution either side of the mean and for a set of flux values $f$ with mean $\bar{f}$ the skew is computed as:
@@ -98,17 +98,11 @@
 		{(\frac{1}{n}\sum\limits^{n}_{i=1}(f_{i} - \bar{f})^{2})^{2}} \\
 	\end{equation}
 	
-	Figure~\ref{fig:samplestats} shows two sample light curves, their flux histograms and the corresponding skew and kurtosis.  It illustrates the discriminatory power of these simple features.
+	Figure~\ref{fig:samplestats} shows two sample light curves, their flux histograms and the corresponding skew and kurtosis.  It illustrates the discriminatory power of these simple features. \\
+	
 	Skew is highest (in magnitude) for sources with sudden pesaks and troughs emerging from background noise in one direction. As a result, the Supernovae light curve has a very positive skew. The Extreme Scattering Event has a slightly negative skew because of the relative intensity of the central dip to the peaks either side. For sources that are slowly varying or consistent, and skew will be closest to zero. \\
 	
 	Kurtosis will be highest for signals that are extremely consistent or have very sudden variations. Signals that oscillate a great deal with have much lower kurtosis. Again, the supernovae, characterised by sudden sharp increases in flux, has a very high kurtosis. The ESE also has sudden variations, but not as strong as the Supernova. \\
-		
-	\begin{figure}[ht!]
-		\label{fig:samplestats}
-		\centering
-		\includegraphics[width=\textwidth]{/Users/peter/honors/thesis/experiments/exp_features/figures/sample_hist.eps}
-		\caption{Skewness, kurtosis, mean and standard deviation for some sample light curves}
-	\end{figure}
 	
 		
 	\subsubsection{Positive and negative flux histogram bands}
@@ -117,42 +111,54 @@
 	\begin{figure}[ht!]
 		\centering
 		\label{fig:histograms}
-		\includegraphics[width=\textwidth]{/Users/peter/honors/thesis/experiments/exp_features/figures/fluxperc_demo.eps}
+		\includegraphics[width=\textwidth]{/Users/peter/honors/thesis/experiments/exp_features/figures/SNe_IDV_fluxhist.eps}
 		\caption{Figure of histogram feature extraction}
 	\end{figure}
 	
-	The skew and kurtosis have little meaning for the IDV histogram, unlike for the SNe. An alternative to skew and kurtosis that will be more effective for classifying these kind of transients are extracting properties of the flux histogram at discrete intervals. Another simple feature that captures  information about the dynamics of the light curve are the fractions of both the positive and negative components of the ($z$-normalised) flux lying within predefined increments of the standard deviation from the mean. Note that under $z$-normalisation, the mean is 0 and the standard deviation is 1. Each fraction forms a single feature and the group of fractions forms a full feature set called \verb#flux_hist_pos# and \verb#flux_hist_neg# for the positive and negative components of the histogram respectively. The individual features are referred to as \verb#flux_hist_(pos)(neg)(inc)# for values of $inc$ at 5, 10, 20, 30, 40, 50, 60, 75, 100, 200, and 300 percent of the standard deviation.
+	The skew and kurtosis have little meaning for the IDV histogram, unlike for the SNe. An alternative to skew and kurtosis that will be more effective for classifying these kind of transients are extracting properties of the flux histogram at discrete intervals.\\
+	
+	Another simple feature that captures  information about the dynamics of the light curve are the fractions of both the positive and negative components of the (z-normalised) flux lying within predefined increments of the standard deviation from the mean. Note that under z-normalisation, the mean is 0 and the standard deviation is 1. Each fraction forms a single feature and the group of fractions forms a full feature set called \verb#flux_hist_pos# and \verb#flux_hist_neg# for the positive and negative components of the histogram respectively. The individual features are referred to as \verb#flux_hist_(pos)(neg)(inc)# for values of $inc$ at 5, 10, 20, 30, 40, 50, 60, 75, 100, 200, and 300 percent of the standard deviation. This feature is very similar to the histogram based classification of time series proposed in \citet{chen2005using}, as well as a similar approach involving bands around the median of the flux in \citet{richards2011machine}. 
 	
 	% TODO reference "Using multi-scale histograms to answer pattern existence and shape match queries over time series data"
 	
 	\subsection{Linear segmentation features}
-	In noisy, gappy data, extracting information about the time-domain behaviour of an event is difficult. A potential method for refining poor quality data into a useful set of simple shapes outlining its behaviour is the piecewise linear segmentation proposed in \citet{keogh2001online}. A bottom up segmentation of a time series into linear functions is produced, starting from every pair of adjacent points and progressively merging those points which give the lowest error in a line of best fit until the desired number of segments is reached. A visualization of the algorithm on a light curve from our dataset is presented in figure \ref{fig:linearsegmentation}.
+	In noisy, gappy data, extracting information about the time-domain behaviour of an event is difficult. A potential method for refining poor quality data into a useful set of simple shapes outlining its behaviour is the piecewise linear segmentation proposed in \citet{keogh2001online}. A bottom up segmentation of a time series into linear functions is produced, starting from every pair of adjacent points and progressively merging those points which give the lowest error in a line of best fit until the desired number of segments is reached. A visualization of the algorithm on a light curve from our dataset is presented in figure \ref{fig:linearsegexample}.
 	
-	\begin{figure}
-		\label{fig:linsegexample}
+	
+	\begin{figure}[ht!]
 		\centering
-		Placeholder for image of linear segmentation of a lightcurve from the dataset
-		\caption{Linear segmentation of a lightcurve from our dataset}
+		\label{fig:linsegexample}
+		\subfigure {
+			\includegraphics[width=0.45\textwidth]{/Users/peter/honors/thesis/experiments/exp_features/figures/ESE_segmentation_nonoise.eps}
+		}
+		\subfigure {
+			\includegraphics[width=0.45\textwidth]{/Users/peter/honors/thesis/experiments/exp_features/figures/ESE_segmentation.eps}
+		}
+		\caption{Linear segmentation of a lightcurve from our dataset, and then for the same lightcurve with 1.5 times its variance added as gaussian noise. The underlying structure is clearly revealed by the transformation.}
 	\end{figure}
 	
 	A histogram of gradients will be built from the linear segmentation. Each segment of a particular gradient will contribute a unit of that gradient value to the histogram for each time index falling under it. Note that this means longer events with the same structure should have the same histogram, making this feature time-scale invariant provided the start and end points of the event are known. All of the features extracted for the feature histogram are also extracted for this gradient histogram, as outlined in table~\ref{tab:features}.
 	
 	\subsection{Haar coefficients}
-	The Haar wavelet transform produces a representation of the variance in a signal that is robust to noise. Square-wave shaped haar wavelets of decreasing granularity(see literature review) are fitted to data, the coefficients of each wavelet providing a means to reconstruct the original signal. Provided that the width of the signal being transformed is the same, coefficients can be compared to evaluate the similarity of a signal and its variance at different levels. \\
-	The first 4 levels of granularity of Haar Wavelets will be used, giving 15 features in total (1 for the 1st level, 2 for the 2nd, 4 for the 3rd, and 8 for the 4th), as \verb#haar_n# for $n = 1 \ldots 15$. The transform requires that all datapoints are equally spaced in the time domain, the width of the signal is a power of 2, and there are no gaps. Both missing data and the short ends of the signal with be filled with 0s.
+	The Haar wavelet transform produces a representation of the variance in a signal that is robust to noise. Square-wave shaped haar wavelets of decreasing granularity(see literature review) are fitted to data, the coefficients of each wavelet providing a means to reconstruct the original signal. Provided that the width of the signal being transformed is the same, coefficients can be compared to evaluate the similarity of a signal and its variance at different levels.
 	
-	\begin{figure}
+	\begin{figure}[ht!]
 		\label{fig:haarwaveletexample}
 		\centering
-		Placeholder for image of Haar wavelet transformation of a lightcurve from the dataset
-		\caption{Haar wavelet transformation of a lightcurve from our dataset}
+		\includegraphics[width=100mm]{/Users/peter/honors/thesis/experiments/exp_features/figures/haarreconstruction.eps}
+		\caption{Reconstruction from haar wavelet coefficients of a signal}
 	\end{figure}
+	
+	The first 4 levels of granularity of Haar Wavelets will be used, giving 15 features in total (1 for the 1st level, 2 for the 2nd, 4 for the 3rd, and 8 for the 4th), as \verb#haar_n# for $n = 1 \ldots 15$. The transform requires that all datapoints are equally spaced in the time domain, the width of the signal is a power of 2, and there are no gaps. Both missing data and the short ends of the signal with be filled with 0s.
+	
+
 	
 	\subsection{Lomb-Scargle periodogram}
 	An implementation of the Lomb-Scargle periodogram based on the work in the paper \href{http://adsabs.harvard.edu/abs/1989ApJ...338..277P}{Fast algorithm for spectral analysis of unevenly sampled data} was taken from \url{http://www.astropython.org/blog/2010/9/Question-period-finding-packages-in-python}. This implementation allows us to extract as features the phase of significant peaks in the light curve and the intensity on these peaks. Computations are taken on centered (mean subtracted, divided by standard deviation) light curves and the top 5 frequences and their intensity are written as \verb#ls_phase(n)# and and \verb#ls_peak(n)# for $n = 1\ldots 5$. \\ % TODO add ref to paper
+	
 	\begin{figure}[ht!]
 		\label{fig:lsspectrum}
-		\includegraphics[width=\textwidth]{/Users/peter/honors/thesis/experiments/exp_features/figures/lomb_demo.eps}
+		\includegraphics[width=120mm]{/Users/peter/honors/thesis/experiments/exp_features/figures/lomb_demo.eps}
 		\caption{Spectrum produced by Lomb-Scargle periodogram for sample light curves}
 	\end{figure}
 	

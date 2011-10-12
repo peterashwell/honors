@@ -4,7 +4,8 @@ flux_skew	1
 flux_kurtosis	1
 flux_max	1
 flux_min	1
-flux_mean_percentiles	12
+flux_pos_percentiles	12
+flux_neg_percentiles	12
 #flux_time	Time-flux features
 grad_mean	1
 grad_stddev	1
@@ -14,7 +15,8 @@ grad_kurtosis	1
 grad_max	1
 grad_min	1
 complexity_dist	1
-grad_mean_percentiles	12
+grad_pos_percentiles	12
+grad_neg_percentiles	12
 #haar_transform	Haar wavelet transform coefficients
 haar_coeffs	15
 #spectral_features	LS periodogram peaks

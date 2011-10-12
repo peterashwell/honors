@@ -13,7 +13,7 @@ LC_DIR = '../lightcurves'
 CACHE_FNAME = 'features.cache'
 ARFF_DIR = 'arff'
 
-def dir_crossfold(train_dir, test_dir, out_dir):
+def dir_crossfold(train_dir, test_dir, out_dir, experiment_name):
 	# group light curves by class
 	lc_by_class = {}
 	for file in os.listdir('{0}/{1}'.format(LC_DIR, train_dir)):
@@ -72,8 +72,8 @@ def dir_crossfold(train_dir, test_dir, out_dir):
 	# produce the arff files for the light curve files in the crossfolds
 	for fold_num in xrange(NUM_FOLDS):
 		print "file {0} of {1}".format(fold_num + 1, NUM_FOLDS)
-		train_filename = '{0}/{1}/train{2}.arff'.format(out_dir, test_dir, fold_num)
-		test_filename = '{0}/{1}/test{2}.arff'.format(out_dir, test_dir, fold_num)
+		train_filename = '{0}/{1}/train{2}.arff'.format(out_dir, experiment_name, fold_num)
+		test_filename = '{0}/{1}/test{2}.arff'.format(out_dir, experiment_name, fold_num)
 		dyncache, dyncache_keyset = expdir_to_arff(train_folds[fold_num], dyncache, dyncache_keyset, train_dir, train_filename)
 		dyncache, dyncache_keyset = expdir_to_arff(test_folds[fold_num], dyncache, dyncache_keyset, test_dir, test_filename)
 		crossfold_files.append((train_filename, test_filename))
@@ -82,4 +82,4 @@ def dir_crossfold(train_dir, test_dir, out_dir):
 if __name__ == '__main__':
 	if (sys.argv) < 1:
 		print '<train> <test> <out> produce arff files for <train>/<test> 90/10 crossfolds to <out> dir'
-	dir_crossfold(sys.argv[1], sys.argv[2], sys.argv[3])	
+	dir_crossfold(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]) 

@@ -50,7 +50,7 @@ for line in exp_file:
 				# now produce a plot with matplotlib for the experiment
 				produce_figure(latex_output, exp_desc, param_vals, fscores, PARAM_NAMES[param], baseline_result, baseline_powlaw_result)
 				# and sample figures
-				produce_expsamp(latex_output, subexp_fnames, param_vals, PARAM_NAMES[param])
+				produce_expsamp(latex_output, subexp_fnames, param_vals, PARAM_NAMES[param], exp_desc)
 				write_cm(latex_output, PARAM_NAMES[param], cms, param_vals, cm_orders, exp_desc)  	
 				latex_output.write('\\clearpage\n')
 			elif param == 'b':
@@ -62,6 +62,10 @@ for line in exp_file:
 		line = line.strip()[1:].split('\t')
 		param = line[0]
 		exp_desc = line[1]
+		cropped = False
+		if param == 'as':
+			cropped = True
+			param = 'a'
 		
 		# empty all records regarding last experiment
 		# organise precision, recall and fscore according to featureset
@@ -84,6 +88,8 @@ for line in exp_file:
 	else: # routine in experiment
 		exp_fname, param_val = systematic_name(line.strip(), param)
 		subexp_fnames.append(exp_fname)
+		if cropped:
+			exp_fname += '_c'
 		
 		featname_file = open(FEATNAME_FNAME)
 		for featname in featname_file:

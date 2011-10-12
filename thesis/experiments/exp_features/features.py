@@ -33,21 +33,39 @@ def flux_only(lc):
 	
 	# Percentiles - one, fraction of data within regular inc * stddev from MEAN
 	increments = [0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.75, 1, 1.5, 2, 3]
-	flux_mean_percentiles = []
+	flux_pos_percentiles = []
 	flux_mean = numpy.mean(centered_flux)
 	flux_std = numpy.std(centered_flux)
 	inc_upto = 0
 	len_flux = len(centered_flux)
 	flux_pos = 0
-	sorted_abs_flux = sorted([math.fabs(f) for f in centered_flux])
-	#print sorted_abs_flux
+	sorted_pos_flux = sorted(filter(lambda f: f >= 0, centered_flux))
+	#print sorted_flux
 	for inc in increments:
 		f_index = 0
-		while f_index < len(sorted_abs_flux) and sorted_abs_flux[f_index] < flux_std * inc:
+		while f_index < len(sorted_pos_flux) and sorted_pos_flux[f_index] < flux_std * inc:
 			f_index += 1
 		#print "broke at bandwidth:", flux_std * inc
-	
-		flux_mean_percentiles.append((f_index * 1.0) / len(sorted_abs_flux))
+		if len(sorted_pos_flux) == 0:
+			flux_pos_percentiles.append(0)
+		else:
+			flux_pos_percentiles.append((f_index * 1.0) / len(sorted_pos_flux))
+		# Percentiles - one, fraction of data within regular inc * stddev from MEAN
+
+	flux_neg_percentiles = []
+	inc_upto = 0
+	flux_pos = 0
+	sorted_neg_flux = sorted([math.fabs(f) for f in filter(lambda f: f < 0, centered_flux)])
+	#print sorted_flux
+	for inc in increments:
+		f_index = 0
+		while f_index < len(sorted_neg_flux) and sorted_neg_flux[f_index] < flux_std * inc:
+			f_index += 1
+		#print "broke at bandwidth:", flux_std * inc
+		if len(sorted_neg_flux) == 0:
+			flux_neg_percentiles.append(0)
+		else:
+			flux_neg_percentiles.append((f_index * 1.0) / len(sorted_neg_flux))
 	# Percentiles - two, spread of data within regular inc * stddev from MEDIAN
 	#stddev_increments = [0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.75, 1, 1.5, 2, 3]
 	#flux_med_percentiles = []
@@ -62,10 +80,12 @@ def flux_only(lc):
 	# Maximum and minimum
 	flux_max = max(centered_flux)
 	flux_min = min(centered_flux) 
-	
+	print "flux:", centered_flux
+	print "flux_pos_percentiles:", flux_pos_percentiles
+	print "flux_neg_percentiles:", flux_neg_percentiles
 	features = [flux_median, flux_skew, flux_kurtosis] + \
 	       [flux_max, flux_min]	+ \
-	        flux_mean_percentiles #+ flux_med_percentiles
+	        flux_pos_percentiles + flux_neg_percentiles #+ flux_med_percentiles
 	#print "len flux only:", len(features)
 	return features
 
@@ -151,7 +171,7 @@ def time_flux(lc):
 	# Gradient statistical features
 	gradients = [] # Build histogram of gradient masses
 	for seg, coeff in izip(segments, coeffs):
-		gradients += [coeff[0] for t in xrange(seg[1] + 1)]
+		gradients += [coeff[0] for t in xrange(seg[0], seg[1] + 1)]
 	grad_mean = numpy.mean(gradients)
 	grad_med = numpy.median(gradients)
 	grad_stddev = numpy.std(gradients)
@@ -162,16 +182,33 @@ def time_flux(lc):
 
 	# Gradient percentiles (from histogram) (MEDIAN and MEAN)
 	increments = [0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.75, 1, 1.5, 2, 3]
-	grad_mean_percentiles = []
-	len_gradients = len(gradients)	
+	grad_pos_percentiles = []
 #	print gradients
-	sorted_abs_gradients = sorted([math.fabs(g) for g in gradients])
+	sorted_pos_gradients = sorted(filter(lambda g: g >= 0, gradients))
 	for inc in increments:
 		g_index = 0
-		while g_index < len(sorted_abs_gradients) and sorted_abs_gradients[g_index] < grad_stddev * inc:
+		while g_index < len(sorted_pos_gradients) and sorted_pos_gradients[g_index] < grad_stddev * inc:
 			g_index += 1
-		grad_mean_percentiles.append((g_index * 1.0) / len_gradients)
-	#for tol in increments:
+		len_gradients = len(sorted_pos_gradients)
+		if len_gradients == 0:
+			grad_pos_percentiles.append(0)
+		else:
+			grad_pos_percentiles.append((g_index * 1.0) / len_gradients)
+	
+	grad_neg_percentiles = []
+	sorted_neg_gradients = sorted([math.fabs(f) for f in filter(lambda g: g < 0, gradients)])
+	#nprint sorted_neg_gradients
+	#print len(sorted_neg_gradients)
+	for inc in increments:
+		g_index = 0
+		while g_index < len(sorted_neg_gradients) and sorted_neg_gradients[g_index] < grad_stddev * inc:
+			g_index += 1
+		len_gradients = len(sorted_neg_gradients)
+		if len_gradients == 0:
+			grad_neg_percentiles.append(0)
+		else:
+			grad_neg_percentiles.append((g_index * 1.0) / len_gradients)
+	
 	#	mean_within_buf = 0
 	#	med_within_buf = 0
 	#	buffer = grad_stddev * tol
@@ -182,8 +219,11 @@ def time_flux(lc):
 	#			med_within_buf += 1
 	#	grad_mean_percentiles.append(mean_within_buf / (1.0 * len(gradients)))
 	#	grad_med_percentiles.append(med_within_buf / (1.0 * len(gradients)))
+	print "gradients:", gradients, len(gradients)
+	print "grad_pos_percentiles:", grad_pos_percentiles
+	print "grad_neg_percentiles:", grad_neg_percentiles
 	features = [grad_mean, grad_stddev, grad_med, grad_skew, \
 	            grad_kurtosis, grad_max, grad_min, complexity_dist] \
-	            + grad_mean_percentiles
+	            + grad_pos_percentiles + grad_neg_percentiles
 	#print "len time flux:", len(features)
 	return features

@@ -68,7 +68,7 @@ def expdir_to_arff(lc_files, dyncache, dyncache_keyset, exp_dir, arff_fname):
 	to_process = len(lc_files)
 	lc_file = None
 #	try: # to stop corruption of the cache
-	increment = int(round((to_process / 5)))
+	increment = int(round((to_process / 10)))
 	done = 0
 	
 	conn = sqlite3.connect('feat_cache.db')
@@ -76,8 +76,8 @@ def expdir_to_arff(lc_files, dyncache, dyncache_keyset, exp_dir, arff_fname):
 
 	for lc_file in lc_files:
 		#print lc_file
-		#if done % increment == 0 and done != 0:
-		#	print "{0}/{1}".format(done, len(lc_files))
+		if done % increment == 0 and done != 0:
+			print "{0}/{1}".format(done, len(lc_files))
 		done += 1
 
 		# look for cache hit
@@ -99,7 +99,6 @@ def expdir_to_arff(lc_files, dyncache, dyncache_keyset, exp_dir, arff_fname):
 				features = lc_to_features(lc)
 				c.execute('''insert into featcache values {0}'''.format(tuple([lc_path] + features)))
 			else:
-				print "found in db"
 				features = search_result[0][1:] # fetch features and remove key
 			# either if extracted or fetched from db, add to dynamic cache
 			dyncache[lc_path] = features

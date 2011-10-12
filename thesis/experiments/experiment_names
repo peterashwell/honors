@@ -17,6 +17,14 @@ norm_n0.0_a50_m0_s400
 norm_n0.0_a30_m0_s400
 norm_n0.0_a20_m0_s400
 norm_n0.0_a10_m0_s400
+#as Varying available data, cropped training data
+norm_n0.0_a100_m0_s400_c
+norm_n0.0_a90_m0_s400_c
+norm_n0.0_a70_m0_s400_c
+norm_n0.0_a50_m0_s400_c
+norm_n0.0_a30_m0_s400_c
+norm_n0.0_a20_m0_s400_c
+norm_n0.0_a10_m0_s400_c
 #n	Varying noise
 norm_n0.0_a100_m0_s400
 norm_n0.5_a100_m0_s400
@@ -31,4 +39,12 @@ powlaw_n1.5_a50_m50_s400
 powlaw_n1.5_a30_m50_s400
 powlaw_n1.5_a20_m50_s400
 powlaw_n1.5_a10_m50_s400
+#as	All distortions - 5 in 10 data missing, cropped training data
+powlaw_n1.5_a100_m50_s400_c
+powlaw_n1.5_a90_m50_s400_c
+powlaw_n1.5_a70_m50_s400_c
+powlaw_n1.5_a50_m50_s400_c
+powlaw_n1.5_a30_m50_s400_c
+powlaw_n1.5_a20_m50_s400_c
+powlaw_n1.5_a10_m50_s400_c
 #c	None

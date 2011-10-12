@@ -1,0 +1,188 @@
+\documentclass{beamer}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+
+%Darmstadt
+\usepackage[utf8x]{inputenc}
+\usetheme{Frankfurt}
+\setbeamertemplate{navigation symbols}{}
+
+\title{Data Clustering: A Review\\A.K Jain, M.N. Murty and P.J. Flynn}
+\author{Peter Ashwell, Alex Batten, Adam Petrovic, David Rizzuto}
+\date{\today}
+
+\begin{document}
+
+\frame{
+\titlepage
+}
+
+\section{Introduction}
+    %You can put a title in the subsection argument if you want a sub title.
+    \subsection{}
+        \frame
+        {
+            \frametitle{Aim of the Paper}
+            This paper aims to survey and review known and emerging clustering methods (as of 2000), and compare them to show the strengths and weaknesses of each method.
+
+            The authors also attempt to demonstrate some applications for clustering, and how to deal with common issues faced when clustering.
+        }
+
+\section{Structure}
+    \subsection{}
+        \frame
+        {
+            \frametitle{Structure of the Paper}
+                \begin{enumerate}
+                    \item Introduction
+                    \item Background, terms and definitions
+                    \item Pattern representation, feature extraction/selection
+                    \item Similarity measures
+                    \item Clustering techniques, both common and emerging methods
+                    \item Applications
+                \end{enumerate}
+        }
+
+\section{Main Ideas}
+    \subsection{}
+        \frame
+        {
+			\frametitle{Hierarchical Clustering}
+			\begin{block}{Agglomerative Clustering}
+				Start with every data point in its own cluster and merge until a threshold is met
+			\end{block}
+			
+			\begin{figure}
+				\centering
+				\includegraphics[width=60mm]{hierarchical.png}
+				\caption{Measures used in merging clusters}
+			\end{figure}
+		}
+
+        \frame
+        {
+            \frametitle{Partitional Clustering 1: Discrete Methods}
+            \begin{itemize}
+                \item Square-Error Algorithms
+                    \begin{itemize}
+                        \item k-means/fuzzy k-means
+                        \item ISODATA
+                    \end{itemize}
+                \item Graph-Theoretic
+                    \begin{itemize}
+                        \item MST/Delauney-Triangulation based
+                        \item Nearest Neighbour
+                    \end{itemize}
+            \end{itemize}
+
+            \includegraphics[width=0.5\textwidth]{partition_2.png}
+            \includegraphics[width=0.5\textwidth]{partition_1.png}
+            \begin{center}
+                {\sc Left:} Fuzzy Clustering, {\sc Right:} MST-based clustering
+            \end{center}
+        }
+
+        \frame
+        {
+            \frametitle{Partitional Clustering 2: Optimization/Search Methods}
+                \begin{itemize}
+                    \item Heuristic Methods
+                        \begin{itemize}
+                            \item simulated annealing/gradient descent
+                        \end{itemize}
+                    \item Genetic Algorithms
+                    \item Neural-Networks
+                    \item Mixture Resolving
+                        \begin{itemize}
+                            \item Expectation Maximization
+                            \item Nonparametric Methods
+                        \end{itemize}
+                \end{itemize}
+                \begin{center}
+                    \includegraphics[width=0.5\textwidth]{partition_3.png}\\
+                    {\sc Above:} Clustering as a global optimization problem
+                \end{center}
+        }
+
+        \frame
+        {
+            \frametitle{Applications 1}
+			\begin{itemize}
+				\item Image segmentation and processing
+				\item Object and character recognition
+			\end{itemize}
+
+			\begin{figure}
+				\includegraphics[width=100mm]{landsat.png}
+				\caption{Segmenting of satellite imagery reveals water bodies}
+			\end{figure}
+		}
+
+		\frame
+		{
+			\frametitle{Applications 2}
+			\begin{itemize}
+				\item Information Retrieval
+				\item Data mining
+			\end{itemize}
+			\begin{figure}
+				\includegraphics[width=90mm]{unsupervised_document.png}
+				\caption{Clusters of words that are similar in terms of their context of use}
+			\end{figure}
+		}
+
+\section{Highlights}
+    \subsection{}
+        \frame
+        {
+			\frametitle{General Highlights}
+			\begin{itemize}
+				\item Introductory language, useful for a general scientific audience
+				\item Diverse coverage of practical applications
+				\item Wholistic approach to clustering, from domain knowledge, feature selection through to algorithms and applications
+			\end{itemize}
+        }   
+
+        \frame
+        {
+	        \frametitle{Specific Highlights}
+			\begin{itemize}
+				\item Good section on the users dilemma: questions to ask in trying to apply clustering
+				\item Comparison of clustering algorithms for large data sets
+				\item Texture segmentation using Gabor filter
+			\end{itemize}
+			\begin{figure}
+				\includegraphics[width=80mm]{texture.png}
+				\caption{Textures automatically segmented using k-means with Gabor filter features}
+			\end{figure}
+		}
+
+\section{Drawbacks}
+    \subsection{}
+        \frame
+        {
+            \frametitle{Main Drawbacks of the Paper}
+            \begin{block}{Objective Functions}
+                States that many clustering algorithms optimize the ``squared error'' function, which leads to globular clusters. 
+                
+                However other objective functions are not mentioned or explored.
+            \end{block}
+            \pause
+            \begin{alertblock}{Comparison of Techniques}
+                Some non-mainstream techniques are simply described, and not compared against other methods.
+                
+                For example: NN-clustering and Nonparametric methods for density-based clustering
+            \end{alertblock}
+        }
+\section{Conclusion}
+    \subsection{}
+        \frame
+        {
+            \frametitle{Conclusion}
+            In conclusion this paper this paper is a good high level introduction to clustering circa 2000. It covers all known techniques, and demonstrates their possible uses.
+
+            However the comparisons are at times incomplete, and the level of detail is not enough for anyone with serious interest in the field to be able to choose a clustering method for their application.
+        }
+\end{document}
