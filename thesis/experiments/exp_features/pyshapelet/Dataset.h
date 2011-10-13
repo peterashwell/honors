@@ -13,13 +13,33 @@ class Dataset {
 	private:
 		std::vector<TimeSeries*> data;
 		std::vector<std::string> types;
+
 	public:
 		void load(std::string load_dir);
 		std::vector<TimeSeries*>& getData();
 		std::vector<std::string>& getTypes();
 		Dataset();
 		~Dataset();
+		std::vector<TimeSeries*>::iterator begin();
+		std::vector<TimeSeries*>::iterator end();
+		int size();
 };
+
+int Dataset::size() {
+	return types.size();
+}
+
+std::vector<TimeSeries*>::iterator Dataset::begin() {
+	return data.begin();
+}
+
+std::vector<TimeSeries*>::iterator Dataset::end() {
+	return data.end();
+}
+
+Dataset::Dataset() {
+	// nothing
+}
 
 Dataset::~Dataset() {
 	std::vector<TimeSeries*>::iterator iter;

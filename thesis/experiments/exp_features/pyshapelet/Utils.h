@@ -44,7 +44,8 @@ void split(const string &s, char delim, vector<string> &elems) {
 }
 
 int readTimeSeries(string &filename, vector<float> &times, vector<float> &fluxes) {
-	ifstream in(filename.c_str());
+	string path = "shapelet_train/" + filename;
+	ifstream in(path.c_str());
 	string line;
 	// <strong class="highlight">read</strong> in each line
 	while(getline(in,line)) {
@@ -54,10 +55,15 @@ int readTimeSeries(string &filename, vector<float> &times, vector<float> &fluxes
 		float flux;
 		from_string<float>(time, tokens.at(0), dec);
 		from_string<float>(flux, tokens.at(1), dec);
-		cout << time << " " << flux << endl;
 		times.push_back(time);
 		fluxes.push_back(flux);
 	}
 }
+
+struct MDSort {
+	bool operator() (const std::pair<float, &string>& lhs, const pair<float, &string>& rhs) const {
+		return (lhs.first < rhs.first);
+	}
+};
 
 #endif

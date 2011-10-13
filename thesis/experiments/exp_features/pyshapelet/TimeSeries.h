@@ -17,10 +17,15 @@ class TimeSeries {
 	public:
 		string load(string &fname);
 		int size();
+		float fluxAt(int index);
 };
 
 int TimeSeries::size() {
 	return times.size();
+}
+
+float TimeSeries::fluxAt(int index) {
+	return flux.at(index);
 }
 
 string TimeSeries::load(string &fname) {
