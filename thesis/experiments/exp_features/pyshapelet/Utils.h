@@ -7,6 +7,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <utility>
 
 using namespace std;
 
@@ -51,6 +52,9 @@ int readTimeSeries(string &filename, vector<float> &times, vector<float> &fluxes
 	while(getline(in,line)) {
 		vector<string> tokens;
 		split(line, '\t', tokens);
+		if (tokens.size() == 0) {
+			return false;
+		}
 		float time;
 		float flux;
 		from_string<float>(time, tokens.at(0), dec);
@@ -58,11 +62,18 @@ int readTimeSeries(string &filename, vector<float> &times, vector<float> &fluxes
 		times.push_back(time);
 		fluxes.push_back(flux);
 	}
+	return true;
 }
 
-struct MDSort {
-	bool operator() (const std::pair<float, &string>& lhs, const pair<float, &string>& rhs) const {
+struct MDSortOnDistance {
+	bool operator() (const pair<float, string>& lhs, const pair<float, string>& rhs) {
 		return (lhs.first < rhs.first);
+	}
+};
+
+struct MDSortOnLabels {
+	bool operator() (const pair<float, string>& lhs, const pair<float, string>& rhs) {
+		return (lhs.second.compare(rhs.second) < 0);
 	}
 };
 

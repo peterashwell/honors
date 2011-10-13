@@ -21,6 +21,8 @@ int main(int argc, char* argv[]) {
 	Dataset sample;
 	sample.load(sample_dir);
 
+	cout << "done loading" << endl;
+	
 	Dataset train;
 	train.load(train_dir);
 

@@ -1,5 +1,6 @@
 #include <vector>
 #include <string>
+#include <tr1/unordered_map>
 
 #include "TimeSeries.h"
 #include "Utils.h"
@@ -13,11 +14,12 @@ class Dataset {
 	private:
 		std::vector<TimeSeries*> data;
 		std::vector<std::string> types;
-
+		std::tr1::unordered_map<std::string, int> class_counts;
 	public:
 		void load(std::string load_dir);
 		std::vector<TimeSeries*>& getData();
 		std::vector<std::string>& getTypes();
+		int numOfClass(string& s);
 		Dataset();
 		~Dataset();
 		std::vector<TimeSeries*>::iterator begin();
@@ -47,6 +49,16 @@ Dataset::~Dataset() {
 		free(*iter); // free each time series pointer
 	}
 }
+
+int Dataset::numOfClass(string& type) {
+	if ( class_counts.find(type) == class_counts.end() ) {
+		return class_counts[type];
+	}
+	else {
+		return 0;
+	}
+}
+
 std::vector<TimeSeries*>& Dataset::getData() {
 	return data;
 }
@@ -55,19 +67,35 @@ std::vector<std::string>& Dataset::getTypes() {
 }
 
 void Dataset::load(std::string load_dir) {
+	cout << "loading from directory " << load_dir << endl;
 	std::vector<std::string> dir_list;
+
 	getdir(load_dir, dir_list); // See Utils.h	
 	
 	// Load each time series into the dataset, recording class data
 	std::vector<std::string>::iterator iter;	
+	cout << "Loading " << dir_list.size() << "files" << endl;
 	for (iter = dir_list.begin(); iter != dir_list.end(); iter++) {
+		if (iter->compare(string(".")) == 0 or iter->compare(string("..")) == 0) {
+			continue;
+		}
 		TimeSeries* t = new TimeSeries();
 		string type = t->load(*iter);
 		data.push_back(t); // copy t into vector
 		types.push_back(type); // see Utils.h	
 		cout << "Type:" << type << endl;
+		if ( class_counts.find(type) == class_counts.end() ) {
+			class_counts[type] = 1;
+		}
+		else {
+			class_counts[type]++;
+		}
 	}
 	cout << "Loaded " << data.size() << " time series" << endl;
+	std::tr1::unordered_map<string, int>::iterator c_count;
+	for (c_count = class_counts.begin(); c_count != class_counts.end(); c_count++) {
+		cout << (*c_count).first << ": " << (*c_count).second << endl;
+	}
 }
 
 
