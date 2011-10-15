@@ -10,7 +10,7 @@ from itertools import izip
 import matplotlib.pyplot as plt
 import utils
 
-def flux_only(lc):
+def flux_features(lc):
 	# Centered and sorted flux to work with
 	mean = numpy.mean(lc.flux)
 	stddev = numpy.std(lc.flux)
@@ -144,7 +144,7 @@ def haar_coeffs(lc):
 	#	norm_transform += [0.0] * (TOP_COEFFS - len(norm_transform))
 	return norm_transform
 
-def time_flux(lc):
+def grad_features(lc):
 	# Center the flux
 	stddev = numpy.std(lc.flux)
 	mean = numpy.mean(lc.flux)

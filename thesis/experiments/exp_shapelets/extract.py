@@ -9,7 +9,8 @@ CONFIG_FILE = "config"
 configs = eval(open(CONFIG_FILE).read().strip())
 CF_DIR = configs["CROSSFOLD_DIR"]
 LC_DIR = configs["LIGHTCURVE_DIR"]
-
+RAW_FEAT_DIR = configs["RAW_FEATURE_DIR"]
+JOINED_FEAT_DIR = configs["JOINED_FEATURE_DIR"]
 # Read features.config file in experiment directory and extract features
 # Features stored as:
 #	features/
@@ -35,6 +36,16 @@ for line in feature_config:
 	
 	# Extract features using given parameters and store according to directory structure above
 	line = line.strip().split(',')
-	feature_func = line[0]
-	args = line[1]
-			
+	if compute:
+		feature_func = line[0]
+		args = line[1:]
+		extract_dir = "{0}/{1}".format(RAW_FEAT_DIR, feature_func)
+		print extract_dir
+		print args
+	if not compute: # Features we are to display
+		id = line[0]
+		name = line[1]
+		to_join = line[2:]
+		join_dir = "{0}/{1}".format(JOINED_FEAT_DIR, id)
+		print join_dir	
+		print to_join

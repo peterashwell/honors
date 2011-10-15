@@ -2,4 +2,6 @@
 "CROSSFOLD_DIR" : "crossfold"\
 ,"LIGHTCURVE_DIR" : "lightcurves"\
 ,"NUM_CROSSFOLDS" : 10\
+,"RAW_FEATURE_DIR" : "raw_features"\
+,"JOINED_FEATURE_DIR" : "joined_features"\
 }
