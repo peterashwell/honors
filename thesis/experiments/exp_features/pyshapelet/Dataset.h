@@ -16,7 +16,7 @@ class Dataset {
 		std::vector<std::string> types;
 		std::tr1::unordered_map<std::string, int> class_counts;
 	public:
-		void load(std::string load_dir, int limit);
+		void load(std::string load_dir);
 		std::vector<TimeSeries*>& getData();
 		std::vector<std::string>& getTypes();
 		int numOfClass(string& s);
@@ -75,6 +75,7 @@ void Dataset::load(std::string load_dir) {
 	// Load each time series into the dataset, recording class data
 	std::vector<std::string>::iterator iter;	
 
+	int limit = 50;
 	if (limit > dir_list.size()) {
 		cout << "Error: trying to load more files in directory (" << limit << 
 		") than there are (" << dir_list.size() << "). Using max number of files" << endl;

@@ -2,6 +2,9 @@ PROJ = standalone
 
 all: pdf
 
+prelim:
+	pdflatex -shell-escape prelim_results.tex
+
 pdf:
 	pdflatex -shell-escape $(PROJ)
 	bibtex $(PROJ)

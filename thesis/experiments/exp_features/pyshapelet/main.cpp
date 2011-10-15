@@ -17,19 +17,20 @@ int MAX_LENGTH = 100;
 int STEPSIZE = 10;
 
 int main(int argc, char* argv[]) {
-	//std::string sample_dir = argv[1];
-	//std::string train_dir = argv[2];
-	//std::string out_dir = argv[3];
 	
-	string sample_dir = "nosample";
-	string train_dir = "notrain";
-	std::cout << "sd: " << sample_dir << " td: " << train_dir << endl; //" od: " << out_dir << std::endl;	
+	//string sample_dir = "nosample";
+	//string train_dir = "notrain";
 	string crossfold = "-1"; // extract crossfolds one at a time for hacky parallellism
 	bool use_dtw = false; // use dynamic time warping as distance measure
 	bool use_md = true; // use minimum distance as distance measure
 	bool use_scaling = false; // use scaling in distance measure
 	string train_amt = "-1"; // number of training light curves to use from train
 	string samp_amt = "-1"; // number of sample light cruves to use
+	
+	std::string sample_dir = argv[1];
+	std::string train_dir = argv[2];
+	std::string out_dir = argv[3];
+	std::cout << "sd: " << sample_dir << " td: " << train_dir << endl; //" od: " << out_dir << std::endl;	
 	
 	char c;
 	while ((c = getopt (argc, argv, "dac:s:t:T:S:")) != -1)
@@ -78,7 +79,7 @@ int main(int argc, char* argv[]) {
 				abort ();
 		}
 	}
-
+	/*
 	cout << "crossfold" << crossfold << endl;
 	cout << "sd: " << sample_dir << " td: " << train_dir << " cf: " << crossfold << " md: " << use_md << " dtw: " << use_dtw << " ta: " << train_amt
 	  << " sa: " << samp_amt << endl;
@@ -100,15 +101,15 @@ int main(int argc, char* argv[]) {
 
 	cout << "train: " << train_cf_dir << endl;
 	cout << "sample: " << sample_cf_dir << endl;
-	cout << "out: " << out_dir << endl;
+	cout << "out: " << out_dir << endl; */
 	// Read in files in given source and training directories
 	Dataset sample;
-	//sample.load(sample_cf_dir, limit);
+	sample.load(sample_dir);
 
 	cout << "done loading" << endl;
 	
 	Dataset train;
-	//train.load(train_dir, limit);
+	train.load(train_dir);
 
 	ShapeletFinder res;
 	//res.extractShapelets(sample, train);
