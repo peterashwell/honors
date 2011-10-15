@@ -1,0 +1,5 @@
+{\
+"CROSSFOLD_DIR" : "crossfold"\
+,"LIGHTCURVE_DIR" : "lightcurves"\
+,"NUM_CROSSFOLDS" : 10\
+}

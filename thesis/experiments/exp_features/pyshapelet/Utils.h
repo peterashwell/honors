@@ -44,8 +44,7 @@ void split(const string &s, char delim, vector<string> &elems) {
 	}
 }
 
-int readTimeSeries(string &filename, vector<float> &times, vector<float> &fluxes) {
-	string path = "shapelet_train/" + filename;
+int readTimeSeries(string &path, vector<float> &times, vector<float> &fluxes) {
 	ifstream in(path.c_str());
 	string line;
 	// <strong class="highlight">read</strong> in each line

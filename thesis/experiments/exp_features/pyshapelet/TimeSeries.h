@@ -16,7 +16,7 @@ class TimeSeries {
 		vector<float> flux;
 		vector<bool> missing;
 	public:
-		string load(string &fname);
+		string load(string& path, string &fname);
 		int size();
 		string& getType();
 		float fluxAt(int index);
@@ -39,9 +39,10 @@ float TimeSeries::fluxAt(int index) {
 	return flux.at(index);
 }
 
-string TimeSeries::load(string &fname) {
-	source_file = fname;
-	readTimeSeries(fname, times, flux); // TODO missing data 	
+string TimeSeries::load(string& path, string &fname) {
+	source_file = path + "/" + fname;
+	cout << "reading file: " << source_file << endl;;
+	readTimeSeries(source_file, times, flux); // TODO missing data 	
 	vector<string> fname_split;
 	split(fname, '_', fname_split);
 	type = fname_split.at(0);

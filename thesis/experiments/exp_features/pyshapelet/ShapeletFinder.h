@@ -15,16 +15,16 @@ class ShapeletFinder {
 		vector<float> information_gain;
 		vector<Shapelet> shapelets;
 		int SHAPELET_ID; // id of shapelet we are up to
-		static const int MAX_LEN = 100;
+		static const int MAX_LEN = 80;
 		static const int MIN_LEN = 20;
 		static const int STEPSIZE = 20;
 		static const int NUM_LABELS = 8; // TODO define somewhere else
 		ofstream shapelet_index;
 		ofstream class_index;
-		float getSplitEntropy(vector<pair<float, string> >& vals);
-		float getSetEntropy(vector<pair<float, string> >::iterator iter, vector<pair<float, string> >::iterator end, int size);
+		float getSplitEntropy(vector<pair<float, string> >& vals, float& sepdist, string& st);
+		float getSetEntropy(vector<pair<float, string> >::iterator iter, vector<pair<float, string> >::iterator end, int size, string& st);
 		float minimumDistance(Shapelet& shapelet, TimeSeries* ts);
-		float informationGain(Shapelet& shapelet, Dataset& train);
+		float informationGain(Shapelet& shapelet, Dataset& train, float& sepdist);
 		void computeDistances(Dataset& sample, Dataset& train, string& outdir);
 		float getSepDist(vector<pair<float,string> >::iterator s, vector<pair<float, string> >::iterator e, int bp);
 	public:
@@ -61,15 +61,17 @@ void ShapeletFinder::computeDistances(Dataset& sample, Dataset& train, string& o
 	clock_t start = clock();
 	int done = 0;
 	for (ts = sample.begin(); ts != sample.end(); ++ts) {
+		cout << "source file: " << (*ts)->getSourceFile() << endl;
 		// Get subsequences
 		for (int slen = MIN_LEN; slen <= MAX_LEN; slen += STEPSIZE) {
 			cout << "\tlen:" << slen << endl;
 			for (int start = 0; start < (*ts)->size() - slen; ++start) {
 				shapelet_index << SHAPELET_ID << "," << (*ts)->getSourceFile() << "," << start << "," << slen;
-				cout << "\t\tstart: " << start << endl;
+				//cout << "\t\tstart: " << start << endl;
 				Shapelet ns(slen, start, *ts, (*ts)->getType());	// TODO create shapelet using length, start, and TimeSeries
-				float ig = informationGain(ns, train); // Find information gain on training dataset
-				shapelet_index << "," << ig << endl;
+				float sepdist;
+				float ig = informationGain(ns, train, sepdist); // Find information gain on training dataset
+				shapelet_index << "," << ig << "," << sepdist << endl;
 				//shapelet_type.push_back(*sampled_type);
 				//information_gain.push_back(ig);
 				//shapelets.push_back(ns);
@@ -84,16 +86,17 @@ void ShapeletFinder::computeDistances(Dataset& sample, Dataset& train, string& o
 }
 
 float ShapeletFinder::minimumDistance(Shapelet& shapelet, TimeSeries* ts) {
-	float smallest = 999999999; // just in case for loop fails 
+	float smallest; // just in case for loop fails 
 	bool first = true;
 	int sh_len = shapelet.getLength();
+	
 	/*
 	cout << "running from 0 to " << ts->size() - shapelet.getLength() << endl;
 	cout << "shapelet length: " << sh_len << endl;
 	cout << "shapelet type: " << shapelet.getType() << endl;
 	cout << "ts class: " << ts->getType() << endl;
 	cout << "ts length: " << ts->size() << endl;
-	*/
+*/
 	for (int start = 0; start < ts->size() - shapelet.getLength(); ++start) {
 		float distance = 0;
 		for (int index = 0; index < min(sh_len, ts->size()); ++index) {
@@ -120,7 +123,7 @@ float ShapeletFinder::minimumDistance(Shapelet& shapelet, TimeSeries* ts) {
 	return sqrt(smallest) / shapelet.getLength();
 }
 
-float ShapeletFinder::getSplitEntropy(vector<pair<float, string> >& vals) {
+float ShapeletFinder::getSplitEntropy(vector<pair<float, string> >& vals, float& sepdist, string& st) {
 	vector<pair<float, string> >::iterator iter;
 
 	//cout << "first set" << endl;
@@ -133,10 +136,10 @@ float ShapeletFinder::getSplitEntropy(vector<pair<float, string> >& vals) {
 		int D_R_size = vals.size() - bp;
 	
 		// Compute set entropy of D_l and D_r
-		float D_L_entropy = getSetEntropy(vals.begin(), vals.begin() + bp, D_L_size);	
-		float D_R_entropy = getSetEntropy(vals.begin() + bp, vals.end(), D_R_size);
+		float D_L_entropy = getSetEntropy(vals.begin(), vals.begin() + bp, D_L_size, st);	
+		float D_R_entropy = getSetEntropy(vals.begin() + bp, vals.end(), D_R_size, st);
 		float infgain = ((D_L_size * 1.0) / vals.size()) * D_L_entropy + ((D_R_size * 1.0) / vals.size()) * D_R_entropy;
-		cout << "infgain at split: " << bp << " is: " << infgain << endl;
+		//cout << "infgain at split: " << bp << " is: " << infgain << endl;
 		float sepdist = getSepDist(vals.begin(), vals.end(), bp);
 		bool update = false;
 		if (first) {
@@ -150,19 +153,20 @@ float ShapeletFinder::getSplitEntropy(vector<pair<float, string> >& vals) {
 			}
 			else if (infgain == best_IG) {
 				if (sepdist > best_SD) {
-					cout << "found new best: " << infgain << " instead of: " << best_IG << endl;
+					//cout << "found new best: " << infgain << " instead of: " << best_IG << endl;
 					update = true;
 				}
 			}
 		}
 		if (update) {
-			cout << "found new best: " << infgain << " instead of: " << best_IG << endl;
+			//cout << "found new best: " << infgain << " instead of: " << best_IG << endl;
 			best_IG = infgain;
 			best_bp = bp;
 			best_SD = sepdist;
 		}
 	}
-	cout << "best split point: " << best_bp << endl;
+	//cout << "best split point: " << best_bp << endl;
+	sepdist = best_SD;
 	return best_IG;
 }
 
@@ -170,28 +174,43 @@ float ShapeletFinder::getSepDist(vector<pair<float, string> >::iterator iter, ve
 	float sum = 0;
 	float running_sum = 0;
 	int count = 0;
-	while (iter != end) {
-		if (count == bp) {
-			sum += (1.0 * running_sum) / count;
-			count = 0;
-		}
+	while (count < bp) {
 		running_sum += iter->first;
-		++count; 
-		++iter;
+		count += 1;
+		iter++;
+		//cout << "added: " << iter->first << endl;
 	}
-	sum += (1.0 * running_sum) / count;
+	if (count != 0) {
+		sum += (running_sum / count);
+	}
+	//cout << "count: " << count << endl;
+	count = 0;
+	running_sum = 0;
+	while (iter != end) {
+		running_sum += iter->first;
+		count += 1;
+		iter++;
+		//cout << "added: " << iter->first << endl;
+	}
+	sum += running_sum / count;
+	//cout << "count: " << count << endl;
 	return sum;
 }
 
 float ShapeletFinder::getSetEntropy(vector<pair<float, string> >::iterator iter,
-                                   vector<pair<float, string> >::iterator end, int size) {
+                                   vector<pair<float, string> >::iterator end, int size, string& st) {
 	std::tr1::unordered_map<string, int> counts;
+
 	while (iter != end) {
-		if ( counts.find(iter->second) == counts.end()) {
-			counts[iter->second] = 1;
+		string label = "B"; // do binary entropy
+		if (st.compare(iter->second) == 0) {
+			label = "A";
+		}
+		if ( counts.find(label) == counts.end()) {
+			counts[label] = 1;
 		}
 		else {
-			counts[iter->second] += 1;
+			counts[label] += 1;
 		}
 		++iter;
 	}
@@ -206,12 +225,13 @@ float ShapeletFinder::getSetEntropy(vector<pair<float, string> >::iterator iter,
 	return -1 * entropy_sum;
 }
 
-float ShapeletFinder::informationGain(Shapelet& shapelet, Dataset& train) {
+float ShapeletFinder::informationGain(Shapelet& shapelet, Dataset& train, float& sepdist) {
 	vector<TimeSeries*>::iterator ts;
 	vector<pair<float, string> > mindists; // preallocate TODO
 	for (ts = train.begin(); ts != train.end(); ++ts) {
 		float d = minimumDistance(shapelet, *ts);
 		mindists.push_back(pair<float,string>(d,(*ts)->getType()));
+		//cout << "sh type:" << shapelet.getType() << (*ts)->getType() << "," << (*ts)->getSourceFile() << "," << d << endl;
 	}
 	// Now sort the mindists and class labels at the same time
 	sort(mindists.begin(), mindists.end(), MDSortOnDistance()); // See Utils.h
@@ -222,7 +242,6 @@ float ShapeletFinder::informationGain(Shapelet& shapelet, Dataset& train) {
 	md_file.open(s.str().c_str());
 	for (iter = mindists.begin(); iter != mindists.end(); iter++) {
 		md_file << iter->first << "," << iter->second << endl;
-		cout << iter->first << "," << iter->second << endl;
 	}
 	md_file.close();
 
@@ -268,7 +287,7 @@ float ShapeletFinder::informationGain(Shapelet& shapelet, Dataset& train) {
 	//cout << endl;
 	//cout << "broke with ofs: " << ofclass_seen << " " << " nofs: " << notofclass_seen << " breakpoint " << breakpoint << endl;
 	// Now compute information gain by sorting on the labels
-	float split_entropy = getSplitEntropy(mindists);
+	float split_entropy = getSplitEntropy(mindists, sepdist, shapelet.getType());
 	//cout << "found entropy: " << split_entropy << endl;
 	return split_entropy; // TODO is the dataset entropy even needed
 }

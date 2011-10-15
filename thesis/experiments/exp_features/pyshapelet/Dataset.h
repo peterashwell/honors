@@ -80,7 +80,7 @@ void Dataset::load(std::string load_dir) {
 			continue;
 		}
 		TimeSeries* t = new TimeSeries();
-		string type = t->load(*iter);
+		string type = t->load(load_dir, *iter);
 		data.push_back(t); // copy t into vector
 		types.push_back(type); // see Utils.h	
 		cout << "Type:" << type << endl;
