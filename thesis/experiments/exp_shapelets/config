@@ -4,6 +4,7 @@
 ,"NUM_CROSSFOLDS" : 10\
 ,"RAW_FEATURE_DIR" : "raw_features"\
 ,"JOINED_FEATURE_DIR" : "joined_features"\
+,"FIGURE_DIR" : "figures"\
 ,"RAW_RESULT_DIR" : "raw_results"\
 ,"RAW_DATA_DIR" : "norm_n0.0_a100_m0_s400"\
 ,"FEATURE_CONFIG" : "features.config"\
@@ -11,4 +12,5 @@
 ,"EXPERIMENT_CONFIG" : "exp.config"\
 ,"CLASSES" : ["ESE","BG","XRB","FSdMe","FSRSCVn","Novae","IDV","SNe"]\
 ,"ACCUM_RES_DIR" : "results"\
+,"EXPERIMENT_DETAILS" : "details.config"\
 }

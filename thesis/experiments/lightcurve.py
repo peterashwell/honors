@@ -19,7 +19,6 @@ class LightCurve:
 		return LightCurve(self.time[:], self.flux[:])	
 	
 def file_to_lc(filename):
-	print "converting file", filename, "to lc"
 	time = []
 	flux = []
 	lc_file = open(filename)

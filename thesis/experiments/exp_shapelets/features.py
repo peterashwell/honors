@@ -1,6 +1,8 @@
 #Given a time series object, potentially with missing data or sampling, extract features
 import scipy
+import os
 from scipy.stats import *
+import lightcurve
 import numpy
 import math
 from lightcurve import LightCurve
@@ -9,7 +11,72 @@ from operator import itemgetter
 from itertools import izip
 import matplotlib.pyplot as plt
 import utils
+import getshoutdir
+import distances
+NUM_CROSSFOLDS = 10
+RAW_FEAT_DIR = "raw_features"
 
+# Find distance from shapelets according to args
+# extract for all lightcurves in lc_dir
+SHAPELET_TRAIN_DIR = "norm_n0.0_a100_m0_s400"
+LC_DIR = "lightcurves" # TODO configure this
+
+def shapelet_features(extract_dir, args):
+	print "args to shfeats:", args
+	params = getshoutdir.getshfeatdir(args)
+	sh_source = getshoutdir.getshstoredir(args)
+	crossfold = params[0]
+	shapelet_feat_dir = "{0}/{1}".format(RAW_FEAT_DIR, crossfold) # zeroth element is directory name
+
+	if not os.path.isdir(shapelet_feat_dir):
+		os.mkdir(shapelet_feat_dir)
+	feature_out_dir = shapelet_feat_dir + "/" + extract_dir
+	if os.path.isdir(feature_out_dir):
+		print "feature directory:", feature_out_dir, "exists. skipping..."
+		return
+	os.mkdir(feature_out_dir)
+	use_dtw = params[1]
+	use_md = params[2]
+	best_amt = params[3]
+	dist_func = None
+	if use_md:
+		dist_func = distances.mindist
+	elif use_dtw:
+		dist_func = distances.dtw
+	else:
+		print "error!, no distance measure being used"
+	# for each crossfold, use distance measure on best shapelets in cfn
+	# on the test directory of crossfold/cfn, then extract features
+	extraction_dir = LC_DIR + "/" + extract_dir
+	for cfnum in xrange(NUM_CROSSFOLDS):
+		cf_best = utils.best_shapelets(sh_source + "/cf{0}".format(cfnum))
+		test_list = "crossfold/cf{0}/test".format(cfnum)
+		for fname in open(test_list):
+			fname = fname.strip()
+			extraction_file = extraction_dir + "/" + fname
+			# Open extraction file to lc
+			extract_from = lightcurve.file_to_lc(extraction_file)
+			features = []
+			for shapelet_class in cf_best.keys(): # for each features
+				# Read every relevant test dir lightcurve and extract features out
+				shapelet_details = cf_best[shapelet_class]
+				shapelet_sourcefile = shapelet_details[1].split('/')[-1]
+				shapelet_source = LC_DIR + "/" + SHAPELET_TRAIN_DIR + "/" + shapelet_sourcefile
+				shapelet_start = int(shapelet_details[2])
+				shapelet_len = int(shapelet_details[3])
+				measure_with = lightcurve.file_to_lc(shapelet_source)
+				measure_with.time = measure_with.time[shapelet_start: shapelet_start + shapelet_len]
+				measure_with.flux = measure_with.flux[shapelet_start : shapelet_start + shapelet_len]
+				distance = dist_func(extract_from, measure_with)
+				features.append(distance)
+			print "features:", features
+			# finally, write out as features to appropriate directory
+			feat_outfname = feature_out_dir + "/"  + fname
+			print "writing features out to", feat_outfname
+			
+			feat_outfile = open(feat_outfname, 'w')
+			feat_outfile.write(','.join([str(o) for o in features]))
+			feat_outfile.close()
 def flux_features(lc):
 	# Centered and sorted flux to work with
 	mean = numpy.mean(lc.flux)

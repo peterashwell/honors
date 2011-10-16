@@ -6,7 +6,7 @@ import sys
 import os
 import lightcurve
 from features import *
-
+import getshoutdir
 # Configure
 CONFIG_FILE = "config"
 configs = eval(open(CONFIG_FILE).read().strip())
@@ -31,11 +31,11 @@ print "experiment directory:", EXP_DIR
 
 # Read "compute" section of the experiment and extract all
 feature_config = open("{0}/{1}".format(EXP_DIR, FEATURE_CONFIG_FILE))
-comp_features = []
+comp_features = {}
 for line in feature_config:
-	line = line.strip()
-	comp_features.append(line)
-
+	line = line.strip().split(',')
+	comp_features[line[0]] = line[1:]
+print comp_features
 # Read experiment config, and extract features for each
 exp_config = open("{0}/{1}".format(EXP_DIR, EXP_CONFIG_FILE))
 
@@ -48,14 +48,18 @@ for line in exp_config:
 	train = line[5]
 	test = line[6]
 	# Take each file from crossfold, extract features and place in raw features
-	for feat in comp_features:
-		feat_id = feat
+	for feat_id in comp_features.keys():
 		# check if feature has already been computed
 		exp_feat_dir = "{0}/{1}".format(RAW_FEAT_DIR, feat_id)
 		if not os.path.isdir(exp_feat_dir):
 			os.mkdir(exp_feat_dir)
 		# Extract features from every light curve in training directory
 		for train_test in [train, test]: # just for convenience
+			# Extract shapelets if necessary (external step to other feature extraction)
+			if "shapelet" in feat_id:
+				shapelet_features(train_test, comp_features[feat_id][0]) # extract all shapelets for train_test with args
+				continue # do not proceed (what would we do anyway?)
+			
 			outdir = "{0}/{1}".format(exp_feat_dir, train_test)
 			if os.path.isdir(outdir):
 				print "features already extracted to", outdir, "skipping"

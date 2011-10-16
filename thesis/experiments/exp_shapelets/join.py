@@ -3,6 +3,7 @@
 import sys
 import os
 import lightcurve
+import getshoutdir
 from features import *
 
 # Configure
@@ -59,11 +60,11 @@ for line in exp_config:
 				join_cf_dir = "{0}/{1}".format(this_arff_cf_dir, join_id)
 				if not os.path.isdir(join_cf_dir):
 					os.mkdir(join_cf_dir)
-				print "joining feature set", join_cf_dir
+				#print "joining feature set", join_cf_dir
 				arff_fname = join_cf_dir + "/" + train_test + ".arff"
-				print "arff file:", arff_fname
+				#print "arff file:", arff_fname
 				lc_cf_filename = "{0}/cf{1}/{2}".format(CF_DIR, cfnum, train_test)
-				print "reading lcs from:", lc_cf_filename
+				#print "reading lcs from:", lc_cf_filename
 				arff_outfile = open(arff_fname, 'w')
 				feature_lengths = {} # figure out feature lengths on the go
 				feature_block = [] # block of lines to write into @data section
@@ -77,7 +78,7 @@ for line in exp_config:
 						elif train_test == "test":
 							feature_file += "/" + test
 						feature_file += "/" + fname.strip()
-						print "reading features from", feature_file
+						#print "reading features from", feature_file
 						features = open(feature_file).read().strip().split(',')[1:] # omit filename
 						joined_features += features
 						if featname not in feature_lengths.keys():
@@ -85,7 +86,7 @@ for line in exp_config:
 						elif feature_lengths[featname] != len(features):
 							print "fatal error: inconsistent feature lengths. exiting..."
 							exit(0)
-					print "adding filename:", [fname.split('/')[-1].split('_')[0]] # Get the class
+					#print "adding filename:", [fname.split('/')[-1].split('_')[0]] # Get the class
 					joined_features += [fname.split('/')[-1].split('_')[0]] # Get the class
 					feature_block.append(joined_features) # add onto the block
 					#arff_outfile.write(','.join(joined_features) + '\n')
