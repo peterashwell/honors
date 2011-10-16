@@ -3,6 +3,14 @@ CROSSFOLD_PATH="crossfold"
 SHAPELET_PATH="shapelet"
 EXP_DIR=$1
 
+if [[ ! -d $CROSSFOLD_PATH ]]; then
+	mkdir $CROSSFOLD_PATH
+fi
+
+if [[ ! -d $SHAPELET_PATH ]]; then
+	mkdir $SHAPELET_PATH
+fi
+
 while read config_line
 do
 	echo $config_line
@@ -15,8 +23,8 @@ do
 	id=${config[0]}
 	param_type=${config[1]}
 	param_val=${config[2]}
-	shapelet_dir="${config[3]}_${config[4]}_${config[5]}"
-	crossfold_dir="${config[6]}_${config[7]}"
+	shapelet_dir="${config[3]}-${config[4]}"
+	crossfold_dir="${config[5]}-${config[6]}"
 	
 	#echo $id
 	#echo $param_type
@@ -27,23 +35,23 @@ do
 	# Check the crossfold directory exists, create if necessary
 	if [[ ! -d "${CROSSFOLD_PATH}/${crossfold_dir}" ]]; then
 		echo "Crossfold directory ${CROSSFOLD_PATH}/${crossfold_dir} found, creating..."
-		python crossfold.py ${config[6]} ${config[7]} ${crossfold_dir}
+		python crossfold.py ${config[5]} ${config[6]} ${crossfold_dir}
 	else
 		echo "Found crossfold directory"
 	fi
 
 	# Check the shapelet directory exists, complain if not
-	if [[ ! -d "${SHAPELET_PATH}/${shapelet_dir}" ]]; then
-		echo "Shapelet directory ${SHAPELET_PATH}/${shapelet_dir} not found"
-		echo "Create relevant shapelet directory and run again (exiting...)"
-		exit
+	if [[ ! $shapelet_dir =~ "None" ]]; then
+		if [[ ! -d "${SHAPELET_PATH}/${shapelet_dir}" ]]; then
+			echo "Shapelet directory ${SHAPELET_PATH}/${shapelet_dir} not found"
+			echo "Create relevant shapelet directory and run again (exiting...)"
+			exit
+		fi
 	fi
 
 	# Creating experiment directory
 	echo Creating directory for experiment ${id}
-	mkdir "$EXP_DIR/$id"
-	mkdir "${EXP_DIR}/${id}/arff"
-	mkdir "${EXP_DIR}/${id}/result"
+	#mkdir "$EXP_DIR/$id"
 
 	# Use script with features.config to extract features to arff per crossfold
 	python extract_features.py $EXP_DIR 

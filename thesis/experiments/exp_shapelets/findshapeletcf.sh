@@ -1,5 +1,5 @@
 #!/bin/bash
-args="-t norm_n0.0_a100_m0_s400 -s norm_n0.0_a100_m0_s400 -T 50 -S 50 -c $1"
+args="-t norm_n0.0_a100_m0_s400 -s norm_n0.0_a100_m0_s400 -T 100 -S 100 -c $1"
 #args="-t  -s  -T 50 -S 50 -c 1"
 outdir=`python getshoutdir.py $args`
 echo outdir $outdir

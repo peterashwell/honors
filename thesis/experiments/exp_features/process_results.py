@@ -18,7 +18,6 @@ for filename in os.listdir('{0}/{1}'.format(TEMPRES_DIR, feat_name)):
 	unord_map = {}
 	classes = []
 	for class_num, line in enumerate(cm_file):
-		line = re.split('\s+', line.strip())
 		lc_class = line[-1]
 		classes.append(lc_class)
 		unord_map[class_num] = lc_class

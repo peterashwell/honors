@@ -11,17 +11,20 @@ configs = eval(open(CONFIG_FILE).read().strip())
 CF_DIR = configs["CROSSFOLD_DIR"]
 LC_DIR= configs["LIGHTCURVE_DIR"]
 NUM_FOLDS = configs["NUM_CROSSFOLDS"]
+RAW_DATA_DIR = configs["RAW_DATA_DIR"]
+#TEST_DIR = sys.argv[2]
+#OUT_DIR = "{0}/{1}-{2}".format(CF_DIR, RAW_DATA_DIR, TEST_DIR)
 
-TRAIN_DIR = sys.argv[1]
-TEST_DIR = sys.argv[2]
-OUT_DIR = "{0}/{1}_{2}".format(CF_DIR, TRAIN_DIR, TEST_DIR)
-
-os.mkdir("{0}/{1}_{2}".format(CF_DIR, TRAIN_DIR, TEST_DIR))
-print "train: {0} test: {1}, out: {2}".format(TRAIN_DIR, TEST_DIR, OUT_DIR)
-
+#print "train: {0} test: {1}, out: {2}".format(RAW_DATA_DIR, TEST_DIR, OUT_DIR)
+if not os.path.isdir(CF_DIR):
+	print "creating crossfold directory"
+	os.mkdir(CF_DIR)
+else:
+	print "crossfold directory exists, exiting..."
+	exit(0)
 # 1) Collect lightcurves by class, assumes that TRAIN and TEST are symmetric (if not the same)
 lc_by_class = {}
-for filename in os.listdir("{0}/{1}".format(LC_DIR, TRAIN_DIR)):
+for filename in os.listdir("{0}/{1}".format(LC_DIR, RAW_DATA_DIR)):
 	lc_class = filename.strip().split('_')[0]
 	if lc_class in lc_by_class.keys():
 		lc_by_class[lc_class].append(filename)
@@ -58,27 +61,27 @@ for c in lc_by_class.keys():
 
 # Copy files from train and test directories to appropriate directory in crossfold
 for fold_num in xrange(NUM_FOLDS):
-	
-	cf_fold_dir = "{0}/cf{1}".format(OUT_DIR, fold_num)
-	fold_test_dir = "{0}/train".format(cf_fold_dir)
-	fold_train_dir = "{0}/test".format(cf_fold_dir)
+	cf_fold_dir = "{0}/cf{1}".format(CF_DIR, fold_num)
+	os.mkdir(cf_fold_dir)
+	fold_test_file = open("{0}/train".format(cf_fold_dir), 'w')
+	fold_train_file = open("{0}/test".format(cf_fold_dir), 'w')
 
 	print "creating directory:", cf_fold_dir
-	os.mkdir(cf_fold_dir)
-	print "creating directory:", fold_test_dir
-	os.mkdir(fold_test_dir)
-	print "creating directory:", fold_train_dir
-	os.mkdir(fold_train_dir)
+	#print "creating directo`ry:", fold_test_dir
+	#os.mkdir(fold_test_dir)
+	#print "creating directory:", fold_train_dir
+	#os.mkdir(fold_train_dir)
 	
-	print "moving", len(train_folds[fold_num]), "lightcurves"
-	print "moving", len(test_folds[fold_num]), "lightcurves"
+	#print "moving", len(train_folds[fold_num]), "lightcurves"
+	#print "moving", len(test_folds[fold_num]), "lightcurves"
 
 	# VERY IMPORTANT FOR CORRECT RESULTS
 	train_folds[fold_num].sort()
 	test_folds[fold_num].sort()
-	for fname in train_folds[fold_num]:
-		print "copying from {0}/{1}/{2}".format(LC_DIR, TRAIN_DIR, fname), "to {0}/train/".format(cf_fold_dir)
-		shutil.copyfile("{0}/{1}/{2}".format(LC_DIR, TRAIN_DIR, fname), "{0}/train/{1}".format(cf_fold_dir, fname))
-	for fname in test_folds[fold_num]:
-		print "copying from {0}/{1}/{2}".format(LC_DIR, TEST_DIR, fname), "to {0}/test/".format(cf_fold_dir)
-		shutil.copyfile("{0}/{1}/{2}".format(LC_DIR, TEST_DIR, fname), "{0}/test/{1}".format(cf_fold_dir,fname))
+	fold_train_file.write('\n'.join(train_folds[fold_num]))
+	fold_test_file.write('\n'.join(test_folds[fold_num]))	
+	
+	# Old way
+	#for fname in test_folds[fold_num]:
+	#	print "copying from {0}/{1}/{2}".format(LC_DIR, TEST_DIR, fname), "to {0}/test/".format(cf_fold_dir)
+	#		shutil.copyfile("{0}/{1}/{2}".format(LC_DIR, TEST_DIR, fname), "{0}/test/{1}".format(cf_fold_dir,fname))
