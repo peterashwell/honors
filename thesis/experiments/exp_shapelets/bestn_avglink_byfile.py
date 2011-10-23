@@ -63,6 +63,8 @@ def cluster_shapelets(shapelets, num_clusters):
 	print len(final_data_clusters), "clusters"
 	for clusternum, cluster in enumerate(final_data_clusters):
 		print "cluster number:", clusternum, "size:", len(cluster)
+	if len(final_data_clusters) == 0:
+		raise Error("not enough clusters")
 	return final_data_clusters
 
 
@@ -126,7 +128,6 @@ for cfnum in xrange(NUM_CROSSFOLDS): # Use more than one shapelet file
 		final_cluster_data = []
 		for cluster in final_clustering:
 			final_cluster_data.append([shapelets_info[o] for o in cluster])
-		
 		# Take the final clusters and write out to the shapelet_feature directory
 		for cnum, ts_list in enumerate(final_cluster_data):
 			candidate = sorted(ts_list, key=lambda o: float(o[4]))[0]
