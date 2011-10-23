@@ -1,188 +1,201 @@
-\documentclass{beamer}
-\usepackage{amsmath}
-\usepackage{amsfonts}
-\usepackage{amssymb}
+\documentclass[12pt]{beamer}
+
+\usepackage{subfigure}
+\usepackage{caption}
 \usepackage{graphicx}
+%\usepackage{natbib}
+%\usepackage{bibentry}
+\usepackage{biblatex}
+\usepackage{amsmath}
+\usepackage{multirow}
 
-%Darmstadt
-\usepackage[utf8x]{inputenc}
-\usetheme{Frankfurt}
-\setbeamertemplate{navigation symbols}{}
+\bibliography{refs}
 
-\title{Data Clustering: A Review\\A.K Jain, M.N. Murty and P.J. Flynn}
-\author{Peter Ashwell, Alex Batten, Adam Petrovic, David Rizzuto}
-\date{\today}
+\mode<presentation>
+\subtitle{Emden R. Gansner, Yehuda Koren \\ \emph{AT\&T Labs - Research}}
+\title{Improved Circular Layouts}
+\date{}
+\author{Peter Ashwell}
+
+%\newcommand{\newblock}{}
 
 \begin{document}
+\maketitle
 
-\frame{
-\titlepage
-}
+\begin{frame}
+	\frametitle{Overview and Circular Layouts}
+	\begin{figure}
+	  \centering
+	  \subfigure {	
+	  	\includegraphics[width=120px]{poorlayout.png}
+	  }
+	  \subfigure {
+	  	\includegraphics[width=120px]{three_improvements.png}
+	  }
+  	%\caption{Wall painting in Chaco Canyon, NM USA}
+	\end{figure}
+	Proposes algorithms for 3 improvements to circular layouts
+	\begin{enumerate}
+		\item Edge crossing reduction by edge length minimisation
+		\item External edge routing
+		\item Edge bundling
+	\end{enumerate}
 
-\section{Introduction}
-    %You can put a title in the subsection argument if you want a sub title.
-    \subsection{}
-        \frame
-        {
-            \frametitle{Aim of the Paper}
-            This paper aims to survey and review known and emerging clustering methods (as of 2000), and compare them to show the strengths and weaknesses of each method.
+\end{frame}
 
-            The authors also attempt to demonstrate some applications for clustering, and how to deal with common issues faced when clustering.
-        }
+\begin{frame}
+	\frametitle{Edge length minimisation}
+	This paper aims to improve node placement by minimising the sum of the edge lengths between the nodes:
+	\begin{center}
+		Smaller edge length sum $\rightarrow$ Less clutter \\
+	\end{center}
+	Utilising force directed layouts a la Tutte and Hall, and minimising a cost function:
+	\begin{align*}
+		\min{x,y}\sum\limits{\langle i,j \rangle \in E}(x_i - x_j)^2 + (y_i - y_j)^2 
+	\end{align*}
+	The sum of all edge lengths. This is done using a process called \emph{mean iteration}.
+\end{frame}
 
-\section{Structure}
-    \subsection{}
-        \frame
-        {
-            \frametitle{Structure of the Paper}
-                \begin{enumerate}
-                    \item Introduction
-                    \item Background, terms and definitions
-                    \item Pattern representation, feature extraction/selection
-                    \item Similarity measures
-                    \item Clustering techniques, both common and emerging methods
-                    \item Applications
-                \end{enumerate}
-        }
+\begin{frame}
+	\frametitle{Mean iteration}
+	Fix all node positions except 1.
+	Place the node at the mean position (barycenter) of nodes it is joined to (minimises edge length):
+	\begin{equation}
+		(x_i, y_i) \leftarrow \left. \frac{\sum_{j \in N(i)}(x_j,y_j)}{||N(i)||} \right.
+	\end{equation}
+	Project it back out onto the unit circle
+	\begin{equation}
+		(x_i, y_i) \leftarrow \left. \frac{(x_i,y_i)}{||(x_i, y_i||} \right.
+	\end{equation}
+	The nodes are redistributed evenly (preserving angular ordering) at regular iterations to prevent the algorithm from placing them all in the same location (the global minimum).
+	
+\end{frame}
 
-\section{Main Ideas}
-    \subsection{}
-        \frame
-        {
-			\frametitle{Hierarchical Clustering}
-			\begin{block}{Agglomerative Clustering}
-				Start with every data point in its own cluster and merge until a threshold is met
-			\end{block}
-			
-			\begin{figure}
-				\centering
-				\includegraphics[width=60mm]{hierarchical.png}
-				\caption{Measures used in merging clusters}
-			\end{figure}
-		}
+\begin{frame}
+	\frametitle{Mean iteration}
+	The second and second graphs represent equations 1 and 2 respectively. \\
+	\begin{figure}
+		\includegraphics[width=300px]{meaniteration.eps}
+	\end{figure}
+	In experiments the authors use the \textbf{median} instead of the mean in equation 1, a change they claim gives better results. Algorithm complexity with either is $O(n + |E|)$ ($n$, $|E|$ number of vertices, edges)
+	
+\end{frame}
 
-        \frame
-        {
-            \frametitle{Partitional Clustering 1: Discrete Methods}
-            \begin{itemize}
-                \item Square-Error Algorithms
-                    \begin{itemize}
-                        \item k-means/fuzzy k-means
-                        \item ISODATA
-                    \end{itemize}
-                \item Graph-Theoretic
-                    \begin{itemize}
-                        \item MST/Delauney-Triangulation based
-                        \item Nearest Neighbour
-                    \end{itemize}
-            \end{itemize}
+\begin{frame}
+	\frametitle{Exterior routing}
+	External routing can improve readability by using the external face of the circle (see right graph)
+	\begin{figure}
+		\includegraphics[width=220px]{externalrouting.png}
+	\end{figure}
 
-            \includegraphics[width=0.5\textwidth]{partition_2.png}
-            \includegraphics[width=0.5\textwidth]{partition_1.png}
-            \begin{center}
-                {\sc Left:} Fuzzy Clustering, {\sc Right:} MST-based clustering
-            \end{center}
-        }
+	The authors propose a dynamic programming algorithm to choose which edges to place outside the circle.
+\end{frame}
 
-        \frame
-        {
-            \frametitle{Partitional Clustering 2: Optimization/Search Methods}
-                \begin{itemize}
-                    \item Heuristic Methods
-                        \begin{itemize}
-                            \item simulated annealing/gradient descent
-                        \end{itemize}
-                    \item Genetic Algorithms
-                    \item Neural-Networks
-                    \item Mixture Resolving
-                        \begin{itemize}
-                            \item Expectation Maximization
-                            \item Nonparametric Methods
-                        \end{itemize}
-                \end{itemize}
-                \begin{center}
-                    \includegraphics[width=0.5\textwidth]{partition_3.png}\\
-                    {\sc Above:} Clustering as a global optimization problem
-                \end{center}
-        }
+\begin{frame}
+	\frametitle{Dynamic programming for optimal exterior routing}
+	\footnotesize {
+	\begin{align*}
+		p_{i,i+1} &= w_{i,i+1} \quad i = 0, \ldots, n - 2 \\
+		p_{i,j} &= w_{i,j} + max_{i<k<j}\{p_{ik} + p_{kj}\} \quad i = 0,\ldots,n-3, i + 1 < j < n
+	\end{align*}
+	}
+	\begin{figure}
+		\includegraphics[width=200px]{circlesplit.eps}
+	\end{figure}
+	$p_{i,j}$ is a recursive expression for the maximum number of non-crossing edges between nodes $i$ and $j$. \\
+	$w_{i,j}$ are weights assigned to the edges to get a better layout (e.g. number of crossings with other edges).
+\end{frame}
 
-        \frame
-        {
-            \frametitle{Applications 1}
-			\begin{itemize}
-				\item Image segmentation and processing
-				\item Object and character recognition
-			\end{itemize}
+\begin{frame}
+	\frametitle{Edge bundling}
+	\begin{figure}
+		\includegraphics[width=300px]{edgeclustering.png}
+	\end{figure}
+	\begin{enumerate}
+		\item Identify collections of edges whose bundling will save ink (through clustering)
+		\item Compute the points $M_{1}$ and $M_{2}$ whose positions reduce the length of the edge bundles
+		\item Join the edges along $M_{1}$,$M_{2}$
+		\item Use a bezier curve representation of the short ends to make the result more readable
+	\end{enumerate}
+\end{frame}
 
-			\begin{figure}
-				\includegraphics[width=100mm]{landsat.png}
-				\caption{Segmenting of satellite imagery reveals water bodies}
-			\end{figure}
-		}
+\begin{frame}
+	\frametitle{Definition of ink saved through merging edges}
+	
+	\begin{figure}
+		\includegraphics[width=200px]{step23bundling.png}
+	\end{figure}
+	
+	\footnotesize {
+	Optimal positions of $M_1$ and $M_2$ (found using numerical methods):
+	\begin{equation}
+		(M_1, M_2) = \underset{M_{1},M_{2}}{\operatorname{argmax}}\sum\limits_{p \in S}||M_1 - p|| + ||M_1 - M_2|| + \sum\limits_{p \in T} ||M_2 - p||
+	\end{equation}
+	}
+	\footnotesize {
+	Ink saved: sum of old edge lengths - sum of new edge lengths passing through optimal $M_1$ and $M_2$
+	\begin{equation}
+		\sum\limits_{v_j,u_j \in Q}||v_j -u_j|| - (\sum\limits_{p \in S}||M_1 - p|| + ||M_1 - M_2|| + \sum\limits_{p \i T}||M_2 - p||
+	\end{equation}
+	}
+\end{frame}
 
-		\frame
-		{
-			\frametitle{Applications 2}
-			\begin{itemize}
-				\item Information Retrieval
-				\item Data mining
-			\end{itemize}
-			\begin{figure}
-				\includegraphics[width=90mm]{unsupervised_document.png}
-				\caption{Clusters of words that are similar in terms of their context of use}
-			\end{figure}
-		}
+\begin{frame}
+	\frametitle{Clustering of edges through ink saving measure}
+	Using this definition of ink saving for an edge cluster, the authors propose a hierarchical clustering algorithm:
+	\begin{enumerate}
+		\item Place each edge in its own cluster
+		\item Merge clusters that will give the most ink saving and that \textbf{do not have crossing edges}
+		\item Repeat at step 1
+	\end{enumerate}
+	\begin{figure}
+		\includegraphics[width=250px]{clustering.eps}
+	\end{figure}
+	The complexity of this clustering algorithm is $O(|E|^2)$ where $|E|$ is the number of edges.
+\end{frame}
 
-\section{Highlights}
-    \subsection{}
-        \frame
-        {
-			\frametitle{General Highlights}
-			\begin{itemize}
-				\item Introductory language, useful for a general scientific audience
-				\item Diverse coverage of practical applications
-				\item Wholistic approach to clustering, from domain knowledge, feature selection through to algorithms and applications
-			\end{itemize}
-        }   
+\begin{frame}
+	\frametitle{Evaluation}
+		
+	\scriptsize {
+		\begin{table}
+		\centering
+		\begin{tabular}{|c|lll|lll|} \hline
+		\multirow{2}{*}{Graph set} & \multicolumn{3}{c|}{No exterior routing} & \multicolumn{3}{c|}{Exterior routing} \\ \cline{2-7}
+					& C & M & MC & C & M & MC \\ \hline
+		Rome 20 - 29 nodes & 7.18 & 8.01 & 5.51 & 0.83 & 0.68 & 0.46 \\
+		Rome 80 - 89 nodes & 167.29 & 161.84 & 130.41 & 69.84 & 58.53 & 46.73 \\
+		Random avg deg 4 & 1337.68 & 1186.50 & 1048.19 & 838.42 & 714.08 & 627.06 \\
+		Random avg deg 7 & 6979.42 & 6843.71 & 6210.86 & 5216.34 & 5126.31 & 4594.56 \\ \hline
+		\end{tabular}
+		\caption{Average number of edge crossings}
+	\end{table}
+	}	
+	
+	\scriptsize {
+	\begin{table}
+	\centering
+	\begin{tabular}{|c|lll|lll|} \hline
+		\multirow{2}{*}{Graph set} & \multicolumn{3}{c|}{No exterior routing} & \multicolumn{3}{c|}{Edge bundling} \\ \cline{2-7}
+					& C & M & MC & C & M & MC \\ \hline
+		Rome 20 - 29 nodes & 17.16 & 15.49 & 15.50 & 13.23 & 12.52 & 12.54 \\
+		Rome 80 - 89 nodes & 53.99 & 46.21 & 45.14 & 36.31 & 33.63 & 33.03 \\
+		Random avg deg 4 & 124.08 & 109.29 & 107.96 & 72.04 & 68.20 & 66.77 \\
+		Random avg deg 7 & 273.35 & 260.37 & 254.79 & 207.10 & 198.32 & 194.59 \\ \hline
+	\end{tabular}
+	\caption{Average sum of edge lengths in graph (ink used)}
+	\end{table}
+	}
+	\textbf{M} is the \emph{median} iteration algorithm. \textbf{C} is the \emph{circo} layout algoritm used in graphviz. \textbf{MC} is mean iteration combined a post-processing step taken from \emph{circo}
+\end{frame}	
 
-        \frame
-        {
-	        \frametitle{Specific Highlights}
-			\begin{itemize}
-				\item Good section on the users dilemma: questions to ask in trying to apply clustering
-				\item Comparison of clustering algorithms for large data sets
-				\item Texture segmentation using Gabor filter
-			\end{itemize}
-			\begin{figure}
-				\includegraphics[width=80mm]{texture.png}
-				\caption{Textures automatically segmented using k-means with Gabor filter features}
-			\end{figure}
-		}
+\begin{frame}
+	\frametitle{Conclusion}
+	\begin{enumerate}
+		\item Edge routing is very effective for reducing edge crossings, doing so from between 90-50\% (less for larger graphs)
+		\item Edge bundling is quite good at reducing ink used, from between 30-40\%. Consistent per graph size.
+		\item Median iteration is slightly better at reducing crossings, and is also better for ink used, even without bundling.
+	\end{enumerate}
+\end{frame}
 
-\section{Drawbacks}
-    \subsection{}
-        \frame
-        {
-            \frametitle{Main Drawbacks of the Paper}
-            \begin{block}{Objective Functions}
-                States that many clustering algorithms optimize the ``squared error'' function, which leads to globular clusters. 
-                
-                However other objective functions are not mentioned or explored.
-            \end{block}
-            \pause
-            \begin{alertblock}{Comparison of Techniques}
-                Some non-mainstream techniques are simply described, and not compared against other methods.
-                
-                For example: NN-clustering and Nonparametric methods for density-based clustering
-            \end{alertblock}
-        }
-\section{Conclusion}
-    \subsection{}
-        \frame
-        {
-            \frametitle{Conclusion}
-            In conclusion this paper this paper is a good high level introduction to clustering circa 2000. It covers all known techniques, and demonstrates their possible uses.
-
-            However the comparisons are at times incomplete, and the level of detail is not enough for anyone with serious interest in the field to be able to choose a clustering method for their application.
-        }
 \end{document}

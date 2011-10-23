@@ -21,20 +21,25 @@ RAW_FEAT_DIR = "raw_features"
 SHAPELET_TRAIN_DIR = "norm_n0.0_a100_m0_s400"
 LC_DIR = "lightcurves" # TODO configure this
 
-def shapelet_features(extract_dir, args):
-	print "args to shfeats:", args
+def shapelet_features(apply_dir, args):
+	# Get the parameters associated with the shapelet arguments given from the expt
 	params = getshoutdir.getshfeatdir(args)
-	sh_source = getshoutdir.getshstoredir(args)
-	crossfold = params[0]
-	shapelet_feat_dir = "{0}/{1}".format(RAW_FEAT_DIR, crossfold) # zeroth element is directory name
+	
+	# This is the diredtory containing the processed shapelets for the arguments
+	shapelet_featureset = params[0]
+	shapelet_feature_path = "shapelet_features/{0}".format(shapelet_featureset)
+	print "extracting shapelet features using shapelets in:", shapelet_feature_path
 
-	if not os.path.isdir(shapelet_feat_dir):
-		os.mkdir(shapelet_feat_dir)
-	feature_out_dir = shapelet_feat_dir + "/" + extract_dir
+	if not os.path.isdir('{0}/{1}'.format("raw_features", shapelet_featureset)):
+		os.mkdir('{0}/{1}'.format("raw_features", shapelet_featureset))
+	# This is the directory where the resulting features are going
+	feature_out_dir = "{0}/{1}/{2}".format(RAW_FEAT_DIR, shapelet_featureset, apply_dir) # zeroth element is directory name
+	print "features extracted to:", feature_out_dir
 	if os.path.isdir(feature_out_dir):
-		print "feature directory:", feature_out_dir, "exists. skipping..."
-		return
-	os.mkdir(feature_out_dir)
+		print "directory already exists", feature_out_dir
+	else:
+		print "creating directory:", feature_out_dir
+		os.mkdir(feature_out_dir)
 	use_dtw = params[1]
 	use_md = params[2]
 	best_amt = params[3]
@@ -45,39 +50,41 @@ def shapelet_features(extract_dir, args):
 		dist_func = distances.dtw
 	else:
 		print "error!, no distance measure being used"
-	# for each crossfold, use distance measure on best shapelets in cfn
-	# on the test directory of crossfold/cfn, then extract features
-	extraction_dir = LC_DIR + "/" + extract_dir
+	
+	# This is the lightcurve directory to which we apply the shapelets
+	apply_dir = LC_DIR + "/" + apply_dir
 	for cfnum in xrange(NUM_CROSSFOLDS):
-		cf_best = utils.best_shapelets(sh_source + "/cf{0}".format(cfnum))
+		print "crossfold", cfnum
+		#	cf_best = utils.best_shapelets(crossfold + "/cf{0}".format(cfnum))
 		test_list = "crossfold/cf{0}/test".format(cfnum)
-		for fname in open(test_list):
+		for fnum, fname in enumerate(open(test_list)):
+			if fnum % 10 == 0:
+				print "{0} files processed".format(fnum)
 			fname = fname.strip()
-			extraction_file = extraction_dir + "/" + fname
+			extract_file = apply_dir + "/" + fname
 			# Open extraction file to lc
-			extract_from = lightcurve.file_to_lc(extraction_file)
+			extract_from = lightcurve.file_to_lc(extract_file)
 			features = []
-			for shapelet_class in cf_best.keys(): # for each features
-				# Read every relevant test dir lightcurve and extract features out
-				shapelet_details = cf_best[shapelet_class]
-				shapelet_sourcefile = shapelet_details[1].split('/')[-1]
-				shapelet_source = LC_DIR + "/" + SHAPELET_TRAIN_DIR + "/" + shapelet_sourcefile
-				shapelet_start = int(shapelet_details[2])
-				shapelet_len = int(shapelet_details[3])
-				measure_with = lightcurve.file_to_lc(shapelet_source)
-				measure_with.time = measure_with.time[shapelet_start: shapelet_start + shapelet_len]
-				measure_with.flux = measure_with.flux[shapelet_start : shapelet_start + shapelet_len]
-				distance = dist_func(extract_from, measure_with)
+			# Load all the shapelets from shapelet_features/dir/cf(num) and find distances
+			shapelet_source_dir = "{0}/cf{1}".format(shapelet_feature_path, cfnum)
+			for shapelet_filename in os.listdir(shapelet_source_dir):
+				# Get the shapelet cotents and apply the distance measure
+				shapelet_as_lc = lightcurve.file_to_lc(shapelet_feature_path + '/cf{0}/'.format(cfnum) + shapelet_filename)
+				
+				measure_with_flux = shapelet_as_lc.flux
+				if len(measure_with_flux) == 0:
+					print "missing a shapelet file:", shapelet_feature_path + '/cf{0}/'.format(cfnum) + shapelet_filename        
+					continue
+				distance = dist_func(extract_from.flux, measure_with_flux)[0]
 				features.append(distance)
-			print "features:", features
-			# finally, write out as features to appropriate directory
+			# Finally, write out all the features
 			feat_outfname = feature_out_dir + "/"  + fname
-			print "writing features out to", feat_outfname
-			
 			feat_outfile = open(feat_outfname, 'w')
 			feat_outfile.write(','.join([str(o) for o in features]))
 			feat_outfile.close()
+
 def flux_features(lc):
+	lc.remove_gaps()
 	# Centered and sorted flux to work with
 	mean = numpy.mean(lc.flux)
 	stddev = numpy.std(lc.flux)
@@ -147,9 +154,9 @@ def flux_features(lc):
 	# Maximum and minimum
 	flux_max = max(centered_flux)
 	flux_min = min(centered_flux) 
-	print "flux:", centered_flux
-	print "flux_pos_percentiles:", flux_pos_percentiles
-	print "flux_neg_percentiles:", flux_neg_percentiles
+	#print "flux:", centered_flux
+	#print "flux_pos_percentiles:", flux_pos_percentiles
+	#print "flux_neg_percentiles:", flux_neg_percentiles
 	features = [flux_median, flux_skew, flux_kurtosis] + \
 	       [flux_max, flux_min]	+ \
 	        flux_pos_percentiles + flux_neg_percentiles #+ flux_med_percentiles
@@ -157,6 +164,7 @@ def flux_features(lc):
 	return features
 
 def spectral_features(lc):
+	lc.remove_gaps()
 	FIND_FREQUENCIES = 4
 	time = numpy.array(lc.time)
 	flux = numpy.array(lc.flux)
@@ -213,6 +221,7 @@ def haar_coeffs(lc):
 
 def grad_features(lc):
 	# Center the flux
+	lc.remove_gaps()
 	stddev = numpy.std(lc.flux)
 	mean = numpy.mean(lc.flux)
 	for index in range(len(lc.flux)):
@@ -286,9 +295,9 @@ def grad_features(lc):
 	#			med_within_buf += 1
 	#	grad_mean_percentiles.append(mean_within_buf / (1.0 * len(gradients)))
 	#	grad_med_percentiles.append(med_within_buf / (1.0 * len(gradients)))
-	print "gradients:", gradients, len(gradients)
-	print "grad_pos_percentiles:", grad_pos_percentiles
-	print "grad_neg_percentiles:", grad_neg_percentiles
+	#print "gradients:", gradients, len(gradients)
+	#print "grad_pos_percentiles:", grad_pos_percentiles
+	#print "grad_neg_percentiles:", grad_neg_percentiles
 	features = [grad_mean, grad_stddev, grad_med, grad_skew, \
 	            grad_kurtosis, grad_max, grad_min, complexity_dist] \
 	            + grad_pos_percentiles + grad_neg_percentiles

@@ -39,10 +39,10 @@ for line in exp_config:
 	test = line[6]
 	
 	exp_arff_dir = "{0}/{1}-{2}".format(ARFF_DIR, train, test)
-	if os.path.isdir(exp_arff_dir):
-		print "arff directory", exp_arff_dir, "already exists. skipping..."
-		continue
-	os.mkdir(exp_arff_dir)
+	if not os.path.isdir(exp_arff_dir):
+		os.mkdir(exp_arff_dir)
+		#print "arff directory", exp_arff_dir, "already exists. skipping..."
+		#continue
 
 	for feat_join in join_features:
 		feat_join = feat_join.strip().split(',')
@@ -85,6 +85,7 @@ for line in exp_config:
 							feature_lengths[featname] = len(features)
 						elif feature_lengths[featname] != len(features):
 							print "fatal error: inconsistent feature lengths. exiting..."
+							print "was reading:", feature_file
 							exit(0)
 					#print "adding filename:", [fname.split('/')[-1].split('_')[0]] # Get the class
 					joined_features += [fname.split('/')[-1].split('_')[0]] # Get the class

@@ -54,12 +54,13 @@ for line in exp_config:
 		if not os.path.isdir(exp_feat_dir):
 			os.mkdir(exp_feat_dir)
 		# Extract features from every light curve in training directory
+		print "extracting features for", exp_feat_dir
 		for train_test in [train, test]: # just for convenience
 			# Extract shapelets if necessary (external step to other feature extraction)
 			if "shapelet" in feat_id:
+				print "extracting shapelet features for directory:", train_test
 				shapelet_features(train_test, comp_features[feat_id][0]) # extract all shapelets for train_test with args
 				continue # do not proceed (what would we do anyway?)
-			
 			outdir = "{0}/{1}".format(exp_feat_dir, train_test)
 			if os.path.isdir(outdir):
 				print "features already extracted to", outdir, "skipping"

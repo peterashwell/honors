@@ -34,7 +34,7 @@ def best_shapelets(shapelet_cf_dir):
 		if sh_class not in best.keys():
 			update = True
 		else:
-			if line[-2] < best[sh_class]:
+			if line[-2] > best[sh_class]:
 				update = True
 		#elif line[-2] == best[sh_class]:
 		#	if line[-1] > best_SD[sh_class]:

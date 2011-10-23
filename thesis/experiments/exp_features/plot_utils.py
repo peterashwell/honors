@@ -125,7 +125,7 @@ def produce_figure(file_handle, exp_desc, param_vals, fscores, param_name, basel
 		if 'all' in fn:
 			pass
 		else:
-			featnames[index] = 'all {' + featnames[index] + '}'
+			featnames[index] = 'all - {' + featnames[index] + '}'
 	legends = tuple(['Baseline'] + featnames)
 	plt.legend(legends, loc='best')
 	plt.savefig('{0}/{1}_fsplot.eps'.format(FIG_DIR, exp_desc.replace(' ', '-').replace('.',',')), format='eps')

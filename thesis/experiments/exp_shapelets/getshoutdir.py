@@ -1,6 +1,6 @@
 import getopt, sys
 def getshstoredir(commands):
-	opts, args = getopt.getopt(commands.split(' '), "dac:s:t:T:S:b:")
+	opts, args = getopt.getopt(commands.split(' '), "odac:s:t:T:S:b:")
 	print "commands:", commands
 	output = None
 	verbose = False
@@ -40,7 +40,7 @@ def getshstoredir(commands):
 	return "shapelets/" + path
 
 def getshfeatdir(commands):
-	opts, args = getopt.getopt(commands.split(' '), "dac:s:t:T:S:b:")
+	opts, args = getopt.getopt(commands.split(' '), "odac:s:t:T:S:b:")
 	print "commands:", commands
 	output = None
 	verbose = False
@@ -87,4 +87,4 @@ def getshfeatdir(commands):
 
 
 if __name__ == '__main__':
-	print getshoutname(sys.argv[1:])
+	print getshstoredir(' '.join(sys.argv[1:]))
