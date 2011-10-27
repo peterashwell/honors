@@ -24,7 +24,7 @@ LC_DIR = "lightcurves" # TODO configure this
 def shapelet_features(apply_dir, args):
 	# Get the parameters associated with the shapelet arguments given from the expt
 	params = getshoutdir.getshfeatdir(args)
-	
+	print "params:", params
 	# This is the diredtory containing the processed shapelets for the arguments
 	shapelet_featureset = params[0]
 	shapelet_feature_path = "shapelet_features/{0}".format(shapelet_featureset)
@@ -37,6 +37,7 @@ def shapelet_features(apply_dir, args):
 	print "features extracted to:", feature_out_dir
 	if os.path.isdir(feature_out_dir):
 		print "directory already exists", feature_out_dir
+		return # do not extract
 	else:
 		print "creating directory:", feature_out_dir
 		os.mkdir(feature_out_dir)

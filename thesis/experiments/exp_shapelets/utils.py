@@ -48,6 +48,8 @@ def best_shapelets(shapelet_cf_dir):
 # Produce figures in figures/ and return tex to be embedded in report
 # plot, dataset_sample, confusion matrices and 
 def primary_plot(params, featset_fscore, featnames, featset_desc, exp_desc, param_name, baseline_result):
+	print "params:", params
+	print "featset_score:", featset_fscore
 	mpl.rc('legend', fontsize=10)
 	plt.clf()
 	# plot baseline TODO use config to set default
@@ -66,7 +68,7 @@ def primary_plot(params, featset_fscore, featnames, featset_desc, exp_desc, para
 		color = colors[lnum % len(colors)]
 		linespecs = '{0}{1}{2}'.format(linetype, markertype, color)
 		plt.plot(params, featset_fscore[featname], linespecs) #, PARAM_NAMES[param])
-	plt.title("F-Score versus {0} in {1}".format(param_name.lower(), exp_desc.replace('%', '\%').lower()))
+	title = "Plot of F-Score versus {0} in the {1} experiment.".format(param_name.lower(), exp_desc.replace('%', '\%').lower())
 	plt.xlabel(param_name)
 	plt.ylabel("F-Score")
 	plt.ylim([0,1])
@@ -79,17 +81,106 @@ def primary_plot(params, featset_fscore, featnames, featset_desc, exp_desc, para
 	# TODO add all the classification descriptions here
 	legends = tuple([featset_desc[featname] for featname in featnames])
 	plt.legend(legends, loc='best')
-	plt.savefig('{0}/{1}_fsplot.eps'.format(FIG_DIR, exp_desc.replace(' ', '-').replace('.',',')), format='eps')
+	fig_name = '{0}/{1}_fsplot.eps'.format(FIG_DIR, exp_desc.replace(' ', '-').replace('.',','))
+	plt.savefig(fig_name, format='eps')
 	plt.close()
 	
-	#file_handle.write('\\begin{figure}[ht!]\n')
-	#file_handle.write('\t\\centering\n')
-	#file_handle.write('\t\\includegraphics[width=\\textwidth]{%s}\n' % (FIG_DIR + '/' + \
-	#	exp_desc.replace(' ', '-').replace('.',',') + '_fsplot.eps'))
-	#file_handle.write('\\end{figure}\n')
+	fig_path = os.getcwd() + '/' + fig_name
+	result_tex = ""
+	result_tex += '\\begin{figure}[ht!]\n'
+	result_tex += '\t\\centering\n'
+	result_tex += '\t\\includegraphics[width=\\textwidth]{%s}\n' % (fig_path)
+	result_tex += '\t\caption{%s}\n' %(title)
+	result_tex += '\\end{figure}\n'
+	return result_tex
+
+NUM_TESTS = 200
+HEAD_SPACE = 0.035
+PARAMCOL_WIDTH = 0.09
+CM_WIDTH = 0.27
+LABEL_WIDTH = 0.06
+
+def confmat_page(param_vals, featnames, feat_desc, param_fs_cm):
+	print feat_desc
+	print featnames
+	tex = "\\begin{minipage}[c]{\\textwidth}\n"
+	col_width = 0.85 / len(featnames)
+	
+	tex += "\t\\begin{minipage}[c]{\\textwidth}\n"	
+	
+	tex += "\t\t\\begin{minipage}[c]{%f\\textwidth}\n" % (PARAMCOL_WIDTH)
+	tex += "\t\t\\centering\n"
+	tex += "\t\t\tNoise\n"
+	tex += "\t\t\\end{minipage}\n"
+
+	tex += "\t\t\\begin{minipage}[c]{%f\\textwidth}\n" % (LABEL_WIDTH)
+	tex += "\t\t\\centering\n"
+	tex += "\t\t\t\\quad\n"
+	tex += "\t\t\\end{minipage}\n"
+	
+	for fs in sorted(list(featnames))[:3]:
+		tex += "\t\t\\begin{minipage}[c]{%f\\textwidth}\n" % (CM_WIDTH)
+		tex += "\t\t\\centering\n"
+		tex += "\t\t\\small{\n"
+		tex += "\t\t\t{0}\n".format(feat_desc[fs][:10].capitalize())
+		tex += "\t\t}\n"
+		tex += "\t\t\\end{minipage} \\ \\ \n"
+	tex += "\\\\ \t\\end{minipage}\n"
+
+	for p in param_vals:
+		tex += "\t\\vspace{5pt}\n"
+		tex += "\t\\begin{minipage}[c]{\\textwidth}\n"
+		tex += "\t\t\\begin{minipage}[c]{%f\\textwidth}\n" % (PARAMCOL_WIDTH)
+		tex += "\t\t\t\\centering\n"
+		tex += "\t\t\t{0}\n".format(p)
+		tex += "\t\t\\end{minipage}\n"
+		tex += "\t\\begin{minipage}[c]{%f\\textwidth}\n" % (LABEL_WIDTH)
+		tex += "\t\t\\tiny {\n"
+		tex += "\t\t\\vspace{-4pt}"
+		tex += "\t\t\t\\begin{tabular}{r}\n"
+		for classname in sorted(CLASSES): # defined at top
+			tex += "\t\t\t\t{0}\\\\ \n".format(classname)
+		tex += "\t\t\t\\end{tabular}\n"
+		tex += "\t\t}\n"
+		tex += "\t\\end{minipage}\n"
+		for fs in sorted(list(featnames))[:3]:
+			print "fs:", fs
+			tex += "\t\t\\begin{minipage}[c]{%f\\textwidth}\n" % (CM_WIDTH)
+			tex += "\t\t\t\\centering\n"
+			tex += "\t\t\t\\tiny {\n"
+			tex += "\t\t\t\t\\begin{tabular}{|c|c|c|c|c|c|c|c|} \hline\n"
+			
+			# Determine cell colors and appropriate labels
+			colored_cm = []
+			cm_rows = {}
+			for row in param_fs_cm[p][fs]:
+				cm_rows[row[0]]= row[1:]
+			for rowkey in sorted(CLASSES):
+				row = cm_rows[rowkey]
+				colored_row = []
+				row = cm_rows[rowkey]
+				for elem in row:
+					elem = elem.strip()
+					elem = float(elem) / NUM_TESTS
+					cell = None
+					if math.fabs(1.0 - elem) < 1e-10:
+						cell = '1.0'
+					elif math.fabs(0.0 - elem) < 1e-10:
+						cell = '0.0'
+					else:
+						cell = str(elem)[1:4]
+					color = "\\cellcolor[rgb]{1.0,%f,%f}" % (1 - float(elem),1 - float(elem))					
+					colored_row.append(color + ' ' + cell)
+				tex += ' & '.join([str(o) for o in colored_row]) + '\\\\ \\hline\n'
+			tex += "\t\t\t\\end{tabular}\n"
+			tex += "}\n"
+			tex += "\t\t\\end{minipage}\n"
+		tex += "\t\\end{minipage}\n"
+	tex += "\\end{minipage}\n"
+	#print tex
+	return tex
 
 MAX_SUBFIG_COLS = 5
-
 def exp_subfigs(exp_fname, param_val):
 	print 'exp_fname:', exp_fname
 	subfig_count = 0

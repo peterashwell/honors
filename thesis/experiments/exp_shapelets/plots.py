@@ -49,14 +49,17 @@ PARAM_NAME = exp_details[0]
 EXP_DESC = exp_details[1]
 
 PARAMS = []
-PARAM_CONFMAT = {}
+PARAM_FS_CONFMAT = {}
 
 # Read experiment configs, build at both levels
 FSCORES = {}
 FEATSETS = set() # feature sets seen
 FEATSET_DESC = {} # description of features
 TEST_DIRS = []
+fs_param_cm = {}
+
 for line in exp_config:
+	print line
 	line = line.strip().split(',')
 	param = line[2]
 	PARAMS.append(param) # param list
@@ -65,6 +68,7 @@ for line in exp_config:
 	# Start accumulating data to put into the functions
 	classify_config = open("{0}/{1}".format(EXP_DIR, CLASSIFY_CONFIG))
 	for clsf_line in classify_config:
+		print "ident0", clsf_line
 		clsf_line = clsf_line.strip().split(',')
 		featset = clsf_line[0]
 		FEATSETS.add(clsf_line[0])
@@ -77,7 +81,11 @@ for line in exp_config:
 		for linenum, cm_line in enumerate(cm_filename):
 			confusion_matrix.append(cm_line.split(','))
 		cm_filename.close()
-		PARAM_CONFMAT[param] = confusion_matrix
+		if param not in PARAM_FS_CONFMAT.keys():
+			new_dict = {featset : confusion_matrix}
+			PARAM_FS_CONFMAT[param] = new_dict
+		else:
+			PARAM_FS_CONFMAT[param][featset] = confusion_matrix
 		# Get the results
 		class_results, total_results = utils.process_cm(confusion_matrix)
 		#params_resultsets[param][featset] = {}
@@ -87,11 +95,17 @@ for line in exp_config:
 			FSCORES[featset] = [total_results[-1]]
 		else:
 			FSCORES[featset].append(total_results[-1]) # gets FSCOREZ
+
 print FSCORES # what we need for it	
 print PARAMS
 print FEATSETS
 print FEATSET_DESC
-main_plot = utils.primary_plot(PARAMS, FSCORES, list(FEATSETS), FEATSET_DESC, EXP_DESC, PARAM_NAME, 0)
+result_tex = ""
+result_tex += utils.primary_plot(PARAMS, FSCORES, list(FEATSETS), FEATSET_DESC, EXP_DESC, PARAM_NAME, 0)
+result_tex += utils.confmat_page(PARAMS, FEATSETS, FEATSET_DESC, PARAM_FS_CONFMAT)
+result_file = open('{0}/results.tex'.format(EXP_DIR), 'w')
+result_file.write(result_tex)
+result_file.close()
 print TEST_DIRS
 print EXP_DESC
 samples = utils.produce_expsamp(TEST_DIRS, PARAMS, PARAM_NAME, EXP_DESC)

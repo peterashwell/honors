@@ -43,6 +43,8 @@ def mindist(ts_flux, shapelet_flux, OFFSET_PCT=0):
 			cur_distance = 1e10 # No idea what it is
 		elif not early_abandon: # Use weaker version
 			cur_distance /= compared_points # use only the number of points we've seen
+		# Now our distance is adjusted for non-early abandon properly
+		# Check to see if it beats the best so far
 		if best_distance is None:
 			update = True
 		elif cur_distance < best_distance: # if gappy, average, otherwise, full distance sum

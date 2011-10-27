@@ -79,8 +79,7 @@ def getshfeatdir(commands):
 	else:
 		path += "-MD"
 	# TODO add entropy measure computations
-	if best_amt != -1: # For feature extraction only
-		path += "-b" + str(best_amt)
+	path += "-b" + str(best_amt)
 	return [path, use_dtw, use_md, best_amt]
 
 

@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 import distances
 distance_function = distances.mindist
 
+#Usage: vis_mindist <shapelet_path> <dir_to_test_on>
+
 NUM_CROSSFOLDS = 10
 
 SHAPELET_DIR = sys.argv[1]

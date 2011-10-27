@@ -16,25 +16,166 @@ There are some details related to the shapelet algorithm that need to be discuss
 \end{itemize}
 
 The following sections outline the experiments leading out of the above discussion.
+\setlength{\tabcolsep}{1.4pt}
+\setlength{\extrarowheight}{1.8pt}
 
 \subsection{Single shapelet per class}
-\subsection{cDTW and scaling}
-\subsection{Binary and multi-class entropy}
-\subsection{Distorted training sets}
+%\subsection{cDTW}
+%\subsection{Binary and multi-class entropy}
+%\subsection{Distorted training sets}
 \subsection{Multiple shapelets}
-
+\clearpage
 \section{Results}
-\subsection{Single shapelet per class}
-\subsection{cDTW and scaling}
-\subsection{Binary and multi-class entropy}
-\subsection{Distorted training sets}
-\subsection{Multiple shapelets}
+\subsection{Introducing gaps into the light curve}
+%\input{/Users/peter/honors/thesis/experiments/exp_shapelets/exp_improved/missing/results.tex}
+\clearpage
+\subsection{Limiting the amount of the light curve observed}
+%\input{/Users/peter/honors/thesis/experiments/exp_shapelets/exp_improved/observed/results.tex}
+\clearpage
+%\subsection{Introducing noise into the light curve}
+\input{/Users/peter/honors/thesis/experiments/exp_shapelets/exp_improved/noise/results.tex}
+\clearpage
+\subsection{Light curves with 1 in 2 datapoints missing, power law applied, clear signal within noise}
+%\input{/Users/peter/honors/thesis/experiments/exp_shapelets/exp_improved/clear_alldist/results.tex}
+\clearpage
+\subsection{Light curves with 1 in 2 datapoints, power law applied, noisy signal}
+%\input{/Users/peter/honors/thesis/experiments/exp_shapelets/exp_improved/noisy_alldist/results.tex}
+\clearpage
 
 \section{Discussion}
-\subsection{Single shapelet per class}
-\subsection{cDTW and scaling}
-\subsection{Binary and multi-class entropy}
-\subsection{Distorted training sets}
+\subsection{Undistorted data}
+The performance of both sets of shapelets on the undistorted set of lightcurves is shown in figures \ref{fig:gappymainplot}, \ref{fig:obsmainplot} and \ref{fig:noisymainplot} with an F-Score of approximately 0.58. This is a lower than expected result because there is so little deviation within the time series classes of the undisorted light curves. There are two possible explanations for this outcome:
+\begin{enumerate}
+	\item There are some classes that have no subsequences (subject to our length constraints [15, 40, 65, 90, 105]) that are separated by the distance measure from all the other classes.
+	\item The shapelet extraction algorithm, trained on a subset of the training data, fails to choose general enough shapelets to accomodate slight variations in the testing data - a kind of overfitting.
+\end{enumerate}
+If the shapelet discrimination is poor on the training set, then the first issue is to blame for the poor performance. If the discrimination is good on the training set and poor on the test set, the second issue is to blame. I ran an additional experiment to evaluate the performance of the extracted shapelets on the exact training sets they were extracted from, with an F-Score of 
+
+
+\begin{minipage}[c]{\textwidth}
+		\vspace{4pt}
+	\begin{minipage}[l]{\textwidth}
+		\begin{minipage}[c]{0.09\textwidth}
+			\centering
+			10
+		\end{minipage}
+		\begin{minipage}[c]{0.03\textwidth}
+			\tiny {
+				\begin{tabular}{c>{\centering\arraybackslash} m{0pt}}
+				ESE &\\
+				ESE &\\
+				ESE &\\
+				ESE &\\
+				ESE &\\
+				ESE &\\
+				ESE &\\
+				ESE &\\
+				\end{tabular}
+			}
+		\end{minipage}	
+		\begin{minipage}[l]{0.27\textwidth}
+			\centering
+			\tiny {
+			\begin{tabular}{|c|c|c|c|c|c|c|c|>{\centering\arraybackslash} m{0pt}}\hline
+			1.0 & .95 & &x &x & &{1.00} & {1.00} &\\ \cline{1-8}
+			{1.00}&{1.00}&{1.00}& {\texttt{1.00}}& {1.00}&{1.00}& &{1.00}&  \\ \cline{1-8}
+			x &x &- &x &x & &{1.00} & {1.00} & \\  \cline{1-8}
+			x & & &x &x &x &{1.00} \cellcolor[gray]{0.5}& {1.00} &\\ \cline{1-8}
+			x &x & &x &x &x &{1.00}& {1.00} &\\  \hline
+			x &x &- &x &x &x &{1.00}& {1.00} &\\  \cline{1-8}
+			x & & &x &x &x &{1.00} & {1.00}  &\\ \cline{1-8}
+			x &x & &x &x &x &{1.00}& {1.00} &\\ \cline{1-8}
+			\end{tabular}
+			}
+		\end{minipage}
+		\begin{minipage}[l]{0.27\textwidth}
+			\centering
+			\tiny {
+			\begin{tabular}{|c|c|c|c|c|c|c|c|}\cline{1-8}
+			1.0 	& .95 & 	&x 			&x & 		&{1.00} & {1.00} \\ \cline{1-8}
+			{1.00}&	{1.00}	&{1.00}	& {\texttt{1.00}}& {1.00}&{1.00}& {1.00}& {1.00}  \\ \cline{1-8}
+			x 		&	x 	&- 	&x 			&x & 		&{1.00} & {1.00} \\  \cline{1-8}
+			x 		& & 	&x 	&x 			&x &{1.00} \cellcolor[gray]{0.5}& {1.00}\\ \cline{1-8}
+			x 		&	x 	& 	&x 			&x &x &{1.00}& {1.00}\\  \hline
+			x 		&	x 	&- 	&x 			&x &x &{1.00}& {1.00}\\  \cline{1-8}
+			x 		&	 		& 	&x 			&x &x &{1.00} & {1.00} \\ \cline{1-8}
+			x			&	x 	& 	&x 			&x &x &{1.00}& {1.00} \\ \cline{1-8}
+			\end{tabular}
+			}
+		\end{minipage}
+		\begin{minipage}[l]{0.27\textwidth}
+			\centering
+			\tiny {
+			\begin{tabular}{|c|c|c|c|c|c|c|c|}\cline{1-8}
+			1.0 	& .95 & 	&x 			&x & 		&{1.00} & {1.00} \\ \cline{1-8}
+			{1.00}&	{1.00}	&{1.00}	& {\texttt{1.00}}& {1.00}&{1.00}& {1.00}& {1.00}  \\ \cline{1-8}
+			x 		&	x 	&- 	&x 			&x & 		&{1.00} & {1.00} \\  \cline{1-8}
+			x 		& & 	&x 	&x 			&x &{1.00} \cellcolor[gray]{0.5}& {1.00}\\ \cline{1-8}
+			x 		&	x 	& 	&x 			&x &x &{1.00}& {1.00}\\  \hline
+			x 		&	x 	&- 	&x 			&x &x &{1.00}& {1.00}\\  \cline{1-8}
+			x 		&	 		& 	&x 			&x &x &{1.00} & {1.00} \\ \cline{1-8}
+			x			&	x 	& 	&x 			&x &x &{1.00}& {1.00} \\ \cline{1-8}
+			\end{tabular}
+			}
+		\end{minipage}
+	\end{minipage}
+\end{minipage}
+
+\setlength{\tabcolsep}{5pt}
+\setlength{\extrarowheight}{1pt}
+\clearpage
+\begin{minipage}[c]{\textwidth}
+	
+	\begin{minipage}[c]{\textwidth}
+		\begin{minipage}[c]{0.09\textwidth}
+			\centering
+			0.0
+		\end{minipage}
+		\begin{minipage}[r]{0.06\textwidth}
+			\tiny {
+			\begin{tabular}	{c>{\centering\arraybackslash} m{0pt}}
+				ESE & \\ 
+				BG & \\ 
+				XRB & \\ 
+				FSdMe & \\ 
+				FSRSCVn & \\ 
+				Novae & \\ 
+				IDV & \\ 
+				SNe & \\ 
+			\end{tabular}
+			}
+		\end{minipage}
+		\begin{minipage}[c]{0.27\textwidth}
+			\centering
+			\tiny {
+			\begin{tabular}{|c|c|c|c|c|c|c|c|}\hline
+\cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 \\ \hline
+\cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 \\ \hline
+\cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 \\ \hline
+\cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 \\ \hline
+\cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 \\ \hline
+\cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 \\ \hline
+\cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 \\ \hline
+\cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 \\ \hline
+%			1.0 	& .95 & 	&x 			&x & 		&{1.00} & {1.00} \\ \hline
+%			{1.00}&	{1.00}	&{1.00}	& {\texttt{1.00}}& {1.00}&{1.00}& {1.00}& {1.00}  \\ \hline
+%			x 		&	x 	&- 	&x 			&x & 		&{1.00} & {1.00} \\  \hline
+%			x 		& & 	&x 	&x 			&x &{1.00} \cellcolor[rgb]{1,0,0}& {1.00}\\ \hline
+%			x 		&	x 	& 	&x 			&x &x &{1.00}& {1.00}\\  \hline
+%			x 		&	x 	&- 	&x 			&x &x &{1.00}& {1.00}\\  \hline
+%			x 		&	 		& 	&x 			&x &x &{1.00} & {1.00} \\ \hline
+%			x			&	x 	& 	&x 			&x &x &{1.00}& {1.00} \\ \hline
+			\end{tabular}
+			}
+		\end{minipage}
+	\end{minipage}
+\end{minipage}
+
+
+\subsection{Missing data}
+%\subsection{cDTW}
+%\subsection{Binary and multi-class entropy}
+%\subsection{Distorted training sets}
 \subsection{Multiple shapelets}
 
 \section{Conclusion}

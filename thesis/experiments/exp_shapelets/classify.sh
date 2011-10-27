@@ -35,6 +35,7 @@ do
 			if [[ ! -d $RAW_RES_DIR/$crossfold_dir/$join_id ]]; then
 				mkdir $RAW_RES_DIR/$crossfold_dir/$join_id
 			fi
+			echo $classify_dir/train.arff
 			let head_bound=$NUM_CLASSES
 			let tail_bound=$NUM_CLASSES+1
 			java -cp /Applications/weka-3-6-4/weka.jar weka.classifiers.trees.RandomForest -t $classify_dir/train.arff -T $classify_dir/test.arff\

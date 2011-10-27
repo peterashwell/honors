@@ -34,7 +34,7 @@ feature_config = open("{0}/{1}".format(EXP_DIR, FEATURE_CONFIG_FILE))
 comp_features = {}
 for line in feature_config:
 	line = line.strip().split(',')
-	comp_features[line[0]] = line[1:]
+	comp_features[line[0]] = [o.strip() for o in line[1:]]
 print comp_features
 # Read experiment config, and extract features for each
 exp_config = open("{0}/{1}".format(EXP_DIR, EXP_CONFIG_FILE))
@@ -55,10 +55,16 @@ for line in exp_config:
 			os.mkdir(exp_feat_dir)
 		# Extract features from every light curve in training directory
 		print "extracting features for", exp_feat_dir
-		for train_test in [train, test]: # just for convenience
+		for tf, train_test in enumerate([train, test]): # just for convenience
 			# Extract shapelets if necessary (external step to other feature extraction)
-			if "shapelet" in feat_id:
+			if "-" in feat_id or 'shapelet' in feat_id: # ugh
 				print "extracting shapelet features for directory:", train_test
+				#if tf == 0: # if we are computing the training set OH GOD SO HACKED
+				#	print comp_features[feat_id]
+				#	if comp_features[feat_id][1] != 'None': # if there is a forced train set
+				#		print train_test
+				#		train_test = comp_features[feat_id][1]
+				#		print "using forced training set:", train_test
 				shapelet_features(train_test, comp_features[feat_id][0]) # extract all shapelets for train_test with args
 				continue # do not proceed (what would we do anyway?)
 			outdir = "{0}/{1}".format(exp_feat_dir, train_test)

@@ -14,18 +14,26 @@ LC_DIR = configs["LIGHTCURVE_DIR"]
 RAW_FEAT_DIR = configs["RAW_FEATURE_DIR"]
 ARFF_DIR = configs["JOINED_FEATURE_DIR"]
 NUM_CROSSFOLDS = configs["NUM_CROSSFOLDS"]
-FEAT_CONFIG = configs["CLASSIFY_CONFIG"]
+CLASSIFY_CONFIG = configs["CLASSIFY_CONFIG"]
 EXP_CONFIG = configs["EXPERIMENT_CONFIG"]
+FEAT_CONFIG = configs["FEATURE_CONFIG"]
 CLASSES = configs["CLASSES"]
 exp_dir = sys.argv[1] # get directory of experiment to process
 
 # Use the exp.config at the sys.argv[1] location to decide what to join
-feature_config = open("{0}/{1}".format(exp_dir, FEAT_CONFIG))
+classify_config = open("{0}/{1}".format(exp_dir, CLASSIFY_CONFIG))
 join_features = []
-for line in feature_config:
+for line in classify_config:
 	line = line.strip()
 	join_features.append(line)
 exp_config = open("{0}/{1}".format(exp_dir, EXP_CONFIG))
+
+forced_train = {}
+for line in open("{0}/{1}".format(exp_dir, FEAT_CONFIG)):
+	line = line.strip().split(',')
+	if line[2].strip() != 'None':
+		forced_train[line[0]] = line[2].strip()
+#print "forcing training sets for:", forced_train
 
 # Create raw feature dir if necessary
 if not os.path.isdir(ARFF_DIR):
@@ -37,7 +45,7 @@ for line in exp_config:
 	exp_id = line[0]
 	train = line[5]
 	test = line[6]
-	
+		
 	exp_arff_dir = "{0}/{1}-{2}".format(ARFF_DIR, train, test)
 	if not os.path.isdir(exp_arff_dir):
 		os.mkdir(exp_arff_dir)
@@ -60,6 +68,7 @@ for line in exp_config:
 				join_cf_dir = "{0}/{1}".format(this_arff_cf_dir, join_id)
 				if not os.path.isdir(join_cf_dir):
 					os.mkdir(join_cf_dir)
+				
 				#print "joining feature set", join_cf_dir
 				arff_fname = join_cf_dir + "/" + train_test + ".arff"
 				#print "arff file:", arff_fname
@@ -73,12 +82,17 @@ for line in exp_config:
 					for featname in args:
 						# TODO write to header here
 						feature_file = "{0}/{1}".format(RAW_FEAT_DIR, featname)
+						temp_train = train
+						if featname in forced_train.keys():
+							temp_train = forced_train[featname]
+							print "using forced training set:", forced_train[featname]
 						if train_test == "train":
-							feature_file += "/" + train
+							feature_file += "/" + temp_train
 						elif train_test == "test":
 							feature_file += "/" + test
 						feature_file += "/" + fname.strip()
 						#print "reading features from", feature_file
+						#print train_test
 						features = open(feature_file).read().strip().split(',')[1:] # omit filename
 						joined_features += features
 						if featname not in feature_lengths.keys():
