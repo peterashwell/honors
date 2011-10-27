@@ -13,41 +13,52 @@ NUM_CROSSFOLDS = 10
 # Usage plot_splitlines.py <shapelet_lc_dir> <dir_to_test_on>
 shapelet_dir = sys.argv[1]
 test_dir = sys.argv[2]
-out_dir = 'shapelet_analysis/{0}'.format(shapelet_dir.split('/')[-1])
+out_dir = sys.argv[3]
 if not os.path.isdir(out_dir):
 	os.mkdir(out_dir)
 # Load shapelet files one by one and store distances per test class
 sh_ts_distances = {}
-for cfnum in xrange(1):
-	load_dir = '{0}/cf{1}'.format(shapelet_dir, cfnum)
-	for shapelet_file in os.listdir(load_dir):
-		if shapelet_file == '.DS_Store':
+load_dir = shapelet_dir #'{0}/cf{1}'.format(shapelet_dir, cfnum)
+for shapelet_file in os.listdir(load_dir):
+	if shapelet_file == '.DS_Store':
+		continue
+	shapelet_class = shapelet_file.split('_')[0]
+	shapelet_path = '{0}/{1}'.format(load_dir, shapelet_file)
+	print "shapelet path:", shapelet_path
+	shapelet_ts = file_to_lc(shapelet_path)
+	# Evaluate on the test directory
+	min_distances = {} # maps class to min_dist
+	#test_cf_list = 'crossfold/cf{0}/test'.format(cfnum)
+	test_list = os.listdir(test_dir)
+	skipped_a_zero = False # if we skipped the self-training lc
+	for test_filename in test_list:
+		test_filename = test_filename.strip()
+		test_path = '{0}/{1}'.format(test_dir, test_filename)
+		print "test path:", test_path
+		#print "reading test file:", test_path
+		test_ts = file_to_lc(test_path)
+		test_class = test_filename.split('_')[0]
+		distance = distances.mindist(test_ts.flux, shapelet_ts.flux)[0]
+		if shapelet_class == 'FSdMe' and test_class == 'FSdMe':
+			#print "shapelet:", shapelet_ts.flux
+			#print "test:", test_ts.flux
+			print "FSdMe distance for files:", shapelet_file, test_filename
+			print "is", distance
+			#print "or is it:", distances.basic_mindist(test_ts.flux, shapelet_ts.flux)
+		if distance == 0 and not skipped_a_zero:
+			print "skipped", test_filename, shapelet_file
+			skipped_a_zero = True
 			continue
-		print "reading shapelet:", shapelet_file
-		shapelet_class = shapelet_file.split('_')[0]
-		shapelet_path = '{0}/{1}'.format(load_dir, shapelet_file)
-		shapelet_ts = file_to_lc(shapelet_path)
-		# Evaluate on the test directory
-		min_distances = {} # maps class to min_dist
-		test_cf_list = 'crossfold/cf{0}/test'.format(cfnum)
-		for test_filename in open(test_cf_list):
-			test_filename = test_filename.strip()
-			test_path = '{0}/{1}'.format(test_dir, test_filename)
-			print "reading test file:", test_path
-			test_ts = file_to_lc(test_path)
-			test_class = test_filename.split('_')[0]
-			distance = distances.mindist(test_ts.flux, shapelet_ts.flux)[0]
-			if shapelet_class not in sh_ts_distances.keys():
-				new_dict = {test_class : [distance]} # new mapping for this ts class and distance
-				sh_ts_distances[shapelet_class] = new_dict
+		if shapelet_class not in sh_ts_distances.keys():
+			new_dict = {test_class : [distance]} # new mapping for this ts class and distance
+			sh_ts_distances[shapelet_class] = new_dict
+		else:
+			if test_class not in sh_ts_distances[shapelet_class].keys():
+				sh_ts_distances[shapelet_class][test_class] = [distance]
 			else:
-				if test_class not in sh_ts_distances[shapelet_class].keys():
-					sh_ts_distances[shapelet_class][test_class] = [distance]
-				else:
-					sh_ts_distances[shapelet_class][test_class].append(distance)
-		out_dir = "{0}/cf{1}".format(out_dir, cfnum)
-		print "creating split line"
-		utils.plot_splitline(sh_ts_distances, out_dir)
+				sh_ts_distances[shapelet_class][test_class].append(distance)
+	out_dir = "{0}".format(out_dir)
+	utils.plot_splitline(sh_ts_distances, out_dir)
 #sh_classes =  sh_ts_distances.keys()
 # Now produce a histogram for this shapelet showing these distances
 #fig = plt.figure()

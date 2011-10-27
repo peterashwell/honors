@@ -124,7 +124,6 @@ float ShapeletFinder::minimumDistance(Shapelet& shapelet, TimeSeries* ts) {
 		}
 	}
 	//cout << "distance:" << smallest << endl;;
-	//cout << "distance: " << smallest << " normalised with " << shapelet.getLength() << endl;
 	return sqrt(smallest) / shapelet.getLength();
 }
 

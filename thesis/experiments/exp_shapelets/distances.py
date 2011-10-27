@@ -1,5 +1,26 @@
 import math
 # return the minimum distance of a, against b (ie b moves)
+
+def basic_mindist(ts_flux, shapelet_flux):
+	len_ts = len(ts_flux)
+	len_shapelet = len(shapelet_flux)
+	best_distance = None
+	for comp_start in xrange(0, len_ts - len_shapelet + 1):
+		cur_distance = 0
+		for comp_pos in xrange(0, len_shapelet):
+			ts_position = comp_pos + comp_start
+			cur_distance += (ts_flux[ts_position] - shapelet_flux[comp_pos]) ** 2
+			if best_distance is not None:
+				if cur_distance > best_distance:
+					break
+		if best_distance is None:
+			best_distance = cur_distance
+		elif cur_distance < best_distance:
+			cur_distance = best_distance
+	return math.sqrt(best_distance) / len(shapelet_flux)
+
+
+
 def mindist(ts_flux, shapelet_flux, OFFSET_PCT=0):
 	len_ts = len(ts_flux)
 	len_shapelet = len(shapelet_flux)
@@ -16,6 +37,7 @@ def mindist(ts_flux, shapelet_flux, OFFSET_PCT=0):
 	offset = int(OFFSET_PCT * len_shapelet) # works with overlapping subsequences # TODO move down
 	if offset != 0:
 		early_abandon = False
+	#print "early abandon:", early_abandon
 	# Now we've got through the distortions, compute minimum distance for contiguous subsequences
 	# If the data is gappy, we store the best average of compared points and use a weaker early abandon condition
 	for comp_start in xrange(0, len_ts - len_shapelet + 1):
@@ -55,7 +77,7 @@ def mindist(ts_flux, shapelet_flux, OFFSET_PCT=0):
 
 	# Now check that there wasn't a better distance on the boundaries
 	assert best_distance is not None # This should no langer happen
-	best_distance /= (len_shapelet) # normalise for shapelet length
+	best_distance = math.sqrt(best_distance) / (len_shapelet) # normalise for shapelet length
 	return best_distance, best_position 
 
 def dtw():

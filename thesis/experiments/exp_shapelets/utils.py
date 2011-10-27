@@ -459,54 +459,59 @@ def plot_splitline(sh_ts_distances, destination):
 		print "creating directory:", destination
 		os.mkdir(destination)
 	
-	sh_classes =  sh_ts_distances.keys()
-	# Now produce a histogram for this shapelet showing these distances
-	fig = plt.figure()
-	colors = ['b', 'g', 'r', 'm', 'y']
-	bins = [1.0 / 100.0 * i for i in xrange(100)]
-	
-	# Find the maximum of any distance to squash them with
-	max_dist = -1
-	for sk in sh_ts_distances.keys():
-		for tsk in sh_ts_distances[sk].keys():
-			this_max = max(sh_ts_distances[sk][tsk])
-			if this_max > max_dist:
-				max_dist = this_max
-	print "max dist:", max_dist
-	
+	COLOURS = ['b', 'g', 'r', 'm', 'y']
 	NUM_BINS = 200
-	BIN_SIZE = 1.0 / NUM_BINS
-	BINS = numpy.linspace(0, 1, NUM_BINS)
+	#BIN_SIZE = 1.0 / NUM_BINS
+	#print "BIN SIZE:", BIN_SIZE
+	#BINS = numpy.linspace(0, 1, NUM_BINS)
 	HIST_HEIGHT = 1 # Height of each histogram
 	
 	sh_ts_hist = {}
 	sh_left = {}
 	sh_right = {}
+	sh_max = {}
 	for shnum, sh_class in enumerate(sh_ts_distances.keys()):
+		# Compute the maximum distance for this shapelet across all classes
+		# Want to squash the diagonals correctly for the split line
+		SHAPELET_MAX_DIST = -1
+		for test_class in sh_ts_distances[sh_class].keys():
+			m = max(sh_ts_distances[sh_class][test_class])
+			if m > SHAPELET_MAX_DIST:
+				SHAPELET_MAX_DIST = m
+		sh_max[sh_class] = SHAPELET_MAX_DIST
 		fig = plt.figure()
-		legend = [[], []]
+		# For each time series in the test set, produce two figures of the split line (all and specific)
 		for tsnum, ts_class in enumerate(sorted(sh_ts_distances[sh_class].keys())):
-			legend[1].append(ts_class)
-			# First step, just get a separate figure for each (maybe lay out in tex)
+			# Squash the distances using the maximum for the shapelet class into the range [0, 1]
 			class_distances = sh_ts_distances[sh_class][ts_class]
-			# Normalise and bin the distances
-			squashed_distances = [d / (1.0 * max_dist) for d in class_distances]
-			#print squashed_distances
-			#print BINS
-			hist = numpy.histogram(squashed_distances, BINS, normed=True)[0]
+			#if math.fabs(0 - SHAPELET_MAX_DIST) < 1e-10:
+			#	squashed_distances = [0 for d in class_distances]
+			#else:
+			#	squashed_distances = [d / (1.0 * SHAPELET_MAX_DIST) for d in class_distances]
+
+			# Build a histogram out of the data
+			hist = numpy.histogram(class_distances, numpy.linspace(-0.1, SHAPELET_MAX_DIST, NUM_BINS), normed=True)[0]
+			print "histogram sums:", numpy.sum(hist, axis=0)
+			print "marker 0a"
 			hist = hist / numpy.sum(hist, axis=0)
+			print "marker 0b"
 			hist = hist.tolist()
-			#print "hist:", hist
+			if ts_class == 'FSdMe' and sh_class == 'FSdMe':
+				print "FSdMe distances:"
+				print class_distances
+				#print "squashed distances:"
+				#print squashed_distances
+				#print "FSdMe histogram, against FSdMe class:"
+				#print hist
+			
+			# Get the bounds of the histogram for the shapelet class (for specific viewing)
 			if sh_class == ts_class: # check the std and mean of histogram
-				this_max = max(squashed_distances)
-				left_lim = min(squashed_distances)
-				spread = this_max - left_lim + 0.05 # have at least a small spread
-				sh_left[sh_class] = max(0, left_lim - spread)
-				sh_right[sh_class] = min(1, this_max + spread)
-				#print this_max, "dist_max"
-				#print left_lim, "dist_min"
-				#print spread, "spread"
-				#print "distances:"
+				this_max = SHAPELET_MAX_DIST #max(squashed_distances)
+				this_min = -0.05 #min(squashed_distances)
+				sh_left[sh_class] = max(-0.05, this_min - 0.05)
+				sh_right[sh_class] = min(1.05, this_max + 0.05)
+			
+			# Store the histogram for plotting, now that we have the bounds we need
 			if sh_class not in sh_ts_hist.keys():
 				new_dict = {ts_class : hist}
 				sh_ts_hist[sh_class] = new_dict
@@ -534,10 +539,10 @@ def plot_splitline(sh_ts_distances, destination):
 		fig = plt.figure()
 		for tsnum, ts_class in enumerate(sh_ts_hist[sh_class].keys()):
 			hist = sh_ts_hist[sh_class][ts_class]
-			p = plt.bar(numpy.linspace(0,1,NUM_BINS)[:-1], hist, BIN_SIZE,\
-				color=colors[tsnum % len(colors)], bottom = HIST_HEIGHT * tsnum, alpha=1.0)	
-			plt.xlim([0,1])
-			legend[0].append(p[0])
+			p = plt.bar(numpy.linspace(-0.05,1.05,NUM_BINS)[:-1], hist, (1.0 - 0) / NUM_BINS,\
+				color=COLOURS[tsnum % len(COLOURS)], bottom = HIST_HEIGHT * tsnum, alpha=1.0)	
+			plt.xlim([-.05,1.05])
+			#legend[0].append(p[0])
 		frame = plt.gca()
 		frame.axes.get_yaxis().set_ticklabels(sorted(sh_ts_distances[sh_class].keys()))
 		frame.axes.get_yaxis().set_ticks([o + 0.5 for o in range(8)])
@@ -549,30 +554,33 @@ def plot_splitline(sh_ts_distances, destination):
 		plt.close()
 	
 	for shnum, sh_class in enumerate(sh_ts_distances.keys()):
+		print "building specific histogram for class:", sh_class
 		fig = plt.figure()
 		for tsnum, ts_class in enumerate(sh_ts_distances[sh_class].keys()):
 			#left_lim = max(0, sh_mean[sh_class] - 3 * sh_std[sh_class])
 			#right_lim = min(1, sh_mean[sh_class] + 3 * sh_std[sh_class])
-			
 			class_distances = sh_ts_distances[sh_class][ts_class]
-			squashed_distances = [d / (1.0 * max_dist) for d in class_distances]
+			squashed_distances = [d / (1.0 * sh_max[sh_class]) for d in class_distances]
 			right_lim = sh_right[sh_class]
-			left_lim = sh_left[sh_class]	
+			left_lim = sh_left[sh_class]
 			#left_lim = max(0, left_lim - spread)
 			#right_lim = min(1, right_lim + spread)
 			# Normalise and bin the distances
 			NUM_BINS = 200
+			print "right lim:", right_lim
+			print "left lim:", left_lim
 			BIN_SIZE = (right_lim - left_lim) / NUM_BINS
 			BINS = numpy.linspace(left_lim, right_lim, NUM_BINS)
 			
 			hist = numpy.histogram(squashed_distances, BINS, normed=True)[0].tolist()
+			print "marker 1a"	
 			hist = hist / numpy.sum(hist, axis=0)
-		
+			print "marker 1b"
 			p = plt.bar(numpy.linspace(left_lim,right_lim,NUM_BINS)[:-1], hist, BIN_SIZE,\
-				color=colors[tsnum % len(colors)], bottom = HIST_HEIGHT * tsnum, alpha=1.0)	
+				color=COLOURS[tsnum % len(COLOURS)], bottom = HIST_HEIGHT * tsnum, alpha=1.0)	
 			
 			plt.xlim([left_lim,right_lim])
-			legend[0].append(p[0])
+			#legend[0].append(p[0])
 		frame = plt.gca()
 		frame.axes.get_yaxis().set_ticklabels(sorted(sh_ts_distances[sh_class].keys()))
 		frame.axes.get_yaxis().set_ticks([o + 0.5 for o in range(8)])

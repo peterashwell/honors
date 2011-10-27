@@ -29,6 +29,7 @@ if not os.path.isdir(SHAPELET_DEBUG_DIR):
 if best_amt == 1:
 	
 	for cfnum in xrange(NUM_CROSSFOLDS):
+		print "crossfold:", cfnum
 		debug_index = open(SHAPELET_DEBUG_DIR + '/cf{0}'.format(cfnum) + "_debug", 'w')
 		shapelet_id_file = open("{0}/cf{1}/{2}".format(shapelet_dir, cfnum, "shapelet_ids"))
 		best_shapelets = {}
@@ -43,7 +44,6 @@ if best_amt == 1:
 			#	print "{0}/{1}".format(ln,"total")
 			line = line.strip().split(',')
 			sh_class = line[1].split('/')[-1].split('_')[0]
-			#print sh_class
 			update = False
 			if sh_class not in best.keys():
 				update = True
@@ -66,6 +66,7 @@ if best_amt == 1:
 		if not os.path.isdir(debug_dir):
 			os.mkdir(debug_dir)
 		for sh_class in best_line.keys():
+			print "class:", sh_class, "id:", best_line[sh_class][0]
 			source_filename = best_line[sh_class][1].split('/')[-1]
 			source = lightcurve.file_to_lc('{0}/{1}'.format(SHAPELET_SOURCE_DIR, source_filename))
 			sh_start = int(best_line[sh_class][2])
