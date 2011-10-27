@@ -3,8 +3,8 @@
 #include <errno.h>
 #include <string>
 #include <iostream>
+#include <algorithm>
 #include <vector>
-#include <iostream>
 #include <fstream>
 #include <sstream>
 #include <utility>
@@ -24,9 +24,28 @@ int getdir (string dir, vector<string> &files)
 	}
 
 	while ((dirp = readdir(dp)) != NULL) {
+		cout << "found" << dirp->d_name << endl;
 		files.push_back(string(dirp->d_name));
 	}
 	closedir(dp);
+	return 0;
+}
+
+int readindex(string path, vector<string> &filenames) {
+	string line;
+	ifstream myfile (path.c_str());
+	if (myfile.is_open())
+	{
+		while ( myfile.good() ) {
+		getline (myfile,line);
+		string::iterator end_pos = std::remove(line.begin(), line.end(), '\n');
+		line.erase(end_pos, line.end());
+		filenames.push_back(line);
+		cout << line << endl;
+		}
+		myfile.close();
+	}
+	else cout << "Unable to open file"; 
 	return 0;
 }
 

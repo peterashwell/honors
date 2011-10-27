@@ -17,7 +17,7 @@ class Dataset {
 		std::vector<std::string> types;
 		std::tr1::unordered_map<std::string, int> class_counts;
 	public:
-		void load(std::string load_dir, int limit, int NUM_CLASSES);
+		void load(std::string ts_dir, string cf_index, string cf, int limit, int NUM_CLASSES);
 		std::vector<TimeSeries*>& getData();
 		std::vector<std::string>& getTypes();
 		int numOfClass(string& s);
@@ -67,12 +67,19 @@ std::vector<std::string>& Dataset::getTypes() {
 	return types;
 }
 
-void Dataset::load(std::string load_dir, int limit, int NUM_CLASSES) {
-	cout << "loading from directory " << load_dir << endl;
-	std::vector<std::string> dir_list;
+void Dataset::load(string ts_dir, string cf_index, string cf, int limit, int NUM_CLASSES) {
+	cout << "loading time series from directory " << ts_dir << endl;
+	//cout << "loading filenames from directory " << cf_index << endl;
 
-	getdir(load_dir, dir_list); // See Utils.h	
-	
+	std::vector<std::string> dir_list;
+	if (cf.compare("-1") == 0) {
+		getdir(ts_dir, dir_list); // just read directory instead
+		cout << "getting dir" << endl;
+	}
+	else {
+		cout << "read index being called wtf" << endl;
+		readindex(cf_index, dir_list); // See Utils.h	
+	}
 	// Load each time series into the dataset, recording class data
 	std::vector<std::string>::iterator iter;	
 	if (limit > dir_list.size()) {
@@ -86,11 +93,12 @@ void Dataset::load(std::string load_dir, int limit, int NUM_CLASSES) {
 		AMT_PER_CLASS = 1; // just cause
 	}
 	for (iter = dir_list.begin(); iter != dir_list.end(); iter++) {
-		if (iter->compare(string(".")) == 0 or iter->compare(string("..")) == 0) {
+		if (iter->compare(string(".")) == 0 or iter->compare(string("..")) == 0
+			or iter->compare(string(".DS_Store")) == 0) {
 			continue;
 		}
 		TimeSeries* t = new TimeSeries();
-		string type = t->load(load_dir, *iter);
+		string type = t->load(ts_dir, *iter);
 		if (class_counts[type] >= AMT_PER_CLASS) {
 			continue; // do not load this one
 		}

@@ -23,19 +23,24 @@ int main(int argc, char* argv[]) {
 	
 	string sample_dir = "nosample";
 	string train_dir = "notrain";
-	std::cout << "sd: " << sample_dir << " td: " << train_dir << endl; //" od: " << out_dir << std::endl;	
+	//std::cout << "sd: " << sample_dir << " td: " << train_dir << endl; //" od: " << out_dir << std::endl;	
 	string crossfold = "-1"; // extract crossfolds one at a time for hacky parallellism
 	bool use_dtw = false; // use dynamic time warping as distance measure
 	bool use_md = true; // use minimum distance as distance measure
 	bool use_scaling = false; // use scaling in distance measure
+	bool single_entropy = true;
+	
 	string train_amt = "-1"; // number of training light curves to use from train
 	string samp_amt = "-1"; // number of sample light cruves to use
 	string out_dir = "";
 	char c;
-	while ((c = getopt (argc, argv, "o:dac:s:t:T:S:")) != -1)
+	while ((c = getopt (argc, argv, "mo:dac:s:t:T:S:")) != -1)
 	{
 		switch (c)
 		{
+			case 'm':
+				single_entropy = false; // use multi class entropy
+				break;
 			case 's':
 				sample_dir = optarg;
 				break;
@@ -80,44 +85,36 @@ int main(int argc, char* argv[]) {
 
 	// Files to draw shapelets from and train on (sample and train)
 	cout << "managed to get args" << endl;
-	string sample_cf_dir = "crossfold/" + sample_dir + "-" + sample_dir;
-	string train_cf_dir = "crossfold/" + train_dir + "-" + train_dir;
-	cout << "crossfold:" <<  crossfold << endl;
-	if (crossfold.compare("-1") != 0) {
-		sample_cf_dir = sample_cf_dir + "/cf" + crossfold + "/train"; // note, use train dir for both sample and train
-		train_cf_dir = train_cf_dir + "/cf" + crossfold + "/train";	
-	}
-	else {
-		cout << "No crossfold set, using fixed sample and train directories" << endl;
-		sample_cf_dir = sample_dir; // note, use train dir for both sample and train
-		train_cf_dir = train_dir;	
-	}
+	string cf_index = "crossfold/cf" + crossfold + "/train";
+	string sample_ts_dir = sample_dir;
+	string train_ts_dir = train_dir;
 	
 	//out_dir now specified manually
 	//string out_dir = "shapelets/" + sample_dir + "-" + train_dir;
 	//out_dir = out_dir + "-S" + samp_amt + "-T" + train_amt;
 	
-	if (out_dir.compare("") == 0) {
-		if (use_dtw) {
-			out_dir = out_dir + "-DTW";
-		}
-		else {
-			out_dir = out_dir + "-MD";
-		}
-		out_dir = out_dir + "/cf" + crossfold;
-	}
-	cout << "train: " << train_cf_dir << endl;
-	cout << "sample: " << sample_cf_dir << endl;
+	//if (out_dir.compare("") == 0) {
+	//	if (use_dtw) {
+	//		out_dir = out_dir + "-DTW";
+	//	}
+	//	else {
+	//		out_dir = out_dir + "-MD";
+	//	}
+	//	if (
+	//	out_dir = out_dir + "/cf" + crossfold;
+	//}
+	cout << "train: " << train_ts_dir << endl;
+	cout << "sample: " << sample_ts_dir << endl;
 	cout << "out: " << out_dir << endl;
 	// Read in files in given source and training directories
 	Dataset sample;
-	sample.load(sample_cf_dir, atoi(samp_amt.c_str()), NUM_CLASSES);
+	sample.load(sample_ts_dir, cf_index, crossfold, atoi(samp_amt.c_str()), NUM_CLASSES);
 
 	cout << "done loading" << endl;
 	
 	Dataset train;
-	train.load(train_cf_dir, atoi(train_amt.c_str()), NUM_CLASSES);
+	train.load(train_ts_dir, cf_index, crossfold, atoi(train_amt.c_str()), NUM_CLASSES);
 
 	ShapeletFinder res(out_dir);
-	res.extractShapelets(sample, train);
+	res.extractShapelets(sample, train, single_entropy);
 }

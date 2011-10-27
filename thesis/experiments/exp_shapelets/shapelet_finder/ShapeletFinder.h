@@ -31,7 +31,7 @@ class ShapeletFinder {
 	public:
 		ShapeletFinder(string& out_dir);
 		~ShapeletFinder();
-		void extractShapelets(Dataset& sample, Dataset& train);;
+		void extractShapelets(Dataset& sample, Dataset& train, bool single_entropy);;
 };
 
 ShapeletFinder::ShapeletFinder(string& OUT_DIR) {
@@ -48,7 +48,7 @@ ShapeletFinder::~ShapeletFinder() {
 	shapelet_index.close();
 }
 
-void ShapeletFinder::extractShapelets(Dataset& sample, Dataset& train) {
+void ShapeletFinder::extractShapelets(Dataset& sample, Dataset& train, bool single_entropy) {
 	computeDistances(sample, train);
 }
 
@@ -59,7 +59,7 @@ void ShapeletFinder::computeDistances(Dataset& sample, Dataset& train) {
 	vector<TimeSeries*>::iterator ts;
 	//vector<string>::iterator sampled_type = sample.getTypes().begin();
 
-	clock_t start = clock();
+	clock_t start_time = clock();
 	int done = 0;
 	cout << sample.size() << " time series to sample from" << endl;
 	for (ts = sample.begin(); ts != sample.end(); ++ts) {
@@ -67,6 +67,8 @@ void ShapeletFinder::computeDistances(Dataset& sample, Dataset& train) {
 		// Get subsequences
 		for (int slen = MIN_LEN; slen <= MAX_LEN; slen += STEPSIZE) {
 			cout << "\tlen:" << slen << endl;
+			cout << "\tsize:" << (*ts)->size() << endl;
+			cout << "\tstart: " << 0 << " end:" << (*ts)->size() - slen << endl;
 			for (int start = 0; start < (*ts)->size() - slen; ++start) {
 				cout << "\t\tstart:" << start << endl;
 				shapelet_index << SHAPELET_ID << "," << (*ts)->getSourceFile() << "," << start << "," << slen;
@@ -82,7 +84,7 @@ void ShapeletFinder::computeDistances(Dataset& sample, Dataset& train) {
 			}
 		}
 		cout << done << "/" << sample.size() << endl;
-		cout << "time elapsed: << " << ((clock() - start) / (double) CLOCKS_PER_SEC) << "s" << endl;
+		cout << "time elapsed: << " << ((clock() - start_time) / (double) CLOCKS_PER_SEC) << "s" << endl;
 		done += 1;
 		//sampled_type++; // iterate over the sampled class also
 	}
@@ -240,13 +242,14 @@ float ShapeletFinder::informationGain(Shapelet& shapelet, Dataset& train, float&
 	for (ts = train.begin(); ts != train.end(); ++ts) {
 		float d = minimumDistance(shapelet, *ts);
 		mindists.push_back(pair<float,string>(d,(*ts)->getType()));
-		//filenames.push_back((*ts)->getSourceFile());
+		filenames.push_back((*ts)->getSourceFile());
 		//cout << "sh type:" << shapelet.getType() << (*ts)->getType() << "," << (*ts)->getSourceFile() << "," << d << endl;
 	}
 	// Now sort the mindists and class labels at the same time
 	vector<pair<float, string> >::iterator iter;
 	stringstream s;
 	s << out_dir << "/shapelet_dist_" << SHAPELET_ID;
+	cout << "writing distances to: " << out_dir << endl;
 	ofstream md_file;
 	int i = 0;
 	md_file.open(s.str().c_str());
