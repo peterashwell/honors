@@ -25,9 +25,10 @@ classify_config = open("{0}/{1}".format(exp_dir, CLASSIFY_CONFIG))
 join_features = []
 for line in classify_config:
 	line = line.strip()
+	print "classify config line:", line
 	join_features.append(line)
+print join_features
 exp_config = open("{0}/{1}".format(exp_dir, EXP_CONFIG))
-
 forced_train = {}
 for line in open("{0}/{1}".format(exp_dir, FEAT_CONFIG)):
 	line = line.strip().split(',')

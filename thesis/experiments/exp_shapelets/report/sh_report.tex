@@ -1,182 +1,712 @@
+\chapter{Shapelets}
 \section{Introduction}
-A \emph{shapelet} of a particular time series object within a dataset that is distinctive to the class of which the time series belongs. Distinctive to a class means that it allows us to tell time series of that class apart from time series that are not, by some method. Shapelets were first introduced in~\citet{ye2009time} and built upon in~\citet{mueen2011logical}. The first paper proposed information theoretic and distance measure based definitions of \emph{distinctness} in a 2-class context, giving an algorithm for Shapelet extraction. The second paper generalised to a multi-class classification context and proposed performance improvements. Both papers suggest a decision tree based classifier using \emph{subsequence distance} (figure~\ref{fig:subsequencedistance}) to training cases as features to build training rules. \\
+\label{sec:shapelets}
+A \emph{shapelet} of a particular time series object within a dataset that is distinctive to the class of which the time series belongs. Shapelets were first introduced in the time series context in~\citet{ye2009time} and built upon in~\citet{mueen2011logical}. The Ye paper proposed information theoretic and distance measure based definitions of distinctness in a 2-class classification context. The paper also gives a brute force extraction algorithm with some performance improvement suggestions. The Mueen paper generalised to a multi-class classification context using multi-class entropy and proposed further performance improvements. Both papers suggest a decision tree based classifier using \emph{subsequence distance} (figure~\ref{fig:subsequencedistance}) to training cases as features to build training rules. \\
 
-Shapelets are interesting to the transient classification problem because they should be effective for classification and they are locale-independent. All previous methods explored rely on knowing the start and end points of an event to get good classification accuracy. Some transients (IDVs, XRBs, Flare stars) do not have well defined boundaries, so that is impossible. Additionally, sometimes only a fragment of a signal is available, and even if that fragment is highly characteristic of the class, no previous approach would function well unless it was trained explicitly on that fragment. Shapelets are robust in both of these scenarios and hence are worth exploring.
+Shapelets are interesting to the transient classification problem because they should be effective for classification in themselves and they are locale-independent. All previous methods explored rely on knowing the start and end points of an event to get good classification accuracy. Some transients (IDVs, XRBs, Flare stars) do not have well defined boundaries, so that is actually impossible. Additionally, sometimes only a fragment of a signal is available, and even if that fragment is highly characteristic of the class, no previous approach would function well unless it was trained explicitly on that fragment. Shapelets are robust in both of these scenarios and hence are worth exploring for transient classification.
 
-This chapter examines shapelets in the transient classification problem context, explores the basic algorithm in terms of classification performance, and finally proposes and compares modifications to both shapelet extraction and classification that may improve performance.
+This chapter examines shapelets in the transient classification problem context, examines the basic algorithm in terms of classification performance, and finally proposes and compares modifications to both shapelet extraction and classification that may improve performance.
 
-\section{Experiments}
-There are some details related to the shapelet algorithm that need to be discussed before making proposals for how to incorporate them into a classifciation approach.
+\section{Shapelet extraction and experiments}
+The fundamental algorithm for extracting shapelets:
 \begin{itemize}
-	\item The Ye 2009  paper determines only one shapelet per class as that having the best information theoretic measure of discrimination. The second paper proposes a find the best single combination of shapelets per class. Neither paper outlines a way to find the best $N$ shapelets, very important for dealing with the high variability of our simulated data and the distortions we apply to it. A potential algorithm involving using clustering of shapelets and a user-defined clustering threshold of \emph{shapelet distinctness} would enable multiple shapelet discovery, with each cluster would be a separate shapelet.
-	\item The distance measures for determining the similarity between time series and shapelet candidate subsequences is a slightly modified Euclidean distance, called the \emph{subsequence distance}. When there is even slight variability (but still a lot of similarity) amongst the phenomena we want the shapelet to represent, the distance measure will give poor results. A good example of such a phenomena is the sharp rise and peak of a Supernova transient. This structure occurs over many time scales and its peakiness means that unless a flexible distance measure is used, the shapelet will not be as useful as it could be. % TODO figure
-	\item When extracting single shapelets, the multi-class entropy defined in \citep{mueen2011logical} may choose a shapelet giving a good split for a class besides the source class for a shapelet, if such a subsequence happens to exist. This means an entire class will have no highly representative shapelets. A remedy is to use a one-vs-all binary entropy for each class, changing the non-source class labels to, say, \emph{B}, and having the source class label as \emph{A}.  This forces the algorithm to choose a shapelet that works only for the source class, but may potentially miss useful shapelets for separating the dataset in more general ways. This is however essential in a single shapelet context. If multiple shapelets are used then multi-class entropy is preferable. % TODO figure for split lines
-	\item Shapelets extracted from clean, normalised training data will not function well on distorted data. On clean data, even very subtle structures can be highly discriminative so long as they appear, in their subtlety, frequently within a class and not in others. These subtle shapelets become completely useless when noise is introduced (figure \ref{fig:noisyshapelet}. Similarly shapelets chosen from the latter part of light curves are useless if that part of the signal is not observed, and small shapelets with very strong variability are vulnerable to gappy data \ref{fig:gappyshapelet}. Clearly these complications will seriously hinder classifiction performance. A potential solution is to draw shapelets from clean light curves and find their discriminative power \emph{amongst distorted lightcurve datasets}. The algorithm would then ignore shapelets that are sensitive to poor data conditions, and in the case of limited data, would choose shapelets appearing early in the time series.
-	\item Speed concerns, use limited dataset % TODO
+	\item Explain sample and evaluation sets for shapelets
+	\item Explain minimum distance
+	\item Explain binary dataset entropy
+	\item Explain the split line
+	\item Outline limitations of the algorithm in prelude to multi-class context
+\end{itemize}
+In the multiclass version:
+\begin{itemize}
+	\item Explain how to adapt the shapelets to our framework
+	\item Explain binary entropy should still work, but does not take full advantage of the potential of multi-class entropy
+	\item Discuss DTW as a potential distance measure
+	\item Discuss the limitations of the training and sample sets
+	\item Discuss other practical considerations such as scalability
+\end{itemize}
+This leads to our proposal for the application of shapelets
+\begin{itemize}
+	\item Features based on the same distance measure as extraction
+	\item A clustering algorithm to approximately identify a number of useful shapelets, not just the absolute best
+	\item Did not have time, but certainly would like to try, applying multi-class entropy, dynamic time warping and modified training and test sets to the problem
+	\item Explicitly state any modifications to the original experimental framework in chapter 3
+\end{itemize}
+%
+%There are some details related to the shapelet algorithm that needs to be discussed before making proposals for how to incorporate them into a classifciation approach.
+%\begin{itemize}
+%	\item The Ye 2009  paper determines only one shapelet per class as that having the best information theoretic measure of discrimination. The second paper proposes a find the best single combination of shapelets per class. Neither paper outlines a way to find the best $N$ shapelets, very important for dealing with the high variability of our simulated data and the distortions we apply to it. A potential algorithm involving using clustering of shapelets and a user-defined clustering threshold of \emph{shapelet distinctness} would enable multiple shapelet discovery, with each cluster would be a separate shapelet.
+%	\item The distance measures for determining the similarity between time series and shapelet candidate subsequences is a slightly modified Euclidean distance, called the \emph{subsequence distance}. When there is even slight variability (but still a lot of similarity) amongst the phenomena we want the shapelet to represent, the distance measure will give poor results. A good example of such a phenomena is the sharp rise and peak of a Supernova transient. This structure occurs over many time scales and its peakiness means that unless a flexible distance measure is used, the shapelet will not be as useful as it could be. % TODO figure
+%	\item When extracting single shapelets, the multi-class entropy defined in \citep{mueen2011logical} may choose a shapelet giving a good split for a class besides the source class for a shapelet, if such a subsequence happens to exist. This means an entire class will have no highly representative shapelets. A remedy is to use a one-vs-all binary entropy for each class, changing the non-source class labels to, say, \emph{B}, and having the source class label as \emph{A}.  This forces the algorithm to choose a shapelet that works only for the source class, but may potentially miss useful shapelets for separating the dataset in more general ways. This is however essential in a single shapelet context. If multiple shapelets are used then multi-class entropy is preferable. % TODO figure for split lines
+%	\item Shapelets extracted from clean, normalised training data will not function well on distorted data. On clean data, even very subtle structures can be highly discriminative so long as they appear, in their subtlety, frequently within a class and not in others. These subtle shapelets become completely useless when noise is introduced (figure \ref{fig:noisyshapelet}. Similarly shapelets chosen from the latter part of light curves are useless if that part of the signal is not observed, and small shapelets with very strong variability are vulnerable to gappy data \ref{fig:gappyshapelet}. Clearly these complications will seriously hinder classifiction performance. A potential solution is to draw shapelets from clean light curves and find their discriminative power \emph{amongst distorted lightcurve datasets}. The algorithm would then ignore shapelets that are sensitive to poor data conditions, and in the case of limited data, would choose shapelets appearing early in the time series.
+%	\item Speed concerns, use limited dataset % TODO
+%\end{itemize}
+%
+%The following sections outline the experiments leading out of the above discussion.
+\setlength{\tabcolsep}{1.4pt}
+\setlength{\extrarowheight}{6.0pt}
+
+\section{Preliminary - Shapelet extraction results}
+The set of shapelets giving the best information gain for their source class is shown in figure~\ref{fig:singleshapelets}. Each sample is shown in its sample context.
+
+\begin{figure}[ht!]
+	\centering
+	\label{fig:singleshapelets}
+	\subfigure[ESE shapelet] {
+	\includegraphics[width=0.40\textwidth]{/Users/peter/honors/thesis/experiments/exp_shapelets/figures/singleshapelets/ESE_shapelet.pdf}
+	}
+	\subfigure[SNe shapelet] {
+	\includegraphics[width=0.40\textwidth]{/Users/peter/honors/thesis/experiments/exp_shapelets/figures/singleshapelets/SNe_shapelet.pdf}
+	}\\
+	\subfigure[IDV shapelet] {
+	\includegraphics[width=0.40\textwidth]{/Users/peter/honors/thesis/experiments/exp_shapelets/figures/singleshapelets/IDV_shapelet.pdf}
+	}
+	\subfigure[XRB shapelet] {
+	\includegraphics[width=0.40\textwidth]{/Users/peter/honors/thesis/experiments/exp_shapelets/figures/singleshapelets/XRB_shapelet.pdf}
+	}\\
+	\subfigure[BG shapelet] {
+	\includegraphics[width=0.40\textwidth]{/Users/peter/honors/thesis/experiments/exp_shapelets/figures/singleshapelets/BG_shapelet.pdf}
+	}
+	\subfigure[Novae shapelet] {
+	\includegraphics[width=0.40\textwidth]{/Users/peter/honors/thesis/experiments/exp_shapelets/figures/singleshapelets/Novae_shapelet.pdf}
+	}\\
+	\subfigure[FSdMe shapelet] {
+	\includegraphics[width=0.40\textwidth]{/Users/peter/honors/thesis/experiments/exp_shapelets/figures/singleshapelets/FSdMe_shapelet.pdf}
+	}
+	\subfigure[FSRSCVn shapelet] {
+	\includegraphics[width=0.40\textwidth]{/Users/peter/honors/thesis/experiments/exp_shapelets/figures/singleshapelets/FSRSCVn_shapelet.pdf}
+	}\\
+	\caption{Single best shapelets per class extracted by the shapelet algorithm}
+\end{figure}
+
+The extracted shapelets are puzzling because the intuitively most discriminative structures of the light curves such as the sharp spikes of the XRB or the decay of the SNe are not chosen. For several classes very short and unintuitive shapelets are selected and in the case of the SNe, a long noisy sequence that seems to have no relationship to the structure of the class.
+
+To investigate the odd results I produced a plot of the separation lines (figure~\ref{fig:separationlines}) of one crossfold of shapelets to their evaluation set. The results are in figures~\ref{fig:splitlines1} and~\ref{fig:splitlines2}. The split lines for the shapelet evaluation set in the left column are combined with the separation lines for the corresponding undistorted test set to that crossfold in the right column. Each plot in the left column shows the distribution of the minimum distance function for that shapelet to every member of the evaluation set. The mass for the dataset elements whose class matches the shapelet's class are shown in green, for other classes, red. The algorithm's purpose is to choose precisely the subsequences that produce the best possible separation of the green mass from the red masses. Note also that a good separation here leads directly to good classification performance since these plots demonstrate exactly the how the classifier uses the shapelets as features.
+
+The figures demonstrate the algorithm works for several classes but struggles somewhat on others. The ESE, FSdMe and FSRSCVn classes all have very clear separations. The BG and IDV classes are close but still clear. The Novae, SNe and XRB classes all have some degree of overlap. This is surprising since the SNe and XRB classes in particular have very distinctive structures. This lack of clear separation is reflected in the unintuitive choices of shapelet illustrated in figure~\ref{fig:singleshapelets}. It is critical to my investigation that this poor separation is explained.
+
+I selected regions of the SNe that I felt should have been utilised by the shapelet extraction algorithm better. From these regions I drew shapelets that had the highest information gain and plotted their separation lines on the shapelet evaluation set. The results as well as figures of the structures I chose are in figure~\ref{fig:sneseparation} and show that there is too much similarity between the most intuitive shapelet choices for the SNe and XRB classes for the binary entropy based extraction algorithm to select them. This limits a key limitation of binary entropy - when two classes have very similar discriminative shapelets they will never be chosen. The shapelets could not classify either class, but could allow a classifier to separate them effectively from the rest of the dataset where other features could do the rest. These results also explain the difficulty in extracting shapelets for the XRB class.
+
+\begin{figure}[ht!]
+	\label{fig:sneseparation}
+	\subfigure[SNe decay shapelet] {
+		\includegraphics[width=0.45\textwidth]{/Users/peter/honors/thesis/experiments/exp_shapelets/figures/splitlines/decayshapelet.pdf}
+	}
+	\subfigure[Decay shapelet splitline] {
+		\includegraphics[width=0.45\textwidth]{/Users/peter/honors/thesis/experiments/exp_shapelets/figures/splitlines/decay_splitline.pdf}
+	} \\
+	\subfigure[SNe peak shapelet] {
+		\includegraphics[width=0.45\textwidth]{/Users/peter/honors/thesis/experiments/exp_shapelets/figures/splitlines/peakshapelet.pdf}
+	}
+	\subfigure[Peak shapelet splitline] {
+		\includegraphics[width=0.45\textwidth]{/Users/peter/honors/thesis/experiments/exp_shapelets/figures/splitlines/peaksplitline.pdf}
+	} \\
+	\caption{Figure illustrating failure of more intuitive shapelets to separate the SNe class from the dataset.}
+\end{figure}
+
+\begin{figure}[ht!]
+	\label{fig:splitlines1}
+	\begin{minipage}[c]{\textwidth}
+		\label{fig:samplesplitlines}
+		\begin{minipage}[c]{\textwidth}
+			\begin{minipage}[c]{0.15\textwidth}
+				\centering
+				Shapelet class
+			\end{minipage}
+			\begin{minipage}[c]{0.40\textwidth}
+				\centering
+				Shapelet evaluation dataset
+			\end{minipage}
+			\begin{minipage}[c]{0.40\textwidth}
+				\centering
+				Undistorted test dataset
+			\end{minipage}
+		\end{minipage}
+		
+		\begin{minipage}[c]{\textwidth}
+			\begin{minipage}[c]{0.15\textwidth}
+				\centering
+				ESE shapelet
+			\end{minipage}
+			\begin{minipage}[c]{0.40\textwidth}
+				\centering
+				\includegraphics[width=\textwidth]{/Users/peter/honors/thesis/experiments/exp_shapelets/figures/splitlines/sample_validation/ESE_sm.pdf}
+			\end{minipage}
+			\begin{minipage}[c]{0.40\textwidth}
+				\centering
+				\includegraphics[width=\textwidth]{/Users/peter/honors/thesis/experiments/exp_shapelets/figures/splitlines/test_validation/ESE_sm.pdf}
+			\end{minipage}
+		\end{minipage}
+		
+		\begin{minipage}[c]{\textwidth}
+			\begin{minipage}[c]{0.15\textwidth}
+				\centering
+				BG shapelet
+			\end{minipage}
+			\begin{minipage}[c]{0.40\textwidth}
+				\centering
+				\includegraphics[width=\textwidth]{/Users/peter/honors/thesis/experiments/exp_shapelets/figures/splitlines/sample_validation/BG_sm.pdf}
+			\end{minipage}
+			\begin{minipage}[c]{0.40\textwidth}	
+				\centering
+				\includegraphics[width=\textwidth]{/Users/peter/honors/thesis/experiments/exp_shapelets/figures/splitlines/test_validation/BG_sm.pdf}
+			\end{minipage}
+		\end{minipage} \\
+	
+		\begin{minipage}[c]{\textwidth}
+			\begin{minipage}[c]{0.15\textwidth}
+				\centering
+				FSdMe shapelet
+			\end{minipage}
+			\begin{minipage}[c]{0.40\textwidth}	
+			\centering
+			\includegraphics[width=\textwidth]{/Users/peter/honors/thesis/experiments/exp_shapelets/figures/splitlines/sample_validation/FSdMe_sm.pdf}
+			\end{minipage}
+			\begin{minipage}[c]{0.40\textwidth}
+				\centering
+				\includegraphics[width=\textwidth]{/Users/peter/honors/thesis/experiments/exp_shapelets/figures/splitlines/test_validation/FSdMe_sm.pdf}
+			\end{minipage}
+		\end{minipage} \\
+	
+		\begin{minipage}[c]{\textwidth}
+			\begin{minipage}[c]{0.15\textwidth}
+				\centering
+				FSRSCVn shapelet
+			\end{minipage}
+			\begin{minipage}[c]{0.40\textwidth}	
+				\centering
+			\includegraphics[width=\textwidth]{/Users/peter/honors/thesis/experiments/exp_shapelets/figures/splitlines/sample_validation/FSRSCVn_sm.pdf}
+			\end{minipage}
+			\begin{minipage}[c]{0.40\textwidth}
+				\centering
+				\includegraphics[width=\textwidth]{/Users/peter/honors/thesis/experiments/exp_shapelets/figures/splitlines/test_validation/FSRSCVn_sm.pdf}
+			\end{minipage}
+		\end{minipage} \\
+	\end{minipage}
+	\caption{First set of separation lines for the sample and evaluation shapelet sets}
+	\end{figure}
+\newpage
+
+\begin{figure}[ht!]
+	\label{fig:splitlines2}
+	\begin{minipage}[c]{\textwidth}
+		\begin{minipage}[c]{\textwidth}
+			\begin{minipage}[c]{0.15\textwidth}
+				\centering
+				Shapelet class
+			\end{minipage}
+			\begin{minipage}[c]{0.40\textwidth}
+				\centering
+				Shapelet evaluation dataset
+			\end{minipage}
+			\begin{minipage}[c]{0.40\textwidth}
+				\centering
+				Undistorted test dataset
+			\end{minipage}
+		\end{minipage}
+		\begin{minipage}[c]{\textwidth}
+			\begin{minipage}[c]{0.15\textwidth}
+				\centering
+				IDV shapelet
+			\end{minipage}
+			\begin{minipage}[c]{0.40\textwidth}
+			\includegraphics[width=\textwidth]{/Users/peter/honors/thesis/experiments/exp_shapelets/figures/splitlines/sample_validation/IDV_sm.pdf}
+			\end{minipage}
+			\begin{minipage}[c]{0.40\textwidth}
+				\centering
+				\includegraphics[width=\textwidth]{/Users/peter/honors/thesis/experiments/exp_shapelets/figures/splitlines/test_validation/IDV_sm.pdf}
+			\end{minipage}
+		\end{minipage} \\
+	
+		\begin{minipage}[c]{\textwidth}
+			\begin{minipage}[c]{0.15\textwidth}
+				\centering
+				XRB shapelet
+			\end{minipage}
+			\begin{minipage}[c]{0.40\textwidth}
+				\centering
+			\includegraphics[width=\textwidth]{/Users/peter/honors/thesis/experiments/exp_shapelets/figures/splitlines/sample_validation/XRB_sm.pdf}
+			\end{minipage}
+			\begin{minipage}[c]{0.40\textwidth}
+				\centering
+				\includegraphics[width=\textwidth]{/Users/peter/honors/thesis/experiments/exp_shapelets/figures/splitlines/test_validation/XRB_sm.pdf}
+			\end{minipage}
+		\end{minipage} \\
+		
+		\begin{minipage}[c]{\textwidth}
+			\begin{minipage}[c]{0.15\textwidth}
+				\centering
+				SNe shapelet
+			\end{minipage}
+			\begin{minipage}[c]{0.4\textwidth}
+				\centering
+			\includegraphics[width=\textwidth]{/Users/peter/honors/thesis/experiments/exp_shapelets/figures/splitlines/sample_validation/SNe_sm.pdf}
+			\end{minipage}
+			\begin{minipage}[c]{0.40\textwidth}
+				\centering
+			\includegraphics[width=\textwidth]{/Users/peter/honors/thesis/experiments/exp_shapelets/figures/splitlines/test_validation/SNe_sm.pdf}
+			\end{minipage}
+		\end{minipage} \\
+		
+		\begin{minipage}[c]{\textwidth}
+			\begin{minipage}[c]{0.15\textwidth}
+				\centering
+				Novae shapelet
+			\end{minipage}
+			\begin{minipage}[c]{0.40\textwidth}
+				\centering
+			\includegraphics[width=\textwidth]{/Users/peter/honors/thesis/experiments/exp_shapelets/figures/splitlines/sample_validation/Novae_sm.pdf}
+			\end{minipage}
+			\begin{minipage}[c]{0.40\textwidth}
+				\centering
+			\includegraphics[width=\textwidth]{/Users/peter/honors/thesis/experiments/exp_shapelets/figures/splitlines/test_validation/Novae_sm.pdf}
+			\end{minipage}
+		\end{minipage} \\
+	\end{minipage}
+	\caption{Second set of separation lines for the sample and evaluation shapelet sets}
+\end{figure}
+\clearpage
+
+%TODO
+%The result of the clustering algorithm to discover additional shapelets produces 20 for each class, a total of 160. Some more distinct examples are presented in figure~\ref{fig:clusteredshapelets}. 
+%\begin{itemize}
+%	\item Shorter - more parsimonious
+%	\item Less robust and general
+%\end{itemize}
+%\subsection{Single shapelet per class}
+%\subsection{cDTW}
+%\subsection{Binary and multi-class entropy}
+%\subsection{Distorted training sets}
+%\subsection{Multiple shapelets}
+%\clearpage
+
+\section{Experiment 1 - Undistorted data}
+
+\setlength{\tabcolsep}{1.4pt}
+\setlength{\extrarowheight}{6.0pt}
+
+\begin{figure}[ht!]
+\begin{minipage}[c]{\textwidth}
+	\label{fig:undistortedcm}
+	\centering 
+	\begin{minipage}[c]{\textwidth}
+		\centering
+%		\begin{minipage}[c]{0.090000\textwidth}
+%		\centering
+%			Observed data
+%		\end{minipage}
+		\begin{minipage}[c]{0.060000\textwidth}
+		\centering
+			\quad
+		\end{minipage}
+		\begin{minipage}[c]{0.270000\textwidth}
+		\centering
+		\small{
+			Initial
+		}
+		\end{minipage} \ \ 
+		\begin{minipage}[c]{0.270000\textwidth}
+		\centering
+		\small{
+			Shapelet
+		}
+		\end{minipage} \ \ 
+		\begin{minipage}[c]{0.270000\textwidth}
+		\centering
+		\small{
+			20 Shapelets
+		}
+		\end{minipage} \ \ 
+\\ 	\end{minipage}
+	\vspace{5pt}
+	\begin{minipage}[c]{\textwidth}	
+	\centering
+%		\begin{minipage}[c]{0.090000\textwidth}
+%			\centering
+%			100
+%		\end{minipage}
+	\begin{minipage}[c]{0.060000\textwidth}
+		\tiny {
+		\vspace{-4pt}			\begin{tabular}{r}
+				BG\\ 
+				ESE\\ 
+				FSRSCVn\\ 
+				FSdMe\\ 
+				IDV\\ 
+				Novae\\ 
+				SNe\\ 
+				XRB\\ 
+			\end{tabular}
+		}
+	\end{minipage}
+		\begin{minipage}[c]{0.270000\textwidth}
+			\centering
+			\tiny {
+				\begin{tabular}{|c|c|c|c|c|c|c|c|} \hline
+\cellcolor[rgb]{1.0,0.010000,0.010000} .99 & \cellcolor[rgb]{1.0,1.000000,1.000000} 0.0 & \cellcolor[rgb]{1.0,1.000000,1.000000} 0.0 & \cellcolor[rgb]{1.0,1.000000,1.000000} 0.0 & \cellcolor[rgb]{1.0,0.990000,0.990000} .01 & \cellcolor[rgb]{1.0,1.000000,1.000000} 0.0 & \cellcolor[rgb]{1.0,1.000000,1.000000} 0.0 & \cellcolor[rgb]{1.0,1.000000,1.000000} 0.0\\ \hline
+\cellcolor[rgb]{1.0,1.000000,1.000000} 0.0 & \cellcolor[rgb]{1.0,0.000000,0.000000} 1.0 & \cellcolor[rgb]{1.0,1.000000,1.000000} 0.0 & \cellcolor[rgb]{1.0,1.000000,1.000000} 0.0 & \cellcolor[rgb]{1.0,1.000000,1.000000} 0.0 & \cellcolor[rgb]{1.0,1.000000,1.000000} 0.0 & \cellcolor[rgb]{1.0,1.000000,1.000000} 0.0 & \cellcolor[rgb]{1.0,1.000000,1.000000} 0.0\\ \hline
+\cellcolor[rgb]{1.0,0.995000,0.995000} .00 & \cellcolor[rgb]{1.0,1.000000,1.000000} 0.0 & \cellcolor[rgb]{1.0,0.055000,0.055000} .94 & \cellcolor[rgb]{1.0,0.980000,0.980000} .02 & \cellcolor[rgb]{1.0,0.990000,0.990000} .01 & \cellcolor[rgb]{1.0,1.000000,1.000000} 0.0 & \cellcolor[rgb]{1.0,1.000000,1.000000} 0.0 & \cellcolor[rgb]{1.0,0.980000,0.980000} .02\\ \hline
+\cellcolor[rgb]{1.0,1.000000,1.000000} 0.0 & \cellcolor[rgb]{1.0,1.000000,1.000000} 0.0 & \cellcolor[rgb]{1.0,0.995000,0.995000} .00 & \cellcolor[rgb]{1.0,0.005000,0.005000} .99 & \cellcolor[rgb]{1.0,1.000000,1.000000} 0.0 & \cellcolor[rgb]{1.0,1.000000,1.000000} 0.0 & \cellcolor[rgb]{1.0,1.000000,1.000000} 0.0 & \cellcolor[rgb]{1.0,1.000000,1.000000} 0.0\\ \hline
+\cellcolor[rgb]{1.0,1.000000,1.000000} 0.0 & \cellcolor[rgb]{1.0,1.000000,1.000000} 0.0 & \cellcolor[rgb]{1.0,0.985000,0.985000} .01 & \cellcolor[rgb]{1.0,1.000000,1.000000} 0.0 & \cellcolor[rgb]{1.0,0.025000,0.025000} .97 & \cellcolor[rgb]{1.0,1.000000,1.000000} 0.0 & \cellcolor[rgb]{1.0,0.995000,0.995000} .00 & \cellcolor[rgb]{1.0,0.995000,0.995000} .00\\ \hline
+\cellcolor[rgb]{1.0,1.000000,1.000000} 0.0 & \cellcolor[rgb]{1.0,1.000000,1.000000} 0.0 & \cellcolor[rgb]{1.0,1.000000,1.000000} 0.0 & \cellcolor[rgb]{1.0,1.000000,1.000000} 0.0 & \cellcolor[rgb]{1.0,0.995000,0.995000} .00 & \cellcolor[rgb]{1.0,0.010000,0.010000} .99 & \cellcolor[rgb]{1.0,0.995000,0.995000} .00 & \cellcolor[rgb]{1.0,1.000000,1.000000} 0.0\\ \hline
+\cellcolor[rgb]{1.0,1.000000,1.000000} 0.0 & \cellcolor[rgb]{1.0,1.000000,1.000000} 0.0 & \cellcolor[rgb]{1.0,0.990000,0.990000} .01 & \cellcolor[rgb]{1.0,1.000000,1.000000} 0.0 & \cellcolor[rgb]{1.0,0.990000,0.990000} .01 & \cellcolor[rgb]{1.0,0.990000,0.990000} .01 & \cellcolor[rgb]{1.0,0.055000,0.055000} .94 & \cellcolor[rgb]{1.0,0.975000,0.975000} .02\\ \hline
+\cellcolor[rgb]{1.0,1.000000,1.000000} 0.0 & \cellcolor[rgb]{1.0,1.000000,1.000000} 0.0 & \cellcolor[rgb]{1.0,0.975000,0.975000} .02 & \cellcolor[rgb]{1.0,1.000000,1.000000} 0.0 & \cellcolor[rgb]{1.0,0.990000,0.990000} .01 & \cellcolor[rgb]{1.0,1.000000,1.000000} 0.0 & \cellcolor[rgb]{1.0,1.000000,1.000000} 0.0 & \cellcolor[rgb]{1.0,0.035000,0.035000} .96\\ \hline
+			\end{tabular}
+}
+		\end{minipage}
+		\begin{minipage}[c]{0.270000\textwidth}
+			\centering
+			\tiny {
+				\begin{tabular}{|c|c|c|c|c|c|c|c|} \hline
+\cellcolor[rgb]{1.0,0.300000,0.300000} .7 & \cellcolor[rgb]{1.0,0.930000,0.930000} .07 & \cellcolor[rgb]{1.0,0.980000,0.980000} .02 & \cellcolor[rgb]{1.0,0.790000,0.790000} .21 & \cellcolor[rgb]{1.0,1.000000,1.000000} 0.0 & \cellcolor[rgb]{1.0,1.000000,1.000000} 0.0 & \cellcolor[rgb]{1.0,1.000000,1.000000} 0.0 & \cellcolor[rgb]{1.0,1.000000,1.000000} 0.0\\ \hline
+\cellcolor[rgb]{1.0,0.955000,0.955000} .04 & \cellcolor[rgb]{1.0,0.250000,0.250000} .75 & \cellcolor[rgb]{1.0,0.880000,0.880000} .12 & \cellcolor[rgb]{1.0,0.970000,0.970000} .03 & \cellcolor[rgb]{1.0,1.000000,1.000000} 0.0 & \cellcolor[rgb]{1.0,0.975000,0.975000} .02 & \cellcolor[rgb]{1.0,0.985000,0.985000} .01 & \cellcolor[rgb]{1.0,0.985000,0.985000} .01\\ \hline
+\cellcolor[rgb]{1.0,0.955000,0.955000} .04 & \cellcolor[rgb]{1.0,0.925000,0.925000} .07 & \cellcolor[rgb]{1.0,0.390000,0.390000} .61 & \cellcolor[rgb]{1.0,0.900000,0.900000} .1 & \cellcolor[rgb]{1.0,0.985000,0.985000} .01 & \cellcolor[rgb]{1.0,1.000000,1.000000} 0.0 & \cellcolor[rgb]{1.0,0.980000,0.980000} .02 & \cellcolor[rgb]{1.0,0.865000,0.865000} .13\\ \hline
+\cellcolor[rgb]{1.0,0.725000,0.725000} .27 & \cellcolor[rgb]{1.0,0.950000,0.950000} .05 & \cellcolor[rgb]{1.0,0.925000,0.925000} .07 & \cellcolor[rgb]{1.0,0.440000,0.440000} .56 & \cellcolor[rgb]{1.0,1.000000,1.000000} 0.0 & \cellcolor[rgb]{1.0,1.000000,1.000000} 0.0 & \cellcolor[rgb]{1.0,0.970000,0.970000} .03 & \cellcolor[rgb]{1.0,0.990000,0.990000} .01\\ \hline
+\cellcolor[rgb]{1.0,1.000000,1.000000} 0.0 & \cellcolor[rgb]{1.0,0.995000,0.995000} .00 & \cellcolor[rgb]{1.0,0.875000,0.875000} .12 & \cellcolor[rgb]{1.0,1.000000,1.000000} 0.0 & \cellcolor[rgb]{1.0,0.420000,0.420000} .58 & \cellcolor[rgb]{1.0,0.960000,0.960000} .04 & \cellcolor[rgb]{1.0,0.810000,0.810000} .19 & \cellcolor[rgb]{1.0,0.940000,0.940000} .06\\ \hline
+\cellcolor[rgb]{1.0,1.000000,1.000000} 0.0 & \cellcolor[rgb]{1.0,0.900000,0.900000} .1 & \cellcolor[rgb]{1.0,0.985000,0.985000} .01 & \cellcolor[rgb]{1.0,1.000000,1.000000} 0.0 & \cellcolor[rgb]{1.0,0.880000,0.880000} .12 & \cellcolor[rgb]{1.0,0.525000,0.525000} .47 & \cellcolor[rgb]{1.0,0.745000,0.745000} .25 & \cellcolor[rgb]{1.0,0.965000,0.965000} .03\\ \hline
+\cellcolor[rgb]{1.0,1.000000,1.000000} 0.0 & \cellcolor[rgb]{1.0,0.780000,0.780000} .22 & \cellcolor[rgb]{1.0,0.905000,0.905000} .09 & \cellcolor[rgb]{1.0,0.965000,0.965000} .03 & \cellcolor[rgb]{1.0,0.945000,0.945000} .05 & \cellcolor[rgb]{1.0,0.955000,0.955000} .04 & \cellcolor[rgb]{1.0,0.650000,0.650000} .35 & \cellcolor[rgb]{1.0,0.800000,0.800000} .2\\ \hline
+\cellcolor[rgb]{1.0,0.990000,0.990000} .01 & \cellcolor[rgb]{1.0,0.875000,0.875000} .12 & \cellcolor[rgb]{1.0,0.805000,0.805000} .19 & \cellcolor[rgb]{1.0,0.970000,0.970000} .03 & \cellcolor[rgb]{1.0,0.965000,0.965000} .03 & \cellcolor[rgb]{1.0,0.995000,0.995000} .00 & \cellcolor[rgb]{1.0,0.815000,0.815000} .18 & \cellcolor[rgb]{1.0,0.585000,0.585000} .41\\ \hline
+			\end{tabular}
+}
+		\end{minipage}
+		\begin{minipage}[c]{0.270000\textwidth}
+			\centering
+			\tiny {
+				\begin{tabular}{|c|c|c|c|c|c|c|c|} \hline
+\cellcolor[rgb]{1.0,0.300000,0.300000} .7 & \cellcolor[rgb]{1.0,1.000000,1.000000} 0.0 & \cellcolor[rgb]{1.0,0.975000,0.975000} .02 & \cellcolor[rgb]{1.0,0.725000,0.725000} .27 & \cellcolor[rgb]{1.0,1.000000,1.000000} 0.0 & \cellcolor[rgb]{1.0,1.000000,1.000000} 0.0 & \cellcolor[rgb]{1.0,1.000000,1.000000} 0.0 & \cellcolor[rgb]{1.0,1.000000,1.000000} 0.0\\ \hline
+\cellcolor[rgb]{1.0,0.955000,0.955000} .04 & \cellcolor[rgb]{1.0,0.150000,0.150000} .85 & \cellcolor[rgb]{1.0,0.985000,0.985000} .01 & \cellcolor[rgb]{1.0,1.000000,1.000000} 0.0 & \cellcolor[rgb]{1.0,1.000000,1.000000} 0.0 & \cellcolor[rgb]{1.0,1.000000,1.000000} 0.0 & \cellcolor[rgb]{1.0,0.945000,0.945000} .05 & \cellcolor[rgb]{1.0,0.965000,0.965000} .03\\ \hline
+\cellcolor[rgb]{1.0,0.955000,0.955000} .04 & \cellcolor[rgb]{1.0,0.960000,0.960000} .04 & \cellcolor[rgb]{1.0,0.260000,0.260000} .74 & \cellcolor[rgb]{1.0,0.965000,0.965000} .03 & \cellcolor[rgb]{1.0,0.995000,0.995000} .00 & \cellcolor[rgb]{1.0,1.000000,1.000000} 0.0 & \cellcolor[rgb]{1.0,0.945000,0.945000} .05 & \cellcolor[rgb]{1.0,0.920000,0.920000} .08\\ \hline
+\cellcolor[rgb]{1.0,0.775000,0.775000} .22 & \cellcolor[rgb]{1.0,0.995000,0.995000} .00 & \cellcolor[rgb]{1.0,0.955000,0.955000} .04 & \cellcolor[rgb]{1.0,0.280000,0.280000} .72 & \cellcolor[rgb]{1.0,1.000000,1.000000} 0.0 & \cellcolor[rgb]{1.0,1.000000,1.000000} 0.0 & \cellcolor[rgb]{1.0,1.000000,1.000000} 0.0 & \cellcolor[rgb]{1.0,0.995000,0.995000} .00\\ \hline
+\cellcolor[rgb]{1.0,1.000000,1.000000} 0.0 & \cellcolor[rgb]{1.0,0.980000,0.980000} .02 & \cellcolor[rgb]{1.0,0.990000,0.990000} .01 & \cellcolor[rgb]{1.0,1.000000,1.000000} 0.0 & \cellcolor[rgb]{1.0,0.360000,0.360000} .64 & \cellcolor[rgb]{1.0,0.980000,0.980000} .02 & \cellcolor[rgb]{1.0,0.805000,0.805000} .19 & \cellcolor[rgb]{1.0,0.885000,0.885000} .11\\ \hline
+\cellcolor[rgb]{1.0,1.000000,1.000000} 0.0 & \cellcolor[rgb]{1.0,0.990000,0.990000} .01 & \cellcolor[rgb]{1.0,1.000000,1.000000} 0.0 & \cellcolor[rgb]{1.0,1.000000,1.000000} 0.0 & \cellcolor[rgb]{1.0,0.885000,0.885000} .11 & \cellcolor[rgb]{1.0,0.395000,0.395000} .60 & \cellcolor[rgb]{1.0,0.805000,0.805000} .19 & \cellcolor[rgb]{1.0,0.925000,0.925000} .07\\ \hline
+\cellcolor[rgb]{1.0,0.990000,0.990000} .01 & \cellcolor[rgb]{1.0,0.965000,0.965000} .03 & \cellcolor[rgb]{1.0,0.940000,0.940000} .06 & \cellcolor[rgb]{1.0,0.995000,0.995000} .00 & \cellcolor[rgb]{1.0,0.930000,0.930000} .07 & \cellcolor[rgb]{1.0,0.975000,0.975000} .02 & \cellcolor[rgb]{1.0,0.560000,0.560000} .44 & \cellcolor[rgb]{1.0,0.645000,0.645000} .35\\ \hline
+\cellcolor[rgb]{1.0,1.000000,1.000000} 0.0 & \cellcolor[rgb]{1.0,0.975000,0.975000} .02 & \cellcolor[rgb]{1.0,0.820000,0.820000} .18 & \cellcolor[rgb]{1.0,0.995000,0.995000} .00 & \cellcolor[rgb]{1.0,0.955000,0.955000} .04 & \cellcolor[rgb]{1.0,1.000000,1.000000} 0.0 & \cellcolor[rgb]{1.0,0.780000,0.780000} .22 & \cellcolor[rgb]{1.0,0.475000,0.475000} .52\\ \hline
+			\end{tabular}
+}
+		\end{minipage}
+	\end{minipage}
+\end{minipage}
+	\caption{Confusion matrices for the undisorted data test set}
+\end{figure}
+\setlength{\tabcolsep}{6pt}
+\setlength{\extrarowheight}{0pt}
+
+
+The performance of both sets of shapelets on the undistorted set of lightcurves is shown in the confusion matrix set in figure~\ref{fig:undistortedcm} with an F-Score of approximately 0.58 for the \emph{shapelet} feature set and 0.63 for the \emph{20 shapelets} feature set. This is a lower than expected result because there is apparently so little deviation within the time series classes of the undisorted light curves. We saw in the previous section that there are issues with the shapelet extraction algorithm that are contributing to classification errors. The poor separation for the XRB and SNe classes should not amount to an F-Score of 0.58 however, and further investigation is needed. The most likely explanation for the poor performance is:
+\begin{center}
+	The shapelet extraction algorithm, trained on a subset of the training data, fails to choose general enough shapelets to accomodate slight variations in the testing data - a kind of overfitting.
+\end{center}
+The extent to which the above statement explains the classification performance can be demonstrated by comparing the separation lines for the shapelet evaluation and the undistorted test sets. If the separation becomes worse as we move from evaluation to testing, then the above statement is verified. 
+
+Figure ~\ref{fig:samplesplitlines} shows the separation lines for a single crossfold of the shapelet evaluation and undistorted test sets to the \emph{shapelet} feature set. Again, the mass of test cases with the same class as the shapelet in question is colored green. If the green mass is clearly separated from the red masses belonging to the other classes, then this will lead directly to good classification performance for that class. If some green mass is not separated from the other classes, then classification will be poor.
+
+%TODO
+%Because of the in-class consistency of our light curves one crossfold should be sufficient to generalise to classification as a whole. 
+
+The split lines show for most classes an increased overlap from the mass distributions seen on the evaluation set. The clear separations for the two flare star and ESE classes are no longer present, replaced by a smooth overlap with the next nearest class from the evaluation separation line. To demonstrate how clearly these overlaps correspond to diminished classification performance, not how conflicting classes are linked directly to off-diagonal entries on the confusion matrices in figure~\ref{fig:undistortedcm}. Key examples are XRB and SNe co-confusion, BG and FSdMe co-confusion, and SNe and XRB misclassification to many classes.
+
+The conclusion to draw from the increase in overlap is that the original shapelets chosen from the limited evaluation set do not generalise well. To improve generalisation the size of the evaluation set could be increased at a large but at least one-off computational cost. Additionally it might be worth exploring other ways to decide on the `best' shapelet besides the absolute highest information gain. It is possible that the situation in figure~\ref{fig:poorchoice} is taking place, where shorter and less intuitive subsequences are chosen, sacrificing greater generality for a minor increase in information gain.
+
+\begin{figure}
+	\label{fig:poorchoice}
+	Place holder for figure of split line with good separation distance sacrificed to include one additional test object on one side for improved entropy
+	\caption{Figure illustrating how the `best information gain' shapelet can lead to poor decisions in terms of generalising to test data}
+\end{figure}
+% TODO add class specific discussion and exact metrics
+
+A suggestion to improve classification accuracy in light of this issue is as follows
+\begin{enumerate}
+	\item Select the top $f$ fraction of shapelets in terms of information gain
+	\item Select the shapelet from this fraction having the highest average separation distance (figure~\ref{fig:separationdistance}).
+	\item The shifting of the separation has now a less severe impact on classification performance
+\end{enumerate}
+
+\begin{itemize}
+	\item Brief commentary on shapelet clustering results
 \end{itemize}
 
-The following sections outline the experiments leading out of the above discussion.
-\setlength{\tabcolsep}{1.4pt}
-\setlength{\extrarowheight}{1.8pt}
+%\begin{figure}[ht!]
+%	\label{fig:testsplitlines}
+%	\subfigure[ESE shapelet] {
+%		\includegraphics[width=0.40\textwidth]{/Users/peter/honors/thesis/experiments/exp_shapelets/figures/splitlines/test_validation/ESE_sm.pdf}
+%	}
+%	\subfigure[BG shapelet] {
+%		\includegraphics[width=0.40\textwidth]{/Users/peter/honors/thesis/experiments/exp_shapelets/figures/splitlines/test_validation/BG_sm.pdf}
+%	} \\
+%	\subfigure[FSdMe shapelet] {
+%		\includegraphics[width=0.40\textwidth]{/Users/peter/honors/thesis/experiments/exp_shapelets/figures/splitlines/test_validation/FSdMe_sm.pdf}
+%	}
+%	\subfigure[FSRSCVn shapelet] {
+%		\includegraphics[width=0.40\textwidth]{/Users/peter/honors/thesis/experiments/exp_shapelets/figures/splitlines/test_validation/FSRSCVn_sm.pdf}
+%	} \\
+%	\subfigure[IDV shapelet] {
+%		\includegraphics[width=0.40\textwidth]{/Users/peter/honors/thesis/experiments/exp_shapelets/figures/splitlines/test_validation/IDV_sm.pdf}
+%	}
+%	\subfigure[XRB shapelet] {
+%		\includegraphics[width=0.40\textwidth]{/Users/peter/honors/thesis/experiments/exp_shapelets/figures/splitlines/test_validation/XRB_sm.pdf}
+%	} \\
+%	\subfigure[SNe shapelet] {
+%		\includegraphics[width=0.40\textwidth]{/Users/peter/honors/thesis/experiments/exp_shapelets/figures/splitlines/test_validation/SNe_sm.pdf}
+%	}
+%	\subfigure[Novae shapelet] {
+%		\includegraphics[width=0.40\textwidth]{/Users/peter/honors/thesis/experiments/exp_shapelets/figures/splitlines/test_validation/Novae_sm.pdf}
+%	} \\
+%	\caption{Split lines for the \emph{best shapelets} shapelet set against the undistorted test set}
+%\end{figure}
+%\clearpage
+\clearpage
+\section{Experiment 2 - Introducing gaps into the light curve}
+\subsection{Results}
+\input
+{/Users/peter/honors/thesis/experiments/exp_shapelets/exp_improved/missing/results.tex}
+\clearpage
+\subsection{Discussion}
+The results for the missing data experiment contain some interesting observations. The main plot (figure~\ref{fig:Introducing-gaps-into-the-signal}) shows that both the \emph{shapelet} and \emph{20 shapelet} sets perform abysmally as soon as any amount of data is removed from the signal. The F-scores for both these feature sets for any amount of missing data are around 1.5. Random classification with an 8-class classification problem would give an F-Score of 1.25. 
 
-\subsection{Single shapelet per class}
-%\subsection{cDTW}
-%\subsection{Binary and multi-class entropy}
-%\subsection{Distorted training sets}
-\subsection{Multiple shapelets}
+Despite this mediocre performance the classifier leverages the \emph{shapelet} feature set, boosting F-score by close to 0.1 at 50\% missing, and close to 0.15 at 75\% missing. This performance is in contrast to the \emph{20 shapelet} set, apprently confusing the classifier and dragging classification performance down by about 0.2 F-Score from 25\% to 75\% missing data.
+
+The first result, that both shapelet sets perform very poorly on missing data, has two likely contributing factors:
+\begin{enumerate}
+	\item For sufficient amounts of missing data the distinct features the shapelets use for classification are not still present
+	\item The missing data allows the distance measure to ignore critical parts of shapelets in determining a match. \end{enumerate}
+%
+%Conversely, the distinctive structures of a whole time series may have been removed by the gapifying process, meaning that the shapelet no longer has its own structure inside the class to identify it with. TODO
+
+The first explanation certainly must become true at a point. If we had only 5 data points sampled from a different part of the light curve than our shapelets were extracted from then classification using that shapelet is not possible. However, for smaller amounts of missing data the most critical structures are still evident as can be seen in section\~ref{expframework}, experimental framework chapter, and in appendix~\ref{appendixmissingdataplots}, showing samples from the dataset for each parameter in this experiment. The results for the 25\% missing data experiment are more likely to be explained by the second complication. \\
+
+The distance measure used so far for producing features from shapelets, subsequence distance, is intented for use on fully sampled time series and did not immediately extend to the transient classification problem. As outlined in the introduction to this chapter, it was extended with a lower limit on the number of matches  was extended to allow omissions of up to 5 data points, so a shapelet must fit those 5 points well at least for that distance to be considered as a minimum for the test case. These results suggest that this modification is not good enough to make shapelets useful for classificaiton involving a any amount of missing data.
+
+Although a shapelet must contain a structure distinctive to its class, especially using the length constraints applied for performance reasons, it may have subsequences that are not. An illustrative example is the noise situated in the shapelet extracted for the FSdMe class (figure\ref{fig:singleshapelets}), consisting of three peaks and then flat noise. If the peaks are omitted in the distance measure computation then the underlying flat noise could fit on pretty much any other light curve in our dataset with a near-zero distance. It is observed that there is an almost completely solid mass in the FSdMe column of the shapelet confusion matrices for all levels of missing data.
+
+To verify that these false positives are the cause of the poor performance I did a manual investigation of the minimum distances found for a few shapelets to the light curves for one crossfold of the 25\% missing data test set. The results are shown in figure ~\ref{fig:falsepositives}. As a rough way of quantifying exactly how much of the critical part of these signals goes unmatched, I include for each shapelet the fraction of the total deviation from the mean of the shapelet datapoints that go unmatched (visualized in figure ~\ref{fig:unmatchedshapelets}). For contiguous time series this measure will always be 1. If no point was matched at all, the minimum distance would always be zero, and this measure would be 0. If half the deviation of the shapelet is matched, it would be 0.5. The greater this fraction then the more likely that the match indicates a false positive for the shapelet feature.
+
+\begin{figure}[ht!]
+	\label{fig:unmatchedshapelets}
+	\subfigure[Match of FSdMe shapelet to gappy IDV time series]
+	{
+	\includegraphics[width=0.45\textwidth]{/Users/peter/honors/thesis/experiments/exp_shapelets/figures/poormatches/IDV_poormatch.pdf}
+	}
+	\subfigure[Match of FSdMe shapelet to gappy FSdMe time series]
+	{
+	\includegraphics[width=0.45\textwidth]{/Users/peter/honors/thesis/experiments/exp_shapelets/figures/poormatches/FSdMe_poormatch.pdf}
+	}
+	\caption{False positives for the 25\% missing data experiment for the IDV and FSdMe classes to an FSdMe shapelet. $d$ means the value of the minimum distance, deviation is the total fraction of deviation matched}
+\end{figure}
+
+The matches in the figure show exactly why the classifier is so confused. Whenever there is a small gap in the time series the minimum distance measure chooses that region to perform a match and getting the same value for almost every piece of test data. If I were to produce a separation like those in the previous section for this shapelet to the gappy dataset, there would be tight overlapping masses all on one side.
+
+To attempt to fix this problem I produced a modified distance measure that discards all matches not meeting a deviation fraction threshold. The problem with this approach is that there is no certain way to decide on a sensible value of the threshold. It should probably be closer to 1, say 0.9, since as we see in the figure above matchings can still be very poor even with 70\% of the variance matched. If the value is 1 then the minimum distance would ignore matches with even a single unmatched point. What value would work best in practice would have to be determined by experiment and might vary depending on the kinds of data being classified. Figure \ref{fig:modifieddistance} shows the minimum distance matches for the same time series with the threshold modification.
+
+\begin{figure}[ht!]
+	\label{fig:modifieddistance}
+	\subfigure[Match of FSdMe shapelet to gappy IDV time series]
+	{
+	\includegraphics[width=0.45\textwidth]{/Users/peter/honors/thesis/experiments/exp_shapelets/figures/poormatches/IDV_fixedmatch.pdf}
+	}
+	\subfigure[Match of FSdMe shapelet to gappy FSdMe time series]
+	{
+	\includegraphics[width=0.45\textwidth]{/Users/peter/honors/thesis/experiments/exp_shapelets/figures/poormatches/FSdMe_fixedmatch.pdf}
+	}
+	\caption{Results of modifying the distance measure to use a deviation matched threshold}
+\end{figure}
+The actual choice of match for the IDV time series is only shifted slightly, still utilising that gap to omit the small fraction of the variance it is still allowed to (only 10\% of total variance). However, the spread between the distances is at least now distinct (0.08 for the IDV and 0.04 for the FSdMe). This distinctness will at least allow the possibility of correct classification.
+
+A final suggestion on how to improve shapelet classification of gappy data would be to remove the restrictions on shapelet length used for extraction. These were simply there due to time restraints on performing the extraction. In an application scenario the one-off cost of shapelet extraction from a training set would not be a problem.
+
+Gappy time series is a serious issue then for the shapelet classification approach. A modified distance has demonstrated potential to improve the situation but no time was available to run further experiments. These then are left for future work.
+
+%I'm really not sure what to make of the result in the missing data F-Score plot where somehow the Random Forest uses features giving essentially random results to improve classification. It's possible that with the disparity of training and test sets that this is simply a random positive outcome, but that seems unlikely. Looking at the confusion matrix the classes being improved are the Nova and IDV classes. It is possible that the terrible results for the features alone is that the rule for the FSdMe class is matching the strongest for every class, because every class likely contains a few bits of missing data that the FSdMe shapelet utilises to omit its most prominent peaks and hence giving a very low distance. This means that even though the IDV and Nova shapelets are still functional they just look too much like FSdMe classes to the classifier. However, when combined with statistical features,
+
 \clearpage
-\section{Results}
-\subsection{Introducing gaps into the light curve}
-%\input{/Users/peter/honors/thesis/experiments/exp_shapelets/exp_improved/missing/results.tex}
+
+\section{Experiment 3 - Limiting the amount of the light curve observed}
+\subsection{Results}
+\input{/Users/peter/honors/thesis/experiments/exp_shapelets/exp_improved/observed/results.tex}
 \clearpage
-\subsection{Limiting the amount of the light curve observed}
-%\input{/Users/peter/honors/thesis/experiments/exp_shapelets/exp_improved/observed/results.tex}
+\subsection{Discussion}
+Observations
+\begin{itemize}
+	\item Again, the \emph{shapelet} feature set is leveraged by the classifier to improve performance
+	\item Again, the \emph{20 shapelets} feature set confuses the classifier for moderate - large limits of observed data
+	\item Both shapelet sets show a gradual decline in performance, with the \emph{20 shapelets} set marginally better, by about 0.5 F-Score
+	\item The confusion matrices illustrate that the classes that the \emph{shapelet} feature set improves performance on are the Novae and IDV classes
+\end{itemize}
+Further experiments
+\begin{itemize}
+	\item Illustrate minimum distance matching on the IDV and Novae classes for the 10\% and 25\% observed signal experiments by producing figures of the matchings
+	\item Explain, also using figures, why the matchings for the ESE, Novae, and SNe classes are not better.
+\end{itemize}
+Improvements
+\begin{itemize}
+	\item Construct shapelet sets by trianing on limited signal data. This will identify shapelets that are guaranteed to be useful in early classification.
+\end{itemize}
+
 \clearpage
-%\subsection{Introducing noise into the light curve}
+
+\section{Experiment 4 - Introducing noise into the light curve}
+\subsection{Results}
 \input{/Users/peter/honors/thesis/experiments/exp_shapelets/exp_improved/noise/results.tex}
 \clearpage
-\subsection{Light curves with 1 in 2 datapoints missing, power law applied, clear signal within noise}
-%\input{/Users/peter/honors/thesis/experiments/exp_shapelets/exp_improved/clear_alldist/results.tex}
+\subsection{Discussion}
+Classification becomes poor very quickly on all shapelet sets. At a 1.5 noise to signal variance ratio the \emph{shapelet} feature set produces near random classification. With very strong signals (at 0.5 and 1.0 noise to signal), classification is at 0.3 and 0.2 respectively. The confusion matrices in figure~\ref{fig:confmatsadsfasf} show that the classes suffering most in classification are those whose shapelets are short - the IDV, XRB, and Nova classes. Classification accuracy for the Nova and IDV drops to 0 for a 0.5 signal to noise ratio and below 0.2 for both the XRB and SNe. The SNe result is not surprising since it was shown in section~\ref{sec:undisortedshapeletanalysis} to be unsuitable for classifying even undistorted data.
+
+The results for the other classes can be easily explained with a few plots. Even minor amounts of noise offer these tiny subsequences a plethora of locations to give a near perfect fit, reducing the separation distance to very low values for every test class, confounding the classifier.
+
+\begin{figure}[ht!]
+	\label{fig:noisyshapelets}
+	Placeholder for swamping of IDV, Nova and XRB shapelets
+	\caption{XRB, IDV and Nova shapelets being confounded by noise}
+\end{figure}
+
+Suggestions for improving the shapelet classification algorithm on noisy data are to use a separate evaluation and sample set for the shapelets. If slightly noisy data were used to evalute the clean, undistorted data, then fragile 15-point shapelets would never be chosen unless they had very robust structures.
+
+So noise is yet another difficulty for the shapelet algorithm and the transient classification problem, so much so that the number of shapelets used corresponds with a severe confusion of the classifier. If it is actually possible to characterize our transients when they have some or a lot of noise in their signal will be demonstrated by modifying the evaluation set and is left for future work.
 \clearpage
-\subsection{Light curves with 1 in 2 datapoints, power law applied, noisy signal}
-%\input{/Users/peter/honors/thesis/experiments/exp_shapelets/exp_improved/noisy_alldist/results.tex}
-\clearpage
-
-\section{Discussion}
-\subsection{Undistorted data}
-The performance of both sets of shapelets on the undistorted set of lightcurves is shown in figures \ref{fig:gappymainplot}, \ref{fig:obsmainplot} and \ref{fig:noisymainplot} with an F-Score of approximately 0.58. This is a lower than expected result because there is so little deviation within the time series classes of the undisorted light curves. There are two possible explanations for this outcome:
-\begin{enumerate}
-	\item There are some classes that have no subsequences (subject to our length constraints [15, 40, 65, 90, 105]) that are separated by the distance measure from all the other classes.
-	\item The shapelet extraction algorithm, trained on a subset of the training data, fails to choose general enough shapelets to accomodate slight variations in the testing data - a kind of overfitting.
-\end{enumerate}
-If the shapelet discrimination is poor on the training set, then the first issue is to blame for the poor performance. If the discrimination is good on the training set and poor on the test set, the second issue is to blame. I ran an additional experiment to evaluate the performance of the extracted shapelets on the exact training sets they were extracted from, with an F-Score of 
-
-
-\begin{minipage}[c]{\textwidth}
-		\vspace{4pt}
-	\begin{minipage}[l]{\textwidth}
-		\begin{minipage}[c]{0.09\textwidth}
-			\centering
-			10
-		\end{minipage}
-		\begin{minipage}[c]{0.03\textwidth}
-			\tiny {
-				\begin{tabular}{c>{\centering\arraybackslash} m{0pt}}
-				ESE &\\
-				ESE &\\
-				ESE &\\
-				ESE &\\
-				ESE &\\
-				ESE &\\
-				ESE &\\
-				ESE &\\
-				\end{tabular}
-			}
-		\end{minipage}	
-		\begin{minipage}[l]{0.27\textwidth}
-			\centering
-			\tiny {
-			\begin{tabular}{|c|c|c|c|c|c|c|c|>{\centering\arraybackslash} m{0pt}}\hline
-			1.0 & .95 & &x &x & &{1.00} & {1.00} &\\ \cline{1-8}
-			{1.00}&{1.00}&{1.00}& {\texttt{1.00}}& {1.00}&{1.00}& &{1.00}&  \\ \cline{1-8}
-			x &x &- &x &x & &{1.00} & {1.00} & \\  \cline{1-8}
-			x & & &x &x &x &{1.00} \cellcolor[gray]{0.5}& {1.00} &\\ \cline{1-8}
-			x &x & &x &x &x &{1.00}& {1.00} &\\  \hline
-			x &x &- &x &x &x &{1.00}& {1.00} &\\  \cline{1-8}
-			x & & &x &x &x &{1.00} & {1.00}  &\\ \cline{1-8}
-			x &x & &x &x &x &{1.00}& {1.00} &\\ \cline{1-8}
-			\end{tabular}
-			}
-		\end{minipage}
-		\begin{minipage}[l]{0.27\textwidth}
-			\centering
-			\tiny {
-			\begin{tabular}{|c|c|c|c|c|c|c|c|}\cline{1-8}
-			1.0 	& .95 & 	&x 			&x & 		&{1.00} & {1.00} \\ \cline{1-8}
-			{1.00}&	{1.00}	&{1.00}	& {\texttt{1.00}}& {1.00}&{1.00}& {1.00}& {1.00}  \\ \cline{1-8}
-			x 		&	x 	&- 	&x 			&x & 		&{1.00} & {1.00} \\  \cline{1-8}
-			x 		& & 	&x 	&x 			&x &{1.00} \cellcolor[gray]{0.5}& {1.00}\\ \cline{1-8}
-			x 		&	x 	& 	&x 			&x &x &{1.00}& {1.00}\\  \hline
-			x 		&	x 	&- 	&x 			&x &x &{1.00}& {1.00}\\  \cline{1-8}
-			x 		&	 		& 	&x 			&x &x &{1.00} & {1.00} \\ \cline{1-8}
-			x			&	x 	& 	&x 			&x &x &{1.00}& {1.00} \\ \cline{1-8}
-			\end{tabular}
-			}
-		\end{minipage}
-		\begin{minipage}[l]{0.27\textwidth}
-			\centering
-			\tiny {
-			\begin{tabular}{|c|c|c|c|c|c|c|c|}\cline{1-8}
-			1.0 	& .95 & 	&x 			&x & 		&{1.00} & {1.00} \\ \cline{1-8}
-			{1.00}&	{1.00}	&{1.00}	& {\texttt{1.00}}& {1.00}&{1.00}& {1.00}& {1.00}  \\ \cline{1-8}
-			x 		&	x 	&- 	&x 			&x & 		&{1.00} & {1.00} \\  \cline{1-8}
-			x 		& & 	&x 	&x 			&x &{1.00} \cellcolor[gray]{0.5}& {1.00}\\ \cline{1-8}
-			x 		&	x 	& 	&x 			&x &x &{1.00}& {1.00}\\  \hline
-			x 		&	x 	&- 	&x 			&x &x &{1.00}& {1.00}\\  \cline{1-8}
-			x 		&	 		& 	&x 			&x &x &{1.00} & {1.00} \\ \cline{1-8}
-			x			&	x 	& 	&x 			&x &x &{1.00}& {1.00} \\ \cline{1-8}
-			\end{tabular}
-			}
-		\end{minipage}
-	\end{minipage}
-\end{minipage}
-
-\setlength{\tabcolsep}{5pt}
-\setlength{\extrarowheight}{1pt}
-\clearpage
-\begin{minipage}[c]{\textwidth}
-	
-	\begin{minipage}[c]{\textwidth}
-		\begin{minipage}[c]{0.09\textwidth}
-			\centering
-			0.0
-		\end{minipage}
-		\begin{minipage}[r]{0.06\textwidth}
-			\tiny {
-			\begin{tabular}	{c>{\centering\arraybackslash} m{0pt}}
-				ESE & \\ 
-				BG & \\ 
-				XRB & \\ 
-				FSdMe & \\ 
-				FSRSCVn & \\ 
-				Novae & \\ 
-				IDV & \\ 
-				SNe & \\ 
-			\end{tabular}
-			}
-		\end{minipage}
-		\begin{minipage}[c]{0.27\textwidth}
-			\centering
-			\tiny {
-			\begin{tabular}{|c|c|c|c|c|c|c|c|}\hline
-\cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 \\ \hline
-\cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 \\ \hline
-\cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 \\ \hline
-\cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 \\ \hline
-\cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 \\ \hline
-\cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 \\ \hline
-\cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 \\ \hline
-\cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 \\ \hline
-%			1.0 	& .95 & 	&x 			&x & 		&{1.00} & {1.00} \\ \hline
-%			{1.00}&	{1.00}	&{1.00}	& {\texttt{1.00}}& {1.00}&{1.00}& {1.00}& {1.00}  \\ \hline
-%			x 		&	x 	&- 	&x 			&x & 		&{1.00} & {1.00} \\  \hline
-%			x 		& & 	&x 	&x 			&x &{1.00} \cellcolor[rgb]{1,0,0}& {1.00}\\ \hline
-%			x 		&	x 	& 	&x 			&x &x &{1.00}& {1.00}\\  \hline
-%			x 		&	x 	&- 	&x 			&x &x &{1.00}& {1.00}\\  \hline
-%			x 		&	 		& 	&x 			&x &x &{1.00} & {1.00} \\ \hline
-%			x			&	x 	& 	&x 			&x &x &{1.00}& {1.00} \\ \hline
-			\end{tabular}
-			}
-		\end{minipage}
-	\end{minipage}
-\end{minipage}
-
-
-\subsection{Missing data}
-%\subsection{cDTW}
-%\subsection{Binary and multi-class entropy}
-%\subsection{Distorted training sets}
-\subsection{Multiple shapelets}
 
 \section{Conclusion}
+\begin{itemize}
+	\item Baseline shapelet performance - separation problems and generality
+	\item Missing data - false positives and false negatives
+	\item Observed data - unsurprising result, perhaps use shapelets forcibly extracted from earlier sections of light curves
+	\item Noise - unsurprising result - perhapse use shapelets trained on slightly noisy data to prevent fragile choices
+	\item Evaluation and summary of improvement suggestions, possible increases in performance resulting
+\end{itemize}
+
+%\subsection{Light curves with 1 in 2 datapoints missing, power law applied, clear signal within noise}
+%\input{/Users/peter/honors/thesis/experiments/exp_shapelets/exp_improved/clear_alldist/results.tex}
+%\clearpage
+%\subsection{Light curves with 1 in 2 datapoints, power law applied, noisy signal}
+%\input{/Users/peter/honors/thesis/experiments/exp_shapelets/exp_improved/noisy_alldist/results.tex}
+%\clearpage
+
+
+
+
+%
+%\begin{minipage}[c]{\textwidth}
+%		\vspace{4pt}
+%	\begin{minipage}[l]{\textwidth}
+%		\begin{minipage}[c]{0.09\textwidth}
+%			\centering
+%			10
+%		\end{minipage}
+%		\begin{minipage}[c]{0.03\textwidth}
+%			\tiny {
+%				\begin{tabular}{c>{\centering\arraybackslash} m{0pt}}
+%				ESE &\\
+%				ESE &\\
+%				ESE &\\
+%				ESE &\\
+%				ESE &\\
+%				ESE &\\
+%				ESE &\\
+%				ESE &\\
+%				\end{tabular}
+%			}
+%		\end{minipage}	
+%		\begin{minipage}[l]{0.27\textwidth}
+%			\centering
+%			\tiny {
+%			\begin{tabular}{|c|c|c|c|c|c|c|c|>{\centering\arraybackslash} m{0pt}}\hline
+%			1.0 & .95 & &x &x & &{1.00} & {1.00} &\\ \cline{1-8}
+%			{1.00}&{1.00}&{1.00}& {\texttt{1.00}}& {1.00}&{1.00}& &{1.00}&  \\ \cline{1-8}
+%			x &x &- &x &x & &{1.00} & {1.00} & \\  \cline{1-8}
+%			x & & &x &x &x &{1.00} \cellcolor[gray]{0.5}& {1.00} &\\ \cline{1-8}
+%			x &x & &x &x &x &{1.00}& {1.00} &\\  \hline
+%			x &x &- &x &x &x &{1.00}& {1.00} &\\  \cline{1-8}
+%			x & & &x &x &x &{1.00} & {1.00}  &\\ \cline{1-8}
+%			x &x & &x &x &x &{1.00}& {1.00} &\\ \cline{1-8}
+%			\end{tabular}
+%			}
+%		\end{minipage}
+%		\begin{minipage}[l]{0.27\textwidth}
+%			\centering
+%			\tiny {
+%			\begin{tabular}{|c|c|c|c|c|c|c|c|}\cline{1-8}
+%			1.0 	& .95 & 	&x 			&x & 		&{1.00} & {1.00} \\ \cline{1-8}
+%			{1.00}&	{1.00}	&{1.00}	& {\texttt{1.00}}& {1.00}&{1.00}& {1.00}& {1.00}  \\ \cline{1-8}
+%			x 		&	x 	&- 	&x 			&x & 		&{1.00} & {1.00} \\  \cline{1-8}
+%			x 		& & 	&x 	&x 			&x &{1.00} \cellcolor[gray]{0.5}& {1.00}\\ \cline{1-8}
+%			x 		&	x 	& 	&x 			&x &x &{1.00}& {1.00}\\  \hline
+%			x 		&	x 	&- 	&x 			&x &x &{1.00}& {1.00}\\  \cline{1-8}
+%			x 		&	 		& 	&x 			&x &x &{1.00} & {1.00} \\ \cline{1-8}
+%			x			&	x 	& 	&x 			&x &x &{1.00}& {1.00} \\ \cline{1-8}
+%			\end{tabular}
+%			}
+%		\end{minipage}
+%		\begin{minipage}[l]{0.27\textwidth}
+%			\centering
+%			\tiny {
+%			\begin{tabular}{|c|c|c|c|c|c|c|c|}\cline{1-8}
+%			1.0 	& .95 & 	&x 			&x & 		&{1.00} & {1.00} \\ \cline{1-8}
+%			{1.00}&	{1.00}	&{1.00}	& {\texttt{1.00}}& {1.00}&{1.00}& {1.00}& {1.00}  \\ \cline{1-8}
+%			x 		&	x 	&- 	&x 			&x & 		&{1.00} & {1.00} \\  \cline{1-8}
+%			x 		& & 	&x 	&x 			&x &{1.00} \cellcolor[gray]{0.5}& {1.00}\\ \cline{1-8}
+%			x 		&	x 	& 	&x 			&x &x &{1.00}& {1.00}\\  \hline
+%			x 		&	x 	&- 	&x 			&x &x &{1.00}& {1.00}\\  \cline{1-8}
+%			x 		&	 		& 	&x 			&x &x &{1.00} & {1.00} \\ \cline{1-8}
+%			x			&	x 	& 	&x 			&x &x &{1.00}& {1.00} \\ \cline{1-8}
+%			\end{tabular}
+%			}
+%		\end{minipage}
+%	\end{minipage}
+%\end{minipage}
+%
+%\setlength{\tabcolsep}{5pt}
+%\setlength{\extrarowheight}{1pt}
+%\clearpage
+%\begin{minipage}[c]{\textwidth}
+%	
+%	\begin{minipage}[c]{\textwidth}
+%		\begin{minipage}[c]{0.09\textwidth}
+%			\centering
+%			0.0
+%		\end{minipage}
+%		\begin{minipage}[r]{0.06\textwidth}
+%			\tiny {
+%			\begin{tabular}	{c>{\centering\arraybackslash} m{0pt}}
+%				ESE & \\ 
+%				BG & \\ 
+%				XRB & \\ 
+%				FSdMe & \\ 
+%				FSRSCVn & \\ 
+%				Novae & \\ 
+%				IDV & \\ 
+%				SNe & \\ 
+%			\end{tabular}
+%			}
+%		\end{minipage}
+%		\begin{minipage}[c]{0.27\textwidth}
+%			\centering
+%			\tiny {
+%			\begin{tabular}{|c|c|c|c|c|c|c|c|}\hline
+%\cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 \\ \hline
+%\cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 \\ \hline
+%\cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 \\ \hline
+%\cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 \\ \hline
+%\cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 \\ \hline
+%\cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 \\ \hline
+%\cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 \\ \hline
+%\cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 & \cellcolor[rgb]{0,0,0} 1 \\ \hline
+%%			1.0 	& .95 & 	&x 			&x & 		&{1.00} & {1.00} \\ \hline
+%%			{1.00}&	{1.00}	&{1.00}	& {\texttt{1.00}}& {1.00}&{1.00}& {1.00}& {1.00}  \\ \hline
+%%			x 		&	x 	&- 	&x 			&x & 		&{1.00} & {1.00} \\  \hline
+%%			x 		& & 	&x 	&x 			&x &{1.00} \cellcolor[rgb]{1,0,0}& {1.00}\\ \hline
+%%			x 		&	x 	& 	&x 			&x &x &{1.00}& {1.00}\\  \hline
+%%			x 		&	x 	&- 	&x 			&x &x &{1.00}& {1.00}\\  \hline
+%%			x 		&	 		& 	&x 			&x &x &{1.00} & {1.00} \\ \hline
+%%			x			&	x 	& 	&x 			&x &x &{1.00}& {1.00} \\ \hline
+%			\end{tabular}
+%			}
+%		\end{minipage}
+%	\end{minipage}
+%\end{minipage}
+
+
+%\subsection{Missing data}
+%%\subsection{cDTW}
+%%\subsection{Binary and multi-class entropy}
+%%\subsection{Distorted training sets}
+%\subsection{Multiple shapelets}
+%
+%\section{Conclusion}
 

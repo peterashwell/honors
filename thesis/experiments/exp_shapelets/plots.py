@@ -53,6 +53,7 @@ PARAM_FS_CONFMAT = {}
 
 # Read experiment configs, build at both levels
 FSCORES = {}
+ERRORS = {}
 FEATSETS = set() # feature sets seen
 FEATSET_DESC = {} # description of features
 TEST_DIRS = []
@@ -88,6 +89,7 @@ for line in exp_config:
 			PARAM_FS_CONFMAT[param][featset] = confusion_matrix
 		# Get the results
 		class_results, total_results = utils.process_cm(confusion_matrix)
+		error = float(open("{0}/{1}.error".format(result_dir, featset)).read().strip())
 		#params_resultsets[param][featset] = {}
 		#for resultset in class_results:
 		#	params_resultsets[param][featset][class_results[0]] = class_results[1:]
@@ -95,18 +97,32 @@ for line in exp_config:
 			FSCORES[featset] = [total_results[-1]]
 		else:
 			FSCORES[featset].append(total_results[-1]) # gets FSCOREZ
-
+		if featset not in ERRORS.keys():
+			ERRORS[featset] = [error]
+		else:
+			ERRORS[featset].append(error)
 print FSCORES # what we need for it	
 print PARAMS
 print FEATSETS
 print FEATSET_DESC
+print "ERRORS:", ERRORS
 result_tex = ""
-result_tex += utils.primary_plot(PARAMS, FSCORES, list(FEATSETS), FEATSET_DESC, EXP_DESC, PARAM_NAME, 0)
-result_tex += utils.confmat_page(PARAMS, FEATSETS, FEATSET_DESC, PARAM_FS_CONFMAT)
-result_file = open('{0}/results.tex'.format(EXP_DIR), 'w')
+result_tex += utils.primary_plot(PARAMS, FSCORES, ERRORS, list(FEATSETS), FEATSET_DESC, EXP_DESC, PARAM_NAME, 0)
+result_file = open('{0}/texplot.tex'.format(EXP_DIR), 'w')
+result_file.write(result_tex)
+result_file.close()
+
+result_tex = ""
+# read confmat config
+for line in open('{0}/cmlayout.config'.format(EXP_DIR)):
+	featureset = line.strip().split(',')
+	result_tex += utils.confmat_page(PARAMS, featureset, FEATSET_DESC, PARAM_FS_CONFMAT, PARAM_NAME, EXP_DESC)
+result_file = open('{0}/texcms.tex'.format(EXP_DIR), 'w')
 result_file.write(result_tex)
 result_file.close()
 print TEST_DIRS
 print EXP_DESC
-samples = utils.produce_expsamp(TEST_DIRS, PARAMS, PARAM_NAME, EXP_DESC)
-
+sample_tex = utils.produce_expsamp(TEST_DIRS, PARAMS, PARAM_NAME, EXP_DESC)
+result_file = open('{0}/texsamples.tex'.format(EXP_DIR), 'w')
+result_file.write(sample_tex)
+result_file.close()

@@ -39,11 +39,8 @@ for shapelet_file in os.listdir(load_dir):
 		test_ts = file_to_lc(test_path)
 		test_class = test_filename.split('_')[0]
 		distance = distances.mindist(test_ts.flux, shapelet_ts.flux)[0]
-		if shapelet_class == 'FSdMe' and test_class == 'FSdMe':
-			#print "shapelet:", shapelet_ts.flux
-			#print "test:", test_ts.flux
-			print "FSdMe distance for files:", shapelet_file, test_filename
-			print "is", distance
+		if shapelet_class == 'FSdMe':
+			print "distance to file:", test_filename, "is:", distance
 			#print "or is it:", distances.basic_mindist(test_ts.flux, shapelet_ts.flux)
 		if distance == 0 and not skipped_a_zero:
 			print "skipped", test_filename, shapelet_file
@@ -57,8 +54,8 @@ for shapelet_file in os.listdir(load_dir):
 				sh_ts_distances[shapelet_class][test_class] = [distance]
 			else:
 				sh_ts_distances[shapelet_class][test_class].append(distance)
-	out_dir = "{0}".format(out_dir)
-	utils.plot_splitline(sh_ts_distances, out_dir)
+out_dir = "{0}".format(out_dir)
+utils.plot_splitline(sh_ts_distances, out_dir)
 #sh_classes =  sh_ts_distances.keys()
 # Now produce a histogram for this shapelet showing these distances
 #fig = plt.figure()

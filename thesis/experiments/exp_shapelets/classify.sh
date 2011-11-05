@@ -14,6 +14,7 @@ do
 	crossfold_dir="${config[5]}-${config[6]}"
 	while read clsf_config
 	do
+		echo $clsf_config
 		IFS=","; read -ra clsf_split <<< "$clsf_config"
 		join_id=${clsf_split[0]}
 		# Classify the join id crossfolds and store in raw_result
@@ -22,8 +23,8 @@ do
 			#echo i
 			classify_dir="${JOIN_FEAT_DIR}/$crossfold_dir/cf$i/${join_id}"
 			out_file="${RAW_RES_DIR}/$crossfold_dir/$join_id/cf$i"
-			echo $classify_dir
-			echo writing result to $out_file
+			#echo $classify_dir
+			#echo writing result to $out_file
 			if [[ ! -d $RAW_RES_DIR ]]; then
 				mkdir $RAW_RES_DIR
 			fi

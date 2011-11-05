@@ -47,7 +47,8 @@ def best_shapelets(shapelet_cf_dir):
 #
 # Produce figures in figures/ and return tex to be embedded in report
 # plot, dataset_sample, confusion matrices and 
-def primary_plot(params, featset_fscore, featnames, featset_desc, exp_desc, param_name, baseline_result):
+PLOT_WIDTH = 0.9
+def primary_plot(params, featset_fscore, featset_error, featnames, featset_desc, exp_desc, param_name, baseline_result):
 	print "params:", params
 	print "featset_score:", featset_fscore
 	mpl.rc('legend', fontsize=10)
@@ -65,10 +66,25 @@ def primary_plot(params, featset_fscore, featnames, featset_desc, exp_desc, para
 		if lnum > len(markertypes):
 			linetype = ':'
 		markertype = markertypes[lnum % len(markertypes)]
-		color = colors[lnum % len(colors)]
-		linespecs = '{0}{1}{2}'.format(linetype, markertype, color)
-		plt.plot(params, featset_fscore[featname], linespecs) #, PARAM_NAMES[param])
+		plt_color = colors[lnum % len(colors)]
+		linespecs = '{0}{1}{2}'.format(linetype, markertype, plt_color)
+		#print "marker:", markertype
+		print "format:", linespecs
+		#plt.plot(params, featset_fscore[featname], linespecs)#\
+#			marker=markertype, color=plt_color, linestyle=linetype) #, PARAM_NAMES[param])
+		e = plt.errorbar(params, featset_fscore[featname], featset_error[featname], fmt=linespecs, label=featset_desc[featname])
+		for b in e[1]:
+			    b.set_clip_on(False)
+		print "params:", params
+		print "fscores:", featset_fscore[featname]
 	title = "Plot of F-Score versus {0} in the {1} experiment.".format(param_name.lower(), exp_desc.replace('%', '\%').lower())
+	frame = plt.gca()
+	if 'observed data' == param_name.lower():
+		print "flipping x axis:"
+		plt.xlim([10,100])
+		frame.axes.invert_xaxis()
+	if 'noise' == param_name.lower():
+		plt.xlim([0,3.0])
 	plt.xlabel(param_name)
 	plt.ylabel("F-Score")
 	plt.ylim([0,1])
@@ -79,77 +95,104 @@ def primary_plot(params, featset_fscore, featnames, featset_desc, exp_desc, para
 	#	else:
 	#		featnames[index] = 'all {' + featnames[index] + '}'
 	# TODO add all the classification descriptions here
-	legends = tuple([featset_desc[featname] for featname in featnames])
-	plt.legend(legends, loc='best')
-	fig_name = '{0}/{1}_fsplot.eps'.format(FIG_DIR, exp_desc.replace(' ', '-').replace('.',','))
+	#legends = [featset_desc[featname] for featname in featnames]
+	plt.legend(loc='best')
+	fig_name = '{0}/{1}{2}_fsplot.eps'.format(FIG_DIR, exp_desc.replace(' ', '-').replace('.',','),\
+		'-'.join([obj[2:] for obj in featnames]).replace(' ','-'))
+	print "saving to:", fig_name
 	plt.savefig(fig_name, format='eps')
 	plt.close()
 	
 	fig_path = os.getcwd() + '/' + fig_name
 	result_tex = ""
-	result_tex += '\\begin{figure}[ht!]\n'
+	#result_tex += '\\begin{figure}[ht!]\n'
+	#result_tex += '\t\\label{fig:%s}\n' % (exp_desc.replace(' ', '-').replace('.',','))         
 	result_tex += '\t\\centering\n'
-	result_tex += '\t\\includegraphics[width=\\textwidth]{%s}\n' % (fig_path)
-	result_tex += '\t\caption{%s}\n' %(title)
-	result_tex += '\\end{figure}\n'
+	result_tex += '\t\\includegraphics[width=%f\\textwidth]{%s}\n' % (PLOT_WIDTH,fig_path)
+	#result_tex += '\t\caption{%s}\n' %(title)
+	#result_tex += '\\end{figure}\n'
+	#result_tex += '\\newpage\n'
 	return result_tex
 
 NUM_TESTS = 200
 HEAD_SPACE = 0.035
-PARAMCOL_WIDTH = 0.09
-CM_WIDTH = 0.27
-LABEL_WIDTH = 0.06
+PARAMCOL_WIDTH = 0.05 # width of parameter column
+CM_WIDTH = 0.28
+LABEL_WIDTH = 0.09
+YLABEL_WIDTH = 0.06 # width of "ACTUAL" label on side
+XLABEL_HEIGHT = 10 # points
+PARAMNAME_SPACER = 0.05
 
-def confmat_page(param_vals, featnames, feat_desc, param_fs_cm):
-	print feat_desc
-	print featnames
-	tex = "\\begin{minipage}[c]{\\textwidth}\n"
+def confmat_page(param_vals, featnames, feat_desc, param_fs_cm, paramname, exp_desc):
+	#print feat_desc
+	#print featnames
+	# First make the cells square (lol hacked)
+	tex = "\\setlength{\\tabcolsep}{1.4pt}\n\\setlength{\\extrarowheight}{6.0pt}\n"
+	#tex += "\\begin{figure}[ht!]\n"
+	#tex += "\\label{fig:%s}\n" % (paramname.replace(' ','-') + '-' + '-'.join(featnames))
+	tex += "\\begin{minipage}[c]{\\textwidth} \\centering \n" # TOP BOX
+	tex += "\t\\begin{minipage}[c]{\\textwidth} \\centering \n" # STORES X LABEL
+	tex += "\t\t\\begin{minipage}[c]{%f\\textwidth} \\centering \n" % (YLABEL_WIDTH + PARAMNAME_SPACER)
+	tex += "\t\t\t\t\t\t\\quad\n"
+	tex += "\t\t\\end{minipage}\n" # END XLABEL SPACER
+	tex += "\t\t\\begin{minipage}[c]{%f\\textwidth} \\centering \n" % (1.0 - YLABEL_WIDTH - 0.01 - PARAMNAME_SPACER)
+	tex += "\t\t\t\\large{Predicted}\n"
+	tex += "\t\t\t\\vspace{%f pt}\n" % (XLABEL_HEIGHT)
+	tex += "\t\t\\end{minipage}\n" # END Y LABEL
+	tex += "\t\\end{minipage}\n" # END XLABEL BOX
+	tex += "\t\\begin{minipage}[c]{\\textwidth} \\centering \n" # BEGIN MAIN BOX
+	tex += "\t\t\\begin{minipage}[c]{%f\\textwidth} \\centering \n" % (YLABEL_WIDTH) # BEGIN YLABEL BOX 
+	tex += "\t\t\t\\begin{sideways}\large{Actual}\\end{sideways}\n"
+	tex += "\t\t\\end{minipage}\n"
+	tex += "\t\t\\begin{minipage}[c]{%f\\textwidth} \\centering \n" % (1.0 - YLABEL_WIDTH - 0.01) # CM BOX
+	# CM STUFF STARTS HERE
+	tex += "\t\t\t\\begin{minipage}[c]{\\textwidth} \\centering \n"
 	col_width = 0.85 / len(featnames)
 	
-	tex += "\t\\begin{minipage}[c]{\\textwidth}\n"	
+	tex += "\t\t\t\t\\begin{minipage}[c]{\\textwidth}\n"	
 	
-	tex += "\t\t\\begin{minipage}[c]{%f\\textwidth}\n" % (PARAMCOL_WIDTH)
-	tex += "\t\t\\centering\n"
-	tex += "\t\t\tNoise\n"
-	tex += "\t\t\\end{minipage}\n"
+	tex += "\t\t\t\t\t\\begin{minipage}[c]{%f\\textwidth}\n" % (PARAMCOL_WIDTH + LABEL_WIDTH)
+	tex += "\t\t\t %s \n" % (paramname)
+	tex += "\t\t\t\t\t\\end{minipage}\n"
 
-	tex += "\t\t\\begin{minipage}[c]{%f\\textwidth}\n" % (LABEL_WIDTH)
-	tex += "\t\t\\centering\n"
-	tex += "\t\t\t\\quad\n"
-	tex += "\t\t\\end{minipage}\n"
-	
 	for fs in sorted(list(featnames))[:3]:
-		tex += "\t\t\\begin{minipage}[c]{%f\\textwidth}\n" % (CM_WIDTH)
-		tex += "\t\t\\centering\n"
-		tex += "\t\t\\small{\n"
-		tex += "\t\t\t{0}\n".format(feat_desc[fs][:10].capitalize())
-		tex += "\t\t}\n"
-		tex += "\t\t\\end{minipage} \\ \\ \n"
-	tex += "\\\\ \t\\end{minipage}\n"
-
+		tex += "\t\t\t\t\t\\begin{minipage}[c]{%f\\textwidth}\n" % (CM_WIDTH)
+		tex += "\t\t\t\t\t\t\\centering\n"
+		tex += "\t\t\t\t\t\t\\small{\n"
+		fd = feat_desc[fs]
+		fd_formatted = ' - '.join(["\\emph{" + (o.strip()) + "}" for o in fd.split('-')])
+		tex += "\t\t\t\t\t\t{0}\n".format(fd_formatted)
+		tex += "\t\t\t\t\t\t}\n"
+		tex += "\t\t\t\t\t\\end{minipage}\n"
+	tex += "\t\t\t\t\\end{minipage}\n"
+	first_row = True # so we don't overadd rows to legend
 	for p in param_vals:
-		tex += "\t\\vspace{5pt}\n"
-		tex += "\t\\begin{minipage}[c]{\\textwidth}\n"
-		tex += "\t\t\\begin{minipage}[c]{%f\\textwidth}\n" % (PARAMCOL_WIDTH)
-		tex += "\t\t\t\\centering\n"
-		tex += "\t\t\t{0}\n".format(p)
-		tex += "\t\t\\end{minipage}\n"
-		tex += "\t\\begin{minipage}[c]{%f\\textwidth}\n" % (LABEL_WIDTH)
-		tex += "\t\t\\tiny {\n"
-		tex += "\t\t\\vspace{-4pt}"
-		tex += "\t\t\t\\begin{tabular}{r}\n"
-		for classname in sorted(CLASSES): # defined at top
-			tex += "\t\t\t\t{0}\\\\ \n".format(classname)
-		tex += "\t\t\t\\end{tabular}\n"
-		tex += "\t\t}\n"
-		tex += "\t\\end{minipage}\n"
+		tex += "\t\t\t\t\\vspace{5pt}\n"
+		tex += "\t\t\t\t\\begin{minipage}[c]{\\textwidth}\n"
+		tex += "\t\t\t\t\t\\begin{minipage}[c]{%f\\textwidth}\n" % (PARAMCOL_WIDTH)
+		tex += "\t\t\t\t\t\t\\centering\n"
+		tex += "\t\t\t\t\t\t{0}\n".format(p)
+		tex += "\t\t\t\t\t\\end{minipage}\n"
+		tex += "\t\t\t\t\t\\begin{minipage}[c]{%f\\textwidth}\n" % (LABEL_WIDTH)
+		tex += "\t\t\t\t\t\t\\tiny {\n"
+		tex += "\t\t\t\t\t\t\\vspace{-4pt}"
+		tex += "\t\t\t\t\t\t\\begin{tabular}{lr}\n"
+		if first_row:
+			tex += "\t\t\t\t\t\t & \\\\ \n"
+		for rownum, classname in enumerate(sorted(CLASSES)): # defined at top
+			tex += "\t\t\t\t\t\t{1} & {0}\\\\ \n".format(chr(ord('A') + rownum), classname)
+		tex += "\t\t\t\t\t\t\\end{tabular}\n"
+		tex += "\t\t\t\t\t\t}\n"
+		tex += "\t\t\t\t\t\\end{minipage}\n"
 		for fs in sorted(list(featnames))[:3]:
 			print "fs:", fs
-			tex += "\t\t\\begin{minipage}[c]{%f\\textwidth}\n" % (CM_WIDTH)
-			tex += "\t\t\t\\centering\n"
-			tex += "\t\t\t\\tiny {\n"
-			tex += "\t\t\t\t\\begin{tabular}{|c|c|c|c|c|c|c|c|} \hline\n"
-			
+			tex += "\t\t\t\t\t\\begin{minipage}[c]{%f\\textwidth}\n" % (CM_WIDTH)
+			tex += "\t\t\t\t\t\t\\centering\n"
+			tex += "\t\t\t\t\t\t\\tiny {\n"
+			tex += "\t\t\t\t\t\t\\begin{tabular}{|c|c|c|c|c|c|c|c|}\n"
+			if first_row:
+				tex += "\t\t\t\t\t\t" + " & ".join(["\\multicolumn{1}{c}{" + chr(ord('A') + o) + "}" for o in range(8)]) + '\\\\ \n'
+			tex += "\\hline\n"
 			# Determine cell colors and appropriate labels
 			colored_cm = []
 			cm_rows = {}
@@ -163,25 +206,35 @@ def confmat_page(param_vals, featnames, feat_desc, param_fs_cm):
 					elem = elem.strip()
 					elem = float(elem) / NUM_TESTS
 					cell = None
+					color = "\\cellcolor[rgb]{1.0,%f,%f}" % (1 - float(elem),1 - float(elem))					
 					if math.fabs(1.0 - elem) < 1e-10:
 						cell = '1.0'
 					elif math.fabs(0.0 - elem) < 1e-10:
-						cell = '0.0'
+						cell = '\\verb#  #'
 					else:
 						cell = str(elem)[1:4]
-					color = "\\cellcolor[rgb]{1.0,%f,%f}" % (1 - float(elem),1 - float(elem))					
 					colored_row.append(color + ' ' + cell)
 				tex += ' & '.join([str(o) for o in colored_row]) + '\\\\ \\hline\n'
-			tex += "\t\t\t\\end{tabular}\n"
-			tex += "}\n"
-			tex += "\t\t\\end{minipage}\n"
-		tex += "\t\\end{minipage}\n"
-	tex += "\\end{minipage}\n"
+			tex += "\t\t\t\t\t\t\\end{tabular}\n"
+			tex += "\t\t\t\t\t}\n"
+			tex += "\t\t\t\t\t\\end{minipage}\n"
+		tex += "\t\t\t\t\\end{minipage}\n"
+		first_row = False # stop adding legend
+	tex += "\t\t\t\\end{minipage}\n"
+	tex += "\t\t\\end{minipage}\n" # END YLABEL BOX
+	tex += "\t\\end{minipage}\n" # END TOP BOX
+	tex += "\\end{minipage}\n" # END TOP BOX
+	#tex += "\\caption{%s}\n" % ("Confusion matrices for the {0} experiment".format(exp_desc))
+	#tex += "\\end{figure}\n"
+	# Unsquare the cells so your tables aren't all screwed up
+	tex += "\\setlength{\\tabcolsep}{6pt}\n\\setlength{\\extrarowheight}{0pt}\n"
+	tex += "\\newpage\n"
 	#print tex
 	return tex
 
 MAX_SUBFIG_COLS = 5
-def exp_subfigs(exp_fname, param_val):
+SAMPLE_DIR = '/Users/peter/honors/thesis/experiments/exp_shapelets/figures/samples'
+def exp_subfigs(exp_fname, param_val, mp_width):
 	print 'exp_fname:', exp_fname
 	subfig_count = 0
 	width = round(100.0 / MAX_SUBFIG_COLS * 0.88 / 100.0, 3)
@@ -205,14 +258,13 @@ def exp_subfigs(exp_fname, param_val):
 		frame1 = plt.gca()
 		frame1.axes.get_xaxis().set_visible(False)
 		frame1.axes.get_yaxis().set_visible(False)
-		plt.savefig(FIG_DIR + '/' + plot_fname, format='eps')
+		plt.savefig(SAMPLE_DIR + '/' + plot_fname, format='eps')
 		plt.close()
 
 		# now write out corresponding latex
 		# new code - minipage
-		mp_width = 0.8 / len(CLASSES)
 		tex_out += '\\begin{minipage}[c]{%f\\linewidth}\n' % (mp_width)
-		tex_out += '\t\\includegraphics[width=\\textwidth]{%s}\n' % (FIG_DIR + '/' + plot_fname)
+		tex_out += '\t\\includegraphics[width=\\textwidth]{%s}\n' % (SAMPLE_DIR + '/' + plot_fname)
 		tex_out += '\\end{minipage}\n'
 
 		# old code - subfigures
@@ -228,11 +280,12 @@ def exp_subfigs(exp_fname, param_val):
 def produce_expsamp(exp_fnames, params, param_name, exp_desc):
 	print params
 	out_tex = ""
-	out_tex += '\\begin{figure}[ht!]\n'
-	out_tex += '\\centering\n'
+	#out_tex += '\\begin{figure}[ht!]\n'
+	#out_tex += '\\centering\n'
+	out_tex += '\\begin{minipage}[c]{\\textwidth}\n'
 	out_tex += '\\begin{minipage}[b]{0.1\\linewidth}\n'
 	out_tex += '\\centering\n\t%s\n\\end{minipage}\n' % (param_name)
-	mp_width = 0.8 / len(CLASSES)
+	mp_width = 0.85 / len(CLASSES)
 	for lct in CLASSES:
 		out_tex += '\\begin{minipage}[c]{%f\\linewidth}\n' % (mp_width)
 		out_tex += '\\centering\n%s\n\\end{minipage}\n' % (lct)
@@ -242,14 +295,15 @@ def produce_expsamp(exp_fnames, params, param_name, exp_desc):
 		#out_tex += '\\begin{figure}[ht!]\n')
 		#out_tex += '\t\\centering\n')
 	
-		out_tex += exp_subfigs(exp_fname, params[exp_num])
+		out_tex += exp_subfigs(exp_fname, params[exp_num], mp_width)
 			
 		#old stuff - writes out subfigs
 		#out_tex += '\\caption{%s with %s at %s}\n' \
 		#	% (exp_fname.replace('_', '-').replace('.',','), param_name, params[exp_num]))
 		#out_tex += '\\end{figure}\n')	
-	out_tex += '\\caption{Sample lightcurves for the %s experiment}\n' % (exp_desc.lower())
-	out_tex += '\\end{figure}\n'
+	#out_tex += '\\caption{Sample lightcurves for the %s experiment}\n' % (exp_desc.lower())
+	out_tex += '\\end{minipage}\n'
+	#out_tex += '\\end{figure}\n'
 	return out_tex
 
 def cm_array(param_cm, params, exp_desc):
@@ -317,6 +371,8 @@ def process_cm(raw_cm):
 	microavg_recall = 0
 	microavg_fscore = 0
 	for class_num in xrange(len(classes)):
+		this_prec = 0
+		this_recall = 0
 		if class_tp[class_num] + class_fp[class_num] != 0:
 			microavg_precision += class_counts[class_num] * (class_tp[class_num] / \
 				(1.0 * class_tp[class_num] + class_fp[class_num]))
@@ -326,7 +382,6 @@ def process_cm(raw_cm):
 	microavg_precision /= (1.0 * sum(class_counts))
 	microavg_recall /= (1.0 * sum(class_counts))
 	microavg_fscore = 2 * (microavg_precision * microavg_recall) / (1.0 * microavg_precision + microavg_recall)
-	
 	# write number of classes
 	#result_file.write(str(len(classes)) + '\n')
 	
@@ -348,7 +403,6 @@ def process_cm(raw_cm):
 			recall = (1.0 * class_tp[cn] / (class_tp[cn] + class_fn[cn]))
 			#print 'error:, no results for class', classes[cn]
 			#continue
-		
 		if math.fabs(prec) < 1e-10 or math.fabs(recall) < 1e-10:
 			fscore = 0.0
 		else:
@@ -459,16 +513,12 @@ def plot_splitline(sh_ts_distances, destination):
 		print "creating directory:", destination
 		os.mkdir(destination)
 	
-	COLOURS = ['b', 'g', 'r', 'm', 'y']
-	NUM_BINS = 200
+	plt.rcParams.update({'font.size': 16})
+	NUM_BINS = 50
 	#BIN_SIZE = 1.0 / NUM_BINS
 	#print "BIN SIZE:", BIN_SIZE
 	#BINS = numpy.linspace(0, 1, NUM_BINS)
 	HIST_HEIGHT = 1 # Height of each histogram
-	
-	sh_ts_hist = {}
-	sh_left = {}
-	sh_right = {}
 	sh_max = {}
 	for shnum, sh_class in enumerate(sh_ts_distances.keys()):
 		# Compute the maximum distance for this shapelet across all classes
@@ -479,114 +529,89 @@ def plot_splitline(sh_ts_distances, destination):
 			if m > SHAPELET_MAX_DIST:
 				SHAPELET_MAX_DIST = m
 		sh_max[sh_class] = SHAPELET_MAX_DIST
-		fig = plt.figure()
-		# For each time series in the test set, produce two figures of the split line (all and specific)
-		for tsnum, ts_class in enumerate(sorted(sh_ts_distances[sh_class].keys())):
-			# Squash the distances using the maximum for the shapelet class into the range [0, 1]
-			class_distances = sh_ts_distances[sh_class][ts_class]
-			#if math.fabs(0 - SHAPELET_MAX_DIST) < 1e-10:
-			#	squashed_distances = [0 for d in class_distances]
-			#else:
-			#	squashed_distances = [d / (1.0 * SHAPELET_MAX_DIST) for d in class_distances]
 
-			# Build a histogram out of the data
-			hist = numpy.histogram(class_distances, numpy.linspace(-0.1, SHAPELET_MAX_DIST, NUM_BINS), normed=True)[0]
-			print "histogram sums:", numpy.sum(hist, axis=0)
-			print "marker 0a"
-			hist = hist / numpy.sum(hist, axis=0)
-			print "marker 0b"
-			hist = hist.tolist()
-			if ts_class == 'FSdMe' and sh_class == 'FSdMe':
-				print "FSdMe distances:"
-				print class_distances
-				#print "squashed distances:"
-				#print squashed_distances
-				#print "FSdMe histogram, against FSdMe class:"
-				#print hist
-			
-			# Get the bounds of the histogram for the shapelet class (for specific viewing)
-			if sh_class == ts_class: # check the std and mean of histogram
-				this_max = SHAPELET_MAX_DIST #max(squashed_distances)
-				this_min = -0.05 #min(squashed_distances)
-				sh_left[sh_class] = max(-0.05, this_min - 0.05)
-				sh_right[sh_class] = min(1.05, this_max + 0.05)
-			
-			# Store the histogram for plotting, now that we have the bounds we need
-			if sh_class not in sh_ts_hist.keys():
-				new_dict = {ts_class : hist}
-				sh_ts_hist[sh_class] = new_dict
-			else:
-				sh_ts_hist[sh_class][ts_class] = hist
+	for shnum, sh_class in enumerate(sorted(sh_ts_distances.keys())):
+		print "ts_distances:"
+		print sh_ts_distances[sh_class]
+		#fig = plt.figure()
+		for tsnum, ts_class in enumerate(sorted(sh_ts_distances[sh_class].keys())):
+			lbound = 0
+			rbound = sh_max[sh_class]
+			binsize = (rbound - lbound) / NUM_BINS
+			BINS = numpy.linspace(lbound, rbound, NUM_BINS)
+			BINS = numpy.append(BINS,rbound)
+			BINS = numpy.insert(BINS,lbound, 0) # fill polygon correctly
+			distances = sh_ts_distances[sh_class][ts_class]
+			#print "distances:"
+			#print distances
+			hist = (numpy.histogram(distances, NUM_BINS, (lbound, rbound))[0])
+			#print "raw histogram:"
 			#print hist
+			hist = hist / (1.0 * numpy.sum(hist, axis=0)) * 2 # for extra clarity
+			
+			print "HIST (before adding):"
+			print hist
+			
+			hist = numpy.append(hist, 0)
+			hist = numpy.insert(hist,0,0) # fill polygon correctly
+			print "after:"
+			print hist
+			#print "shapelet:", sh_class
+			#print "ts_class:", ts_class
+			#print "histogram:"
+			#print hist
+			#print HIST_HEIGHT * tsnum + 1
 			#print len(hist)
-			#p = plt.bar(numpy.linspace(0,1,NUM_BINS)[:-1], hist, BIN_SIZE,\
-			#	color=colors[tsnum % len(colors)], bottom = HIST_HEIGHT * tsnum, alpha=1.0)	
-			#plt.xlim([0,1])
-			#legend[0].append(p[0])
-		#frame = plt.gca()
-		#frame.axes.get_yaxis().set_ticklabels(sorted(sh_ts_distances[sh_class].keys()))
-		#frame.axes.get_yaxis().set_ticks([o + 0.5 for o in range(8)])
-		#fig.axis().set_ticklabels([sorted(sh_ts_distances[sh_class])])
-		#plt.legend(legend[0], legend[1])
-		#plt.xlabel('Distance measure (normalised across all shapelets)')
-		#plt.ylabel('Class')
-		#cf_dir = '{0}/cf{1}'.format(out_dir, cfnum)
-		#if not os.path.isdir(cf_dir):
-	#		os.mkdir(cf_dir)
-		#plt.savefig('{0}/{1}_sm.pdf'.format(cf_dir,sh_class), format='pdf')
-		#plt.close()
-	for shnum, sh_class in enumerate(sh_ts_hist.keys()):
-		fig = plt.figure()
-		for tsnum, ts_class in enumerate(sh_ts_hist[sh_class].keys()):
-			hist = sh_ts_hist[sh_class][ts_class]
-			p = plt.bar(numpy.linspace(-0.05,1.05,NUM_BINS)[:-1], hist, (1.0 - 0) / NUM_BINS,\
-				color=COLOURS[tsnum % len(COLOURS)], bottom = HIST_HEIGHT * tsnum, alpha=1.0)	
-			plt.xlim([-.05,1.05])
-			#legend[0].append(p[0])
+			hist += HIST_HEIGHT * tsnum # to get the right height
+			barcol = 'r'
+			if ts_class == sh_class:
+				barcol = 'g'
+			p = plt.fill(BINS,hist,barcol,alpha=0.5)	
+			plt.xlim([lbound,rbound])
+			plt.ylim([0,9])
+			print "BINS:"
+			print BINS
+			print "HIST:"
+			print hist
 		frame = plt.gca()
+		#frame.axes.axis["right"].set_visible(False)
+		#frame.axes.axis["top"].set_visible(False)
 		frame.axes.get_yaxis().set_ticklabels(sorted(sh_ts_distances[sh_class].keys()))
 		frame.axes.get_yaxis().set_ticks([o + 0.5 for o in range(8)])
-		#fig.axis().set_ticklabels([sorted(sh_ts_distances[sh_class])])
-		#plt.legend(legend[0], legend[1])
-		plt.xlabel('Distance measure (normalised across all shapelets)')
+		plt.xlabel('Distance measure')
 		plt.ylabel('Class')
+		print "saving figure to:", '{0}/{1}_sm.pdf'.format(destination, sh_class)
 		plt.savefig('{0}/{1}_sm.pdf'.format(destination,sh_class), format='pdf')
 		plt.close()
 	
-	for shnum, sh_class in enumerate(sh_ts_distances.keys()):
-		print "building specific histogram for class:", sh_class
-		fig = plt.figure()
-		for tsnum, ts_class in enumerate(sh_ts_distances[sh_class].keys()):
-			#left_lim = max(0, sh_mean[sh_class] - 3 * sh_std[sh_class])
-			#right_lim = min(1, sh_mean[sh_class] + 3 * sh_std[sh_class])
-			class_distances = sh_ts_distances[sh_class][ts_class]
-			squashed_distances = [d / (1.0 * sh_max[sh_class]) for d in class_distances]
-			right_lim = sh_right[sh_class]
-			left_lim = sh_left[sh_class]
-			#left_lim = max(0, left_lim - spread)
-			#right_lim = min(1, right_lim + spread)
-			# Normalise and bin the distances
-			NUM_BINS = 200
-			print "right lim:", right_lim
-			print "left lim:", left_lim
-			BIN_SIZE = (right_lim - left_lim) / NUM_BINS
-			BINS = numpy.linspace(left_lim, right_lim, NUM_BINS)
-			
-			hist = numpy.histogram(squashed_distances, BINS, normed=True)[0].tolist()
-			print "marker 1a"	
-			hist = hist / numpy.sum(hist, axis=0)
-			print "marker 1b"
-			p = plt.bar(numpy.linspace(left_lim,right_lim,NUM_BINS)[:-1], hist, BIN_SIZE,\
-				color=COLOURS[tsnum % len(COLOURS)], bottom = HIST_HEIGHT * tsnum, alpha=1.0)	
-			
-			plt.xlim([left_lim,right_lim])
-			#legend[0].append(p[0])
-		frame = plt.gca()
-		frame.axes.get_yaxis().set_ticklabels(sorted(sh_ts_distances[sh_class].keys()))
-		frame.axes.get_yaxis().set_ticks([o + 0.5 for o in range(8)])
-		#fig.axis().set_ticklabels([sorted(sh_ts_distances[sh_class])])
-		#plt.legend(legend[0], legend[1])
-		plt.xlabel('Distance measure (normalised across all shapelets)')
-		plt.ylabel('Class')
-		plt.savefig('{0}/{1}_sm_specific.pdf'.format(destination,sh_class), format='pdf')
-		plt.close()	
+
+
+#	for shnum, sh_class in enumerate(sh_ts_distances.keys()):
+#		print "building specific histogram for class:", sh_class
+#		fig = plt.figure()
+#		for tsnum, ts_class in enumerate(sh_ts_distances[sh_class].keys()):
+#			class_distances = sh_ts_distances[sh_class][ts_class]
+#			squashed_distances = [d / (1.0 * sh_max[sh_class]) for d in class_distances]
+#			right_lim = sh_right[sh_class]
+#			left_lim = sh_left[sh_class]
+#			NUM_BINS = 200
+#			print "right lim:", right_lim
+#			print "left lim:", left_lim
+#			BIN_SIZE = (right_lim - left_lim) / NUM_BINS
+#			BINS = numpy.linspace(left_lim, right_lim, NUM_BINS)
+#			
+#			hist = numpy.histogram(squashed_distances, BINS, normed=True)[0].tolist()
+#			print "marker 1a"	
+#			hist = hist / numpy.sum(hist, axis=0)
+#			print "marker 1b"
+#			p = plt.bar(numpy.linspace(left_lim,right_lim,NUM_BINS)[:-1], hist, BIN_SIZE,\
+#				color=COLOURS[tsnum % len(COLOURS)], bottom = HIST_HEIGHT * tsnum, alpha=1.0)	
+#			
+#			plt.xlim([left_lim,right_lim])
+#		frame = plt.gca()
+#		frame.axes.get_yaxis().set_ticklabels(sorted(sh_ts_distances[sh_class].keys()))
+#		frame.axes.get_yaxis().set_ticks([o + 0.5 for o in range(8)])
+#		plt.xlabel('Distance measure (normalised across all shapelets)')
+#		plt.ylabel('Class')
+#		plt.savefig('{0}/{1}_sm_specific.pdf'.format(destination,sh_class), format='pdf')
+#		plt.close()	
